@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    android:id="@+id/coordinatorlayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="25dp" />
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Connect, Disconnect, and View" />
+        <Button
+            android:id="@+id/wifi_connect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="wifi_connect"
+            android:text="Connect to Pi"
+            tools:layout_editor_absoluteX="50dp"
+            tools:layout_editor_absoluteY="262dp" />
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+        <Button
+            android:id="@+id/browser_launch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="browser_launch"
+            android:text="View Stream"
+            tools:layout_editor_absoluteX="252dp"
+            tools:layout_editor_absoluteY="292dp" />
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+        <Button
+            android:id="@+id/wifi_disconnect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="wifi_disconnect"
+            android:text="Disconnect from Pi"
+            tools:layout_editor_absoluteX="40dp"
+            tools:layout_editor_absoluteY="400dp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="25dp" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Device Control" />
+
+        <Button
+            android:id="@+id/reboot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="device_reboot"
+            android:text="Reboot Pi"
+            tools:layout_editor_absoluteX="40dp"
+            tools:layout_editor_absoluteY="400dp" />
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+        <Button
+            android:id="@+id/poweroff"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="device_shutdown"
+            android:text="Shutdown Pi"
+            tools:layout_editor_absoluteX="40dp"
+            tools:layout_editor_absoluteY="400dp" />
+    </LinearLayout>
+</android.support.design.widget.CoordinatorLayout>
