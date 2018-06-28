@@ -2,12 +2,15 @@ package edu.umich.globalchallenges.thirdeye;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
+
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -17,10 +20,13 @@ import com.android.volley.RequestQueue;
 
 public class MainActivity extends AppCompatActivity {
     // Important Globals
-    int last_net_id = 0;                // Network previously attached to
-    String ssid = "\"MD-02\"";          // SSID of network with camera stream
-    String sharedkey = "\"WoN1ukARBG81EWI\"";  // Password to above network
-    String userkey = "QtM0lly02RH18";  // A preshared key that allows for elevated privileges on server
+    public static int last_net_id = 0;                // Network previously attached to
+    private static String ssid = "\"MD-02\"";          // SSID of network with camera stream
+    private static String sharedkey = "\"WoN1ukARBG81EWI\"";  // Password to above network
+    private static String userkey = "QtM0lly02RH18";  // A preshared key that allows for elevated privileges on server
+
+    private static final int UM_BLUE = 0xFF00274C;
+    private static final int UM_MAZE = 0xFFFFCB05;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +104,9 @@ public class MainActivity extends AppCompatActivity {
         else {
             String message = "Not connected to correct network";
             Snackbar errorbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+            errorbar.getView().setBackgroundColor(UM_BLUE);
+            TextView errortext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+            errortext.setTextColor(Color.WHITE);
             errorbar.show();
         }
     }
@@ -117,6 +126,9 @@ public class MainActivity extends AppCompatActivity {
                         public void onResponse(String response) {
                             String message = "Pi rebooting";
                             Snackbar messagebar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT);
+                            messagebar.getView().setBackgroundColor(UM_BLUE);
+                            TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
+                            messagetext.setTextColor(Color.WHITE);
                             messagebar.show();
                         }
                     },
@@ -125,6 +137,9 @@ public class MainActivity extends AppCompatActivity {
                         public void onErrorResponse(VolleyError error) {
                             String message = "Error rebooting Pi";
                             Snackbar errorbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+                            errorbar.getView().setBackgroundColor(UM_BLUE);
+                            TextView errortext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+                            errortext.setTextColor(Color.WHITE);
                             errorbar.show();
                         }
                     }
@@ -134,6 +149,9 @@ public class MainActivity extends AppCompatActivity {
         else {
             String message = "Not connected to correct network";
             Snackbar errorbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+            errorbar.getView().setBackgroundColor(UM_BLUE);
+            TextView errortext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+            errortext.setTextColor(Color.WHITE);
             errorbar.show();
         }
     }
@@ -153,6 +171,9 @@ public class MainActivity extends AppCompatActivity {
                         public void onResponse(String response) {
                             String message = "Pi shutting down";
                             Snackbar messagebar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT);
+                            messagebar.getView().setBackgroundColor(UM_BLUE);
+                            TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
+                            messagetext.setTextColor(Color.WHITE);
                             messagebar.show();
                         }
                     },
@@ -161,6 +182,9 @@ public class MainActivity extends AppCompatActivity {
                         public void onErrorResponse(VolleyError error) {
                             String message = "Error shutting down Pi";
                             Snackbar errorbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+                            errorbar.getView().setBackgroundColor(UM_BLUE);
+                            TextView errortext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+                            errortext.setTextColor(Color.WHITE);
                             errorbar.show();
                         }
                     }
@@ -170,6 +194,9 @@ public class MainActivity extends AppCompatActivity {
         else {
             String message = "Not connected to correct network";
             Snackbar errorbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+            errorbar.getView().setBackgroundColor(UM_BLUE);
+            TextView errortext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+            errortext.setTextColor(Color.WHITE);
             errorbar.show();
         }
     }
