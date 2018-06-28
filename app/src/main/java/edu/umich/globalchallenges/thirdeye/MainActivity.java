@@ -42,24 +42,26 @@ public class MainActivity extends AppCompatActivity {
      * @param view
      */
     public void wifi_connect(View view) {
-        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        last_net_id = wifiManager.getConnectionInfo().getNetworkId();
-        // setup a wifi configuration
-        WifiConfiguration wc = new WifiConfiguration();
-        wc.SSID = ssid;
-        wc.preSharedKey = sharedkey;
-        wc.status = WifiConfiguration.Status.ENABLED;
-        wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-        wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-        wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-        wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-        wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-        wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-        wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-        // connect to and enable the connection
-        int netId = wifiManager.addNetwork(wc);
-        wifiManager.enableNetwork(netId, true);
-        wifiManager.setWifiEnabled(true);
+        if(!connected_to_network()) { // Only connect if we aren't already
+            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            last_net_id = wifiManager.getConnectionInfo().getNetworkId();
+            // setup a wifi configuration
+            WifiConfiguration wc = new WifiConfiguration();
+            wc.SSID = ssid;
+            wc.preSharedKey = sharedkey;
+            wc.status = WifiConfiguration.Status.ENABLED;
+            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+            wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+            wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+            wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+            // connect to and enable the connection
+            int netId = wifiManager.addNetwork(wc);
+            wifiManager.enableNetwork(netId, true);
+            wifiManager.setWifiEnabled(true);
+        }
     }
 
     /**
@@ -70,11 +72,13 @@ public class MainActivity extends AppCompatActivity {
      * @param view
      */
     public void wifi_disconnect(View view) {
-        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        wifiManager.disconnect();
-        if(last_net_id != 0) { // Try to reconnect to the network previously attached to
-            wifiManager.enableNetwork(last_net_id, true);
-            wifiManager.setWifiEnabled(true);
+        if(connected_to_network()) { // We only want to disconnect if we were connected to the server's network
+            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            wifiManager.disconnect();
+            if (last_net_id != 0) { // Try to reconnect to the network previously attached to
+                wifiManager.enableNetwork(last_net_id, true);
+                wifiManager.setWifiEnabled(true);
+            }
         }
     }
 
@@ -92,6 +96,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Displays a snackbar saying we are not connected to the right network
+     *
+     * @param view The view from which we need to send this message
+     */
+    private void network_error_snack(View view) {
+        String message = "Not connected to correct network";
+        Snackbar errorbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+        errorbar.getView().setBackgroundColor(UM_BLUE);
+        TextView errortext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+        errortext.setTextColor(Color.WHITE);
+        errorbar.show();
+    }
+
+    /**
      * Launches activity to view the camera stream if we are connected to the right network, or gives
      * a snackbar message that we aren't connected.
      * @param view
@@ -102,12 +120,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         }
         else {
-            String message = "Not connected to correct network";
-            Snackbar errorbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
-            errorbar.getView().setBackgroundColor(UM_BLUE);
-            TextView errortext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
-            errortext.setTextColor(Color.WHITE);
-            errorbar.show();
+            network_error_snack(view);
         }
     }
 
@@ -147,12 +160,7 @@ public class MainActivity extends AppCompatActivity {
             queue.add(stringRequest);
         }
         else {
-            String message = "Not connected to correct network";
-            Snackbar errorbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
-            errorbar.getView().setBackgroundColor(UM_BLUE);
-            TextView errortext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
-            errortext.setTextColor(Color.WHITE);
-            errorbar.show();
+            network_error_snack(view);
         }
     }
 
@@ -192,12 +200,7 @@ public class MainActivity extends AppCompatActivity {
             queue.add(stringRequest);
         }
         else {
-            String message = "Not connected to correct network";
-            Snackbar errorbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
-            errorbar.getView().setBackgroundColor(UM_BLUE);
-            TextView errortext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
-            errortext.setTextColor(Color.WHITE);
-            errorbar.show();
+            network_error_snack(view);
         }
     }
 }
