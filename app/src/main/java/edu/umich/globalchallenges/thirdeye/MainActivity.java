@@ -96,17 +96,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Displays a snackbar with a message
+     *
+     * @param view The view from which we need to send this message
+     * @param message The message we want displayed
+     */
+    private void snack_message(View view, String message) {
+        Snackbar messagebar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+        messagebar.getView().setBackgroundColor(UM_BLUE);
+        TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
+        messagetext.setTextColor(Color.WHITE);
+        messagebar.show();
+    }
+
+    /**
      * Displays a snackbar saying we are not connected to the right network
      *
      * @param view The view from which we need to send this message
      */
     private void network_error_snack(View view) {
-        String message = "Not connected to correct network";
-        Snackbar errorbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
-        errorbar.getView().setBackgroundColor(UM_BLUE);
-        TextView errortext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
-        errortext.setTextColor(Color.WHITE);
-        errorbar.show();
+        snack_message(view, "Not connected to correct network");
     }
 
     /**
@@ -137,23 +146,13 @@ public class MainActivity extends AppCompatActivity {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            String message = "Pi rebooting";
-                            Snackbar messagebar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT);
-                            messagebar.getView().setBackgroundColor(UM_BLUE);
-                            TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
-                            messagetext.setTextColor(Color.WHITE);
-                            messagebar.show();
+                            snack_message(view, "Pi rebooting");
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            String message = "Error rebooting Pi";
-                            Snackbar errorbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
-                            errorbar.getView().setBackgroundColor(UM_BLUE);
-                            TextView errortext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
-                            errortext.setTextColor(Color.WHITE);
-                            errorbar.show();
+                            snack_message(view, "Error rebooting Pi");
                         }
                     }
             );
@@ -177,23 +176,13 @@ public class MainActivity extends AppCompatActivity {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            String message = "Pi shutting down";
-                            Snackbar messagebar = Snackbar.make(view, message, Snackbar.LENGTH_SHORT);
-                            messagebar.getView().setBackgroundColor(UM_BLUE);
-                            TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
-                            messagetext.setTextColor(Color.WHITE);
-                            messagebar.show();
+                            snack_message(view, "Pi shutting down");
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            String message = "Error shutting down Pi";
-                            Snackbar errorbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
-                            errorbar.getView().setBackgroundColor(UM_BLUE);
-                            TextView errortext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
-                            errortext.setTextColor(Color.WHITE);
-                            errorbar.show();
+                            snack_message(view, "Error shutting down Pi");
                         }
                     }
             );

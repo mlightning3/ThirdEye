@@ -16,6 +16,34 @@
             android:layout_height="match_parent" >
 
         </WebView>
+        <Button
+            android:id="@+id/snapshot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="take_snapshot"
+            android:text="Snapshot"
+            android:layout_gravity="bottom" />
+        <Button
+            android:id="@+id/grayscale"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="toggle_grayscale"
+            android:text="Grayscale"
+            android:layout_gravity="top" />
+        <Button
+            android:id="@+id/resolution"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="toggle_resolution"
+            android:text="Resolution"
+            android:layout_gravity="end" />
+        <Button
+            android:id="@+id/record"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="video_capture"
+            android:text="Record"
+            android:layout_gravity="end|bottom" />
     </FrameLayout>
 
 </android.support.constraint.ConstraintLayout>
