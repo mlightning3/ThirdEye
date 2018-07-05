@@ -81,5 +81,25 @@
             android:text="Shutdown Pi"
             tools:layout_editor_absoluteX="40dp"
             tools:layout_editor_absoluteY="400dp" />
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Settings" />
+        <Button
+            android:id="@+id/view_filename"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="view_filename"
+            android:text="View Filename" />
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+        <Button
+            android:id="@+id/settings_launch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="launch_settings"
+            android:text="View Settings" />
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>

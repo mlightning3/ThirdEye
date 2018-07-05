@@ -2,9 +2,11 @@ package edu.umich.globalchallenges.thirdeye;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,10 +30,14 @@ public class MainActivity extends AppCompatActivity {
     private static final int UM_BLUE = 0xFF00274C;
     private static final int UM_MAZE = 0xFFFFCB05;
 
+    private SharedPreferences sharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     /**
@@ -191,5 +197,14 @@ public class MainActivity extends AppCompatActivity {
         else {
             network_error_snack(view);
         }
+    }
+
+    public void launch_settings(View view) {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+    }
+
+    public void view_filename(View view) {
+        snack_message(view, sharedPreferences.getString("filename", "oops"));
     }
 }
