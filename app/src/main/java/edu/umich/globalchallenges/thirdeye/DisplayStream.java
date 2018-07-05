@@ -1,6 +1,8 @@
 package edu.umich.globalchallenges.thirdeye;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,9 +24,13 @@ public class DisplayStream extends AppCompatActivity {
     private static boolean grayscale = true;
     private static boolean lowresolution = true;
     private static boolean videostatus = true;
+    private static int imgCount = 1;
+    private static int vidCount = 1;
 
     private static final int UM_BLUE = 0xFF00274C;
     private static final int UM_MAZE = 0xFFFFCB05;
+
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +39,7 @@ public class DisplayStream extends AppCompatActivity {
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_display_stream);
         this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         // Open video feed
         final WebView webview = (WebView) this.findViewById(R.id.web);
         webview.getSettings().setBuiltInZoomControls(true);
@@ -59,13 +66,15 @@ public class DisplayStream extends AppCompatActivity {
      * @param view
      */
     public void take_snapshot(final View view) {
-        String url = "http://stream.pi:5000/snapshot?filename=default_picture";
+        final String pictureName = sharedPreferences.getString("filename", "default") + "_picture_" + imgCount;
+        String url = "http://stream.pi:5000/snapshot?filename=" + pictureName;
         RequestQueue queue = Volley.newRequestQueue(this);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        snack_message(view, "Picture taken");
+                        snack_message(view, "Picture taken, saved as " + pictureName);
+                        imgCount++;
                     }
                 },
                 new Response.ErrorListener() {
@@ -85,14 +94,16 @@ public class DisplayStream extends AppCompatActivity {
      */
     public void video_capture(final View view) {
         videostatus = !videostatus; // Flip video capture status
-        String url = "http://stream.pi:5000/video_capture?filename=default_video&status=" + videostatus;
+        final String videoName = sharedPreferences.getString("filename", "default") + "_video_" + vidCount;
+        String url = "http://stream.pi:5000/video_capture?filename=" + videoName + "&status=" + videostatus;
         RequestQueue queue = Volley.newRequestQueue(this);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         if(videostatus) {
-                            snack_message(view, "Done recoding");
+                            snack_message(view, "Done recoding, saved as " + videoName);
+                            vidCount++;
                         }
                         else {
                             snack_message(view, "Recording...");

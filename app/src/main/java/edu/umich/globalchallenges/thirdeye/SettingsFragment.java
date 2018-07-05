@@ -5,6 +5,10 @@ import android.preference.PreferenceFragment;
 
 public class SettingsFragment extends PreferenceFragment {
 
+    /**
+     * Builds the settings view based on what is in the settings xml file
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
