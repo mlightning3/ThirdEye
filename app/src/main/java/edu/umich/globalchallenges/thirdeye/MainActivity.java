@@ -23,8 +23,10 @@ import com.android.volley.RequestQueue;
 public class MainActivity extends AppCompatActivity {
     // Important Globals
     public static int last_net_id = 0;                // Network previously attached to
-    private static String ssid = "\"MD-02\"";          // SSID of network with camera stream
-    private static String sharedkey = "\"WoN1ukARBG81EWI\"";  // Password to above network
+    private static String ssid = "\"Pi_AP\"";
+    private static String sharedkey = "\"raspberry\"";
+    //private static String ssid = "\"MD-02\"";          // SSID of network with camera stream
+    //private static String sharedkey = "\"WoN1ukARBG81EWI\"";  // Password to above network
     private static String userkey = "QtM0lly02RH18";  // A preshared key that allows for elevated privileges on server
 
     private static final int UM_BLUE = 0xFF00274C;
@@ -199,9 +201,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Launches the Settings activity
+     * @param view
+     */
     public void launch_settings(View view) {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
+    }
+
+    /**
+     * Launches the FileView activity
+     * @param view
+     */
+    public void launch_fileviewer(final View view) {
+        if(connected_to_network()) {
+            Intent intent = new Intent(this, FileViewer.class);
+            startActivity(intent);
+        } else {
+            network_error_snack(view);
+        }
     }
 
     public void view_filename(View view) {

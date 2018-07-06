@@ -87,19 +87,16 @@
             android:layout_height="wrap_content"
             android:text="Settings" />
         <Button
-            android:id="@+id/view_filename"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:onClick="view_filename"
-            android:text="View Filename" />
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
-        <Button
             android:id="@+id/settings_launch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="launch_settings"
             android:text="View Settings" />
+        <Button
+            android:id="@+id/filelisting_launch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="launch_fileviewer"
+            android:text="View Files" />
     </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>
