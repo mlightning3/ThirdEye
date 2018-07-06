@@ -10,10 +10,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,33 +38,14 @@ public class JsonAdapter extends RecyclerView.Adapter<JsonAdapter.ViewHolder> {
      * @param queue A RequestQueue from the activity using this that we can add our request to
      */
     public JsonAdapter(RequestQueue queue) {
-        String url = "http://stream.pi:5000/get_database";
         jsonMessage = "null";
         database = new ArrayList<>();
         List<String> temp = new ArrayList<>();
         temp.add("Nothing");
         temp.add("here");
         database.add(temp);
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                jsonMessage = response.toString();
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                jsonMessage = "null";
-            }
-        });
-        queue.add(jsonArrayRequest);
-        if(!jsonMessage.contentEquals("null")) { // Only try to parse the message if we actually got something
-            JsonDatabaseParser databaseParser = new JsonDatabaseParser();
-            try {
-                database = databaseParser.genDatabaseArray(jsonMessage);
-            } catch (IOException e) { // Here we swallow the exception without doing anything about it
-                //database = null;
-            }
-        }
+        fetchData(queue);
+        updateDataSet();
     }
 
     /**
@@ -100,5 +79,41 @@ public class JsonAdapter extends RecyclerView.Adapter<JsonAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         return database.size();
+    }
+
+    /**
+     * Reparses the JSON message and builds new database
+     */
+    public void updateDataSet() {
+        if(!jsonMessage.contentEquals("null")) { // Only try to parse the message if we actually got something
+            JsonDatabaseParser databaseParser = new JsonDatabaseParser();
+            try {
+                database = databaseParser.genDatabaseArray(jsonMessage);
+            } catch (IOException e) { // Here we swallow the exception without doing anything about it
+                //database = null;
+            }
+        }
+    }
+
+    /**
+     * Fetches the data from the server and parses the data before reloading activity view
+     * @param queue Request queue from activity that we can add to
+     */
+    public void fetchData(RequestQueue queue) {
+        String url = "http://stream.pi:5000/get_database";
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                jsonMessage = response.toString();
+                updateDataSet();
+                notifyDataSetChanged();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                jsonMessage = "null";
+            }
+        });
+        queue.add(jsonArrayRequest);
     }
 }

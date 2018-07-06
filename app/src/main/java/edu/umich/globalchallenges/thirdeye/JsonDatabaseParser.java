@@ -88,6 +88,7 @@ public class JsonDatabaseParser {
                 reader.skipValue();
             }
         }
+        reader.endObject();
         List<String> text = new ArrayList<>();
         text.add(date);
         text.add(filename);
