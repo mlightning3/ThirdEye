@@ -4,6 +4,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.ItemDecoration;
+import android.support.v7.widget.DividerItemDecoration;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -12,7 +14,7 @@ public class FileViewer extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
+    private LinearLayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,5 +29,7 @@ public class FileViewer extends AppCompatActivity {
         RequestQueue queue = Volley.newRequestQueue(this);
         adapter = new JsonAdapter(queue);
         recyclerView.setAdapter(adapter);
+        recyclerView.addItemDecoration(new DividerItemDecoration(this,
+                layoutManager.getOrientation()));
     }
 }

@@ -41,8 +41,8 @@ public class JsonAdapter extends RecyclerView.Adapter<JsonAdapter.ViewHolder> {
         jsonMessage = "null";
         database = new ArrayList<>();
         List<String> temp = new ArrayList<>();
-        temp.add("Nothing");
-        temp.add("here");
+        temp.add("Nothing here yet!");
+        temp.add("Loading...");
         database.add(temp);
         fetchData(queue);
         updateDataSet();
