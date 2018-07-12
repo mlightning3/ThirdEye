@@ -1,6 +1,10 @@
 package edu.umich.globalchallenges.thirdeye;
 
+import android.app.DownloadManager;
+import android.content.Context;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Environment;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -61,7 +65,20 @@ public class FileViewer extends AppCompatActivity implements FlexibleAdapter.OnI
 
     @Override
     public boolean onItemClick(View view, int position) {
-        snack_message(view, adapter.getItem(position).toString());
+        // Build needed strings
+        String filename = adapter.getItem(position).toString();
+        filename = filename.substring(filename.indexOf(" ") + 1, filename.length());
+        String url = "http://stream.pi:5000/media/" + filename;
+        // Set up download and queue it up
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+        request.setTitle("Downloading " + filename);
+        request.allowScanningByMediaScanner();
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
+        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        manager.enqueue(request);
+        // Notify user
+        snack_message(view, "Downloading " + filename);
         adapter.toggleSelection(position);
         return true;
     }
