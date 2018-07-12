@@ -23,9 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eu.davidea.flexibleadapter.FlexibleAdapter;
+import eu.davidea.flexibleadapter.SelectableAdapter.Mode;
 import eu.davidea.flexibleadapter.items.IFlexible;
 
-public class FileViewer extends AppCompatActivity {
+public class FileViewer extends AppCompatActivity implements FlexibleAdapter.OnItemClickListener {
 
     private RecyclerView recyclerView;
     private FlexibleAdapter<IFlexible> adapter;
@@ -55,8 +56,17 @@ public class FileViewer extends AppCompatActivity {
         // Load in data
         queue = Volley.newRequestQueue(this);
         adapter = new FlexibleAdapter<>(database);
+        adapter.addListener(this);
+        adapter.setMode(Mode.SINGLE);
         recyclerView.setAdapter(adapter);
         fetchData();
+    }
+
+    @Override
+    public boolean onItemClick(View view, int position) {
+        snack_message(view, adapter.getItem(position).toString());
+        adapter.toggleSelection(position);
+        return true;
     }
 
     /**

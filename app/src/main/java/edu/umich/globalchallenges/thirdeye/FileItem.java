@@ -46,6 +46,11 @@ public class FileItem  extends AbstractFlexibleItem<FileItem.FileViewHolder> {
         holder.filename.setEnabled(isEnabled());
     }
 
+    @Override
+    public String toString() {
+        return date + " " + filename;
+    }
+
     /**
      * Class defining the how the items will be viewed
      */
