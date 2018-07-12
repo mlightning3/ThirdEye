@@ -36,9 +36,6 @@ public class FileViewer extends AppCompatActivity implements FlexibleAdapter.OnI
     private List<List<String>> databaseMessage;
     private List<IFlexible> database;
 
-    private static final int UM_BLUE = 0xFF00274C;
-    private static final int UM_MAZE = 0xFFFFCB05;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,7 +74,7 @@ public class FileViewer extends AppCompatActivity implements FlexibleAdapter.OnI
      */
     private void snack_message(View view, String message) {
         Snackbar messagebar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
-        messagebar.getView().setBackgroundColor(UM_BLUE);
+        messagebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
         TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
         messagetext.setTextColor(Color.WHITE);
         messagebar.show();
