@@ -2,6 +2,7 @@ package edu.umich.globalchallenges.thirdeye;
 
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -40,6 +41,9 @@ public class DisplayStream extends AppCompatActivity {
         // Open video feed
         final WebView webview = (WebView) this.findViewById(R.id.web);
         webview.getSettings().setBuiltInZoomControls(true);
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
+            webview.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // Disable hardware rendering on KitKat
+        }
         webview.loadUrl("http://stream.pi:5000/video_feed");
     }
 
