@@ -120,7 +120,23 @@ public class MainActivity extends AppCompatActivity {
      * @param view The view from which we need to send this message
      */
     private void network_error_snack(View view) {
-        snack_message(view, "Not connected to correct network");
+        Snackbar errorbar = Snackbar.make(view, "Not connected to correct network", Snackbar.LENGTH_LONG);
+        errorbar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        TextView messagetext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+        messagetext.setTextColor(Color.BLACK);
+        errorbar.setAction("Connect", new ConnectListener());
+        errorbar.show();
+    }
+
+    /**
+     * Listens for a connect action and tries to connect to the server's wifi network
+     */
+    public class ConnectListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            wifi_connect(view);
+        }
     }
 
     /**
@@ -218,9 +234,5 @@ public class MainActivity extends AppCompatActivity {
         } else {
             network_error_snack(view);
         }
-    }
-
-    public void view_filename(View view) {
-        snack_message(view, sharedPreferences.getString("filename", "oops"));
     }
 }

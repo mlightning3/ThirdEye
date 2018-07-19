@@ -120,14 +120,14 @@ public class FileViewer extends AppCompatActivity implements FlexibleAdapter.OnI
         deletebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         TextView messagetext = (TextView) deletebar.getView().findViewById(android.support.design.R.id.snackbar_text);
         messagetext.setTextColor(Color.BLACK);
-        deletebar.setAction("Yes", new deleteListener());
+        deletebar.setAction("Yes", new DeleteListener());
         deletebar.show();
     }
 
     /**
      * Listens for delete action on snackbar and calls remove action on server
      */
-    public class deleteListener implements View.OnClickListener {
+    public class DeleteListener implements View.OnClickListener {
 
         @Override
         public void onClick(final View view) {
