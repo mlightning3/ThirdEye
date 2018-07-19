@@ -1,11 +1,18 @@
 package edu.umich.globalchallenges.thirdeye;
 
 import android.app.DownloadManager;
+import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,6 +29,7 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,17 +78,76 @@ public class FileViewer extends AppCompatActivity implements FlexibleAdapter.OnI
         filename = filename.substring(filename.indexOf(" ") + 1, filename.length());
         String url = "http://stream.pi:5000/media/" + filename;
         // Set up download and queue it up
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-        request.setTitle("Downloading " + filename);
-        request.allowScanningByMediaScanner();
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
-        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-        manager.enqueue(request);
-        // Notify user
-        snack_message(view, "Downloading " + filename);
-        adapter.toggleSelection(position);
-        return true;
+        try {
+            registerReceiver(downloadCompleteReceive, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+            request.setTitle("Downloading " + filename);
+            request.allowScanningByMediaScanner();
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
+            DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+            manager.enqueue(request);
+            // Notify user
+            snack_message(view, "Downloading " + filename);
+            adapter.toggleSelection(position);
+            return true;
+        }
+        catch (IllegalStateException e) {
+            snack_message(view, "Error downloading " + filename + " from server");
+            return true;
+        }
+    }
+
+    // This gets called when a download is completed and opens the file
+    BroadcastReceiver downloadCompleteReceive = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                long downloadId = intent.getLongExtra(
+                        DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+                openDownload(context, downloadId);
+            }
+        }
+    };
+
+    /**
+     * Opens file after downloading it from the server
+     *
+     * @param context Place download action came from
+     * @param downloadId The download we wish to open
+     */
+    private void openDownload(final Context context, final long downloadId) {
+        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+        DownloadManager.Query query = new DownloadManager.Query();
+        query.setFilterById(downloadId);
+        Cursor cursor = downloadManager.query(query);
+        if (cursor.moveToFirst()) {
+            int downloadStatus = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+            String downloadLocalUri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI));
+            String downloadMimeType = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_MEDIA_TYPE));
+            if ((downloadStatus == DownloadManager.STATUS_SUCCESSFUL) && downloadLocalUri != null) {
+                Uri attachmentUri = Uri.parse(downloadLocalUri);
+                if(attachmentUri!=null) {
+                    // Get Content Uri.
+                    if (ContentResolver.SCHEME_FILE.equals(attachmentUri.getScheme())) {
+                        // FileUri - Convert it to contentUri.
+                        File file = new File(attachmentUri.getPath());
+                        attachmentUri = FileProvider.getUriForFile(this, "edu.umich.globalchallenges.provider", file);
+                    }
+
+                    Intent openAttachmentIntent = new Intent(Intent.ACTION_VIEW);
+                    openAttachmentIntent.setDataAndType(attachmentUri, downloadMimeType);
+                    openAttachmentIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    try {
+                        context.startActivity(openAttachmentIntent);
+                    } catch (ActivityNotFoundException e) {
+                        snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Unable to open file");
+                    }
+                }
+            }
+        }
+        cursor.close();
     }
 
     /**
@@ -127,7 +194,7 @@ public class FileViewer extends AppCompatActivity implements FlexibleAdapter.OnI
             try {
                 databaseMessage = databaseParser.genDatabaseArray(jsonMessage);
             } catch (IOException e) { // Here we swallow the exception without doing anything about it
-                //snack_message(view, "Error parsing json message");
+                snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Error parsing json message");
                 return;
             }
             database = new ArrayList<>();
