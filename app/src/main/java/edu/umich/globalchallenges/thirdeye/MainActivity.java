@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private static String userkey = "QtM0lly02RH18";  // A preshared key that allows for elevated privileges on server
 
     private SharedPreferences sharedPreferences;
+    private RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        queue = Volley.newRequestQueue(this);
     }
 
     /**
@@ -140,6 +142,58 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Listens for a reboot action and tries to reboot the server
+     */
+    public class RebootListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(final View view) {
+            String url = "http://stream.pi:5000/reboot?key=" + userkey;
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            snack_message(view, "Pi rebooting");
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            snack_message(view, "Error rebooting Pi");
+                        }
+                    }
+            );
+            queue.add(stringRequest);
+        }
+    }
+
+    /**
+     * Listens for a shutdown action and tries to shutdown the server
+     */
+    public class ShutdownListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(final View view) {
+            String url = "http://stream.pi:5000/shutdown?key=" + userkey;
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            snack_message(view, "Pi shutting down");
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            snack_message(view, "Error shutting down Pi");
+                        }
+                    }
+            );
+            queue.add(stringRequest);
+        }
+    }
+
+    /**
      * Launches activity to view the camera stream if we are connected to the right network, or gives
      * a snackbar message that we aren't connected.
      * @param view
@@ -161,23 +215,12 @@ public class MainActivity extends AppCompatActivity {
      */
     public void device_reboot(final View view) {
         if (connected_to_network()) {
-            String url = "http://stream.pi:5000/reboot?key=" + userkey;
-            RequestQueue queue = Volley.newRequestQueue(this);
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            snack_message(view, "Pi rebooting");
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            snack_message(view, "Error rebooting Pi");
-                        }
-                    }
-            );
-            queue.add(stringRequest);
+            Snackbar rebootbar = Snackbar.make(view, "Reboot Pi?", Snackbar.LENGTH_LONG);
+            rebootbar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            TextView messagetext = (TextView) rebootbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+            messagetext.setTextColor(Color.BLACK);
+            rebootbar.setAction("Yes", new RebootListener());
+            rebootbar.show();
         }
         else {
             network_error_snack(view);
@@ -191,23 +234,12 @@ public class MainActivity extends AppCompatActivity {
      */
     public void device_shutdown(final View view) {
         if (connected_to_network()) {
-            String url = "http://stream.pi:5000/shutdown?key=" + userkey;
-            RequestQueue queue = Volley.newRequestQueue(this);
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            snack_message(view, "Pi shutting down");
-                        }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            snack_message(view, "Error shutting down Pi");
-                        }
-                    }
-            );
-            queue.add(stringRequest);
+            Snackbar shutdownbar = Snackbar.make(view, "Shutdown Pi?", Snackbar.LENGTH_LONG);
+            shutdownbar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+            TextView messagetext = (TextView) shutdownbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+            messagetext.setTextColor(Color.BLACK);
+            shutdownbar.setAction("Yes", new ShutdownListener());
+            shutdownbar.show();
         }
         else {
             network_error_snack(view);
