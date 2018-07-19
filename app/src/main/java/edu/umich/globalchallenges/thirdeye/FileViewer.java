@@ -25,6 +25,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
@@ -38,7 +39,7 @@ import eu.davidea.flexibleadapter.FlexibleAdapter;
 import eu.davidea.flexibleadapter.SelectableAdapter.Mode;
 import eu.davidea.flexibleadapter.items.IFlexible;
 
-public class FileViewer extends AppCompatActivity implements FlexibleAdapter.OnItemClickListener {
+public class FileViewer extends AppCompatActivity implements FlexibleAdapter.OnItemClickListener, FlexibleAdapter.OnItemLongClickListener {
 
     private RecyclerView recyclerView;
     private FlexibleAdapter<IFlexible> adapter;
@@ -47,9 +48,11 @@ public class FileViewer extends AppCompatActivity implements FlexibleAdapter.OnI
     private String jsonMessage;
     private List<List<String>> databaseMessage;
     private List<IFlexible> database;
+    private String toDelete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        toDelete = "";
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_viewer);
 
@@ -71,6 +74,13 @@ public class FileViewer extends AppCompatActivity implements FlexibleAdapter.OnI
         fetchData();
     }
 
+    /**
+     * When there is just a short touch, we download and open the file from the server
+     *
+     * @param view View item was touched on
+     * @param position The position of the item touched
+     * @return True, always
+     */
     @Override
     public boolean onItemClick(View view, int position) {
         // Build needed strings
@@ -98,7 +108,52 @@ public class FileViewer extends AppCompatActivity implements FlexibleAdapter.OnI
         }
     }
 
-    // This gets called when a download is completed and opens the file
+    /**
+     * When there is a long touch, we ask to delete the file on the server and delete if approved
+     *
+     * @param position The position of the item touched
+     */
+    @Override
+    public void onItemLongClick(int position) {
+        toDelete = databaseMessage.get(position).get(1); // Grab filename of thing we want deleted
+        Snackbar deletebar = Snackbar.make(getWindow().getDecorView().findViewById(android.R.id.content), "Delete file on server?", Snackbar.LENGTH_LONG);
+        deletebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        TextView messagetext = (TextView) deletebar.getView().findViewById(android.support.design.R.id.snackbar_text);
+        messagetext.setTextColor(Color.BLACK);
+        deletebar.setAction("Yes", new deleteListener());
+        deletebar.show();
+    }
+
+    /**
+     * Listens for delete action on snackbar and calls remove action on server
+     */
+    public class deleteListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(final View view) {
+            String url = "http://stream.pi:5000/database/remove?filename=" + toDelete;
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            snack_message(view, toDelete + " deleted");
+                            fetchData();
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            snack_message(view, "Error deleting file on server");
+                        }
+                    }
+            );
+            queue.add(stringRequest);
+        }
+    }
+
+    /**
+    * This gets called when a download is completed and opens the file
+    */
     BroadcastReceiver downloadCompleteReceive = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -193,13 +248,12 @@ public class FileViewer extends AppCompatActivity implements FlexibleAdapter.OnI
             JsonDatabaseParser databaseParser = new JsonDatabaseParser();
             try {
                 databaseMessage = databaseParser.genDatabaseArray(jsonMessage);
+                database = new ArrayList<>();
+                for(int i = 0; i < databaseMessage.size(); i++) {
+                    database.add(new FileItem(databaseMessage.get(i).get(0), databaseMessage.get(i).get(1)));
+                }
             } catch (IOException e) { // Here we swallow the exception without doing anything about it
                 snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Error parsing json message");
-                return;
-            }
-            database = new ArrayList<>();
-            for(int i = 0; i < databaseMessage.size(); i++) {
-                database.add(new FileItem(databaseMessage.get(i).get(0), databaseMessage.get(i).get(1)));
             }
         }
     }
