@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
         // Load settings
         ssid = "\"" + sharedPreferences.getString("ssid", "Pi_AP") + "\"";
         sharedkey = "\"" + sharedPreferences.getString("passphrase", "raspberry") + "\"";
-        userkey = sharedPreferences.getString("userkey", "development_key");
+        userkey = sharedPreferences.getString("userkey", "developmentkey");
     }
 
     /**

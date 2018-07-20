@@ -21,7 +21,7 @@
         android:title="User Settings"
         android:key="perf_user">
         <EditTextPreference
-            android:defaultValue="development_key"
+            android:defaultValue="developmentkey"
             android:key="userkey"
             android:maxLines="1"
             android:selectAllOnFocus="true"
