@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -29,6 +30,8 @@ public class DisplayStream extends AppCompatActivity {
     private static int vidCount = 1;
 
     private SharedPreferences sharedPreferences;
+    private SeekBar seekbar;
+    private RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +41,9 @@ public class DisplayStream extends AppCompatActivity {
         setContentView(R.layout.activity_display_stream);
         this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        seekbar = findViewById(R.id.seekBar);
+        seekbar.setOnSeekBarChangeListener(new focusListener());
+        queue = Volley.newRequestQueue(this);
         // Open video feed
         final WebView webview = (WebView) this.findViewById(R.id.web);
         webview.getSettings().setBuiltInZoomControls(true);
@@ -45,6 +51,42 @@ public class DisplayStream extends AppCompatActivity {
             webview.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // Disable hardware rendering on KitKat
         }
         webview.loadUrl("http://stream.pi:5000/video_feed");
+    }
+
+    public class focusListener implements SeekBar.OnSeekBarChangeListener {
+
+        @Override
+        public void onProgressChanged(SeekBar bar, int progress, boolean user) {
+            if(user) {
+                final double value = progress/100;
+                String url = "http://stream.pi:5000/set_focus?value=" + value;
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Focus set to " + value);
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Error changing resolution");
+                            }
+                        }
+                );
+                queue.add(stringRequest);
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Focus will change when you let go");
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Adjusting focus...");
+        }
     }
 
     /**
@@ -69,7 +111,6 @@ public class DisplayStream extends AppCompatActivity {
     public void take_snapshot(final View view) {
         final String pictureName = sharedPreferences.getString("filename", "default") + "_picture_" + imgCount;
         String url = "http://stream.pi:5000/snapshot?filename=" + pictureName;
-        RequestQueue queue = Volley.newRequestQueue(this);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -97,7 +138,6 @@ public class DisplayStream extends AppCompatActivity {
         videostatus = !videostatus; // Flip video capture status
         final String videoName = sharedPreferences.getString("filename", "default") + "_video_" + vidCount;
         String url = "http://stream.pi:5000/video_capture?filename=" + videoName + "&status=" + videostatus;
-        RequestQueue queue = Volley.newRequestQueue(this);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -129,7 +169,6 @@ public class DisplayStream extends AppCompatActivity {
     public void toggle_grayscale(final View view) {
         grayscale = !grayscale; // Flip grayscale status
         String url = "http://stream.pi:5000/grayscale?status=" + grayscale;
-        RequestQueue queue = Volley.newRequestQueue(this);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -155,7 +194,6 @@ public class DisplayStream extends AppCompatActivity {
     public void toggle_resolution(final View view) {
         lowresolution = !lowresolution; // Flip resolution status
         String url = "http://stream.pi:5000/resolution?status=" + lowresolution;
-        RequestQueue queue = Volley.newRequestQueue(this);
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override

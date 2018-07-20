@@ -14,8 +14,14 @@
             android:id="@+id/web"
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
-
         </WebView>
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="0"
+            android:layout_gravity="center_vertical"/>
         <Button
             android:id="@+id/snapshot"
             android:layout_width="wrap_content"
