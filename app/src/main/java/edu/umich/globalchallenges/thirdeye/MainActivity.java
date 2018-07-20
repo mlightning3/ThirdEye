@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -205,8 +207,16 @@ public class MainActivity extends AppCompatActivity {
      */
     public void browser_launch(View view) {
         if (connected_to_network()) {
-            Intent intent = new Intent(this, DisplayStream.class);
-            startActivity(intent);
+            if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://stream.pi:5000"));
+                if (browserIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(browserIntent);
+                }
+            }
+            else {
+                Intent intent = new Intent(this, DisplayStream.class);
+                startActivity(intent);
+            }
         }
         else {
             network_error_snack(view);
