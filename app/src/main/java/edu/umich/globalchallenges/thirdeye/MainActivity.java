@@ -23,11 +23,11 @@ import com.android.volley.RequestQueue;
 public class MainActivity extends AppCompatActivity {
     // Important Globals
     public static int last_net_id = 0;                // Network previously attached to
-    private static String ssid = "\"Pi_AP\"";
-    private static String sharedkey = "\"raspberry\"";
+    private static String ssid;
+    private static String sharedkey;
     //private static String ssid = "\"MD-02\"";          // SSID of network with camera stream
     //private static String sharedkey = "\"WoN1ukARBG81EWI\"";  // Password to above network
-    private static String userkey = "QtM0lly02RH18";  // A preshared key that allows for elevated privileges on server
+    private static String userkey; // = "QtM0lly02RH18";  // A preshared key that allows for elevated privileges on server
 
     private SharedPreferences sharedPreferences;
     private RequestQueue queue;
@@ -39,6 +39,11 @@ public class MainActivity extends AppCompatActivity {
 
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         queue = Volley.newRequestQueue(this);
+
+        // Load settings
+        ssid = "\"" + sharedPreferences.getString("ssid", "Pi_AP") + "\"";
+        sharedkey = "\"" + sharedPreferences.getString("passphrase", "raspberry") + "\"";
+        userkey = sharedPreferences.getString("userkey", "development_key");
     }
 
     /**

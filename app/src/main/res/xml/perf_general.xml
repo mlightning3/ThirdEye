@@ -17,4 +17,33 @@
             android:singleLine="true"
             android:title="Default Filename" />
     </PreferenceCategory>
+    <PreferenceCategory
+        android:title="User Settings"
+        android:key="perf_user">
+        <EditTextPreference
+            android:defaultValue="development_key"
+            android:key="userkey"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="User Key" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Network Settings"
+        android:key="perf_network">
+        <EditTextPreference
+            android:defaultValue="Pi_AP"
+            android:key="ssid"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Network SSID" />
+        <EditTextPreference
+            android:defaultValue="raspberry"
+            android:key="passphrase"
+            android:maxLines="1"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:title="Network Password" />
+    </PreferenceCategory>
 </PreferenceScreen>
