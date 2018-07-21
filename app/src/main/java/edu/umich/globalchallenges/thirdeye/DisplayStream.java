@@ -55,26 +55,12 @@ public class DisplayStream extends AppCompatActivity {
 
     public class focusListener implements SeekBar.OnSeekBarChangeListener {
 
+        private double value;
+
         @Override
         public void onProgressChanged(SeekBar bar, int progress, boolean user) {
             if(user) {
-                final double value = progress/100;
-                String url = "http://stream.pi:5000/set_focus?value=" + value;
-                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Focus set to " + value);
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Error changing resolution");
-                            }
-                        }
-                );
-                queue.add(stringRequest);
+                value = progress / 100;
             }
         }
 
@@ -85,7 +71,22 @@ public class DisplayStream extends AppCompatActivity {
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Adjusting focus...");
+            String url = "http://stream.pi:5000/set_focus?value=" + value;
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Focus set to " + value);
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Error changing focus");
+                        }
+                    }
+            );
+            queue.add(stringRequest);
         }
     }
 
