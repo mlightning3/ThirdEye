@@ -53,6 +53,9 @@ public class DisplayStream extends AppCompatActivity {
         webview.loadUrl("http://stream.pi:5000/video_feed");
     }
 
+    /**
+     * Listens for actions preformed on the seekbar, then changes the focus as appropriate
+     */
     public class focusListener implements SeekBar.OnSeekBarChangeListener {
 
         private double value;
