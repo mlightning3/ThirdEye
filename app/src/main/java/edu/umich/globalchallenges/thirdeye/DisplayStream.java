@@ -26,6 +26,7 @@ public class DisplayStream extends AppCompatActivity {
     private static boolean grayscale = true;
     private static boolean lowresolution = true;
     private static boolean videostatus = true;
+    private static boolean autofocusStatus = true;
     private static int imgCount = 1;
     private static int vidCount = 1;
 
@@ -54,27 +55,12 @@ public class DisplayStream extends AppCompatActivity {
     }
 
     public class focusListener implements SeekBar.OnSeekBarChangeListener {
+        double value;
 
         @Override
         public void onProgressChanged(SeekBar bar, int progress, boolean user) {
             if(user) {
-                final double value = progress/100;
-                String url = "http://stream.pi:5000/set_focus?value=" + value;
-                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Focus set to " + value);
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Error changing resolution");
-                            }
-                        }
-                );
-                queue.add(stringRequest);
+                value = progress / 100.0;
             }
         }
 
@@ -85,7 +71,23 @@ public class DisplayStream extends AppCompatActivity {
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-            snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Adjusting focus...");
+            String url = "http://stream.pi:5000/set_focus?value=" + value;
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Adjusting focus...");
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Error changing focus");
+                        }
+                    }
+            );
+            queue.add(stringRequest);
+            autofocusStatus = true; // Change this so when the user presses the toggle autofocus button, it enables autofocus
         }
     }
 
@@ -209,5 +211,40 @@ public class DisplayStream extends AppCompatActivity {
                 }
         );
         queue.add(stringRequest);
+    }
+
+    /**
+     * Sends message to server to set autofocus on or off
+     *
+     * @param status Set status of autofocus. True turns off autofocus, False turns autofocus on
+     */
+    private void set_autofocus_status(boolean status) {
+        String url = "http://stream.pi:5000/autofocus?status=" + status;
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Nothing needed
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Error changing autofocus");
+                    }
+                }
+        );
+        queue.add(stringRequest);
+    }
+
+    /**
+     * Sends message to server to toggle autofocus
+     * ONLY WORKS ON SUPPORTED CAMERAS
+     *
+     * @param view
+     */
+    public void toggle_autofocus(View view) {
+        autofocusStatus = !autofocusStatus; // Flip autofocus status
+        set_autofocus_status(autofocusStatus);
     }
 }
