@@ -55,7 +55,7 @@ public class DisplayStream extends AppCompatActivity {
     }
 
     public class focusListener implements SeekBar.OnSeekBarChangeListener {
-        double value;
+        private double value;
 
         @Override
         public void onProgressChanged(SeekBar bar, int progress, boolean user) {
