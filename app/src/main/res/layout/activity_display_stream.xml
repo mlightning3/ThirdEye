@@ -50,6 +50,13 @@
             android:onClick="video_capture"
             android:text="Record"
             android:layout_gravity="end|bottom" />
+        <Button
+            android:id="@+id/autofocus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="toggle_autofocus"
+            android:text="Autofocus"
+            android:layout_gravity="center_horizontal" />
     </FrameLayout>
 
 </android.support.constraint.ConstraintLayout>
