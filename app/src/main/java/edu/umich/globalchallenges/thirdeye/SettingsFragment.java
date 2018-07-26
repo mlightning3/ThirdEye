@@ -1,17 +1,18 @@
 package edu.umich.globalchallenges.thirdeye;
 
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
+import android.support.v7.preference.PreferenceFragmentCompat;
 
-public class SettingsFragment extends PreferenceFragment {
+public class SettingsFragment extends PreferenceFragmentCompat {
 
     /**
-     * Builds the settings view based on what is in the settings xml file
+     * Builds our preference fragment from the information in the xml file
+     *
      * @param savedInstanceState
+     * @param rootKey
      */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        addPreferencesFromResource(R.xml.perf_general);
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        setPreferencesFromResource(R.xml.perf_general, rootKey);
     }
 }

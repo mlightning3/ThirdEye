@@ -9,6 +9,9 @@
             android:id="@+id/view_files"
             android:title="Files" />
         <item
+            android:id="@+id/device_control"
+            android:title="Device Control" />
+        <item
             android:id="@+id/settings"
             android:icon="@drawable/ic_settings"
             android:title="Settings" />

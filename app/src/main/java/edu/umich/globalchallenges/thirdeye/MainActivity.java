@@ -37,6 +37,27 @@ public class MainActivity extends AppCompatActivity {
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         item.setChecked(true);
                         drawerLayout.closeDrawers();
+
+                        // Swap out Fragment
+                        Fragment newFragment = null;
+                        switch (item.getItemId()) {
+                            case R.id.view_stream : break;
+                            case R.id.view_files :
+                                newFragment = new FileViewerFragment();
+                                break;
+                            case R.id.device_control :
+                                newFragment = new DeviceControlFragment();
+                                break;
+                            case R.id.settings :
+                                newFragment = new SettingsFragment();
+                                break;
+                            default : break;
+                        }
+                        if(newFragment != null) {
+                            fragmentManager.beginTransaction().replace(R.id.fragment_container, newFragment).commit();
+                            activeFragment = newFragment;
+                        }
+
                         return true;
                     }
                 }
