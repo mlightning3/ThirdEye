@@ -12,6 +12,9 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -58,6 +61,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         queue = Volley.newRequestQueue(getContext());
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -66,6 +70,16 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         // Load settings
         ssid = "\"" + sharedPreferences.getString("ssid", "Pi_AP") + "\"";
         sharedkey = "\"" + sharedPreferences.getString("passphrase", "raspberry") + "\"";
+    }
+
+    /**
+     * Adds refresh button to actionbar
+     * @param menu
+     * @param inflater
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.refresh_menu, menu);
     }
 
     /**
@@ -88,9 +102,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
             webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // Disable hardware rendering on KitKat
         }
-        if(!connected_to_network()) {
-            wifi_connect(); // Try to connect to the network with the server automatically
-        }
+        wifi_connect(); // Try to connect to the network with the server automatically
         webView.loadUrl("http://stream.pi:5000/video_feed");
         return view;
     }
@@ -148,6 +160,24 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 break;
             default: break;
         }
+    }
+
+    /**
+     * Preforms actions when things in actionbar are clicked
+     *
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.refresh:
+                wifi_connect();
+                webView.loadUrl("http://stream.pi:5000/video_feed");
+                break;
+            default: break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -363,7 +393,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      * network. This will also save off the network that we are attached to before changing networks
      * so that we can try to reconnect to it when we are done.
      */
-    public void wifi_connect() {
+    private void wifi_connect() {
         if(!connected_to_network()) { // Only connect if we aren't already
             // setup a wifi configuration
             WifiConfiguration wc = new WifiConfiguration();
@@ -389,7 +419,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      *
      * @return true if connected to the right network, false otherwise
      */
-    public boolean connected_to_network() {
+    private boolean connected_to_network() {
         if(wifiManager.getConnectionInfo().getSSID().equals(ssid)) {
             return true;
         }

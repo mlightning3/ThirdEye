@@ -7,11 +7,15 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -19,6 +23,9 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -44,6 +51,11 @@ import eu.davidea.flexibleadapter.items.IFlexible;
 
 public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnItemClickListener, FlexibleAdapter.OnItemLongClickListener {
 
+    private static String ssid;
+    private static String sharedkey;
+
+    private SharedPreferences sharedPreferences;
+    private WifiManager wifiManager;
     private RecyclerView recyclerView;
     private FlexibleAdapter<IFlexible> adapter;
     private LinearLayoutManager layoutManager;
@@ -61,9 +73,16 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         toDelete = "";
         database = new ArrayList<>();
         database.add(new FileItem("Nothing here yet!", "Loading..."));
+        setHasOptionsMenu(true);
+
+        // Load settings
+        ssid = "\"" + sharedPreferences.getString("ssid", "Pi_AP") + "\"";
+        sharedkey = "\"" + sharedPreferences.getString("passphrase", "raspberry") + "\"";
     }
 
     /**
@@ -76,6 +95,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        wifi_connect(); // Try to connect to network automatically
         View view = inflater.inflate(R.layout.activity_file_viewer, container, false);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycle_view);
         recyclerView.setHasFixedSize(true);
@@ -93,11 +113,40 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     }
 
     /**
+     * Adds refresh button to actionbar
+     *
+     * @param menu
+     * @param inflater
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.refresh_menu, menu);
+    }
+
+    /**
      * Anything that needs to be saved between use of fragments should be saved here
      */
     @Override
     public void onPause() {
         super.onPause();
+    }
+
+    /**
+     * Preforms actions when things in actionbar are clicked
+     *
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.refresh:
+                wifi_connect();
+                fetchData();
+                break;
+            default: break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -282,5 +331,43 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                 snack_message(getActivity().getWindow().getDecorView().findViewById(android.R.id.content), "Error parsing json message");
             }
         }
+    }
+
+    /**
+     * Creates a new network connection for the camera streaming computer, and connects to that
+     * network. This will also save off the network that we are attached to before changing networks
+     * so that we can try to reconnect to it when we are done.
+     */
+    private void wifi_connect() {
+        if(!connected_to_network()) { // Only connect if we aren't already
+            // setup a wifi configuration
+            WifiConfiguration wc = new WifiConfiguration();
+            wc.SSID = ssid;
+            wc.preSharedKey = sharedkey;
+            wc.status = WifiConfiguration.Status.ENABLED;
+            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+            wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+            wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+            wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+            // connect to and enable the connection
+            int netId = wifiManager.addNetwork(wc);
+            wifiManager.enableNetwork(netId, true);
+            wifiManager.setWifiEnabled(true);
+        }
+    }
+
+    /**
+     * Tests if we are connected to the right network to view the camera stream.
+     *
+     * @return true if connected to the right network, false otherwise
+     */
+    private boolean connected_to_network() {
+        if(wifiManager.getConnectionInfo().getSSID().equals(ssid)) {
+            return true;
+        }
+        return false;
     }
 }
