@@ -1,19 +1,18 @@
 package edu.umich.globalchallenges.thirdeye;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,11 +22,11 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.android.volley.RequestQueue;
 
 public class MainActivity extends AppCompatActivity {
     // Important Globals
@@ -40,7 +39,10 @@ public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences sharedPreferences;
     private RequestQueue queue;
+    private WifiManager wifiManager;
     private DrawerLayout drawerLayout;
+    private FragmentManager fragmentManager;
+    private Fragment activeFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,11 +71,17 @@ public class MainActivity extends AppCompatActivity {
         // Initialize our global variables
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         queue = Volley.newRequestQueue(this);
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         // Load settings
         ssid = "\"" + sharedPreferences.getString("ssid", "Pi_AP") + "\"";
         sharedkey = "\"" + sharedPreferences.getString("passphrase", "raspberry") + "\"";
         userkey = sharedPreferences.getString("userkey", "developmentkey");
+
+        // Load initial fragment
+        fragmentManager = getSupportFragmentManager();
+        activeFragment = new DeviceControlFragment();
+        fragmentManager.beginTransaction().add(R.id.fragment_container, activeFragment).commit();
     }
 
     @Override
@@ -95,7 +103,6 @@ public class MainActivity extends AppCompatActivity {
      */
     public void wifi_connect(View view) {
         if(!connected_to_network()) { // Only connect if we aren't already
-            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             last_net_id = wifiManager.getConnectionInfo().getNetworkId();
             // setup a wifi configuration
             WifiConfiguration wc = new WifiConfiguration();
@@ -125,7 +132,6 @@ public class MainActivity extends AppCompatActivity {
      */
     public void wifi_disconnect(View view) {
         if(connected_to_network()) { // We only want to disconnect if we were connected to the server's network
-            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             wifiManager.disconnect();
             if (last_net_id != 0) { // Try to reconnect to the network previously attached to
                 wifiManager.enableNetwork(last_net_id, true);
@@ -140,7 +146,6 @@ public class MainActivity extends AppCompatActivity {
      * @return true if connected to the right network, false otherwise
      */
     public boolean connected_to_network() {
-        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if(wifiManager.getConnectionInfo().getSSID().equals(ssid)) {
             return true;
         }
@@ -171,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         errorbar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         TextView messagetext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
         messagetext.setTextColor(Color.BLACK);
-        errorbar.setAction("Connect", new ConnectListener());
+        errorbar.setAction("Connect", new MainActivity.ConnectListener());
         errorbar.show();
     }
 
@@ -239,29 +244,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Launches activity to view the camera stream if we are connected to the right network, or gives
-     * a snackbar message that we aren't connected.
-     * @param view
-     */
-    public void browser_launch(View view) {
-        if (connected_to_network()) {
-            if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://stream.pi:5000"));
-                if (browserIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(browserIntent);
-                }
-            }
-            else {
-                Intent intent = new Intent(this, DisplayStream.class);
-                startActivity(intent);
-            }
-        }
-        else {
-            network_error_snack(view);
-        }
-    }
-
-    /**
      * Tells the computer running the server to reboot. It will display a snackbar with the status
      * of the request (everything ok, or error)
      * @param view
@@ -272,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
             rebootbar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             TextView messagetext = (TextView) rebootbar.getView().findViewById(android.support.design.R.id.snackbar_text);
             messagetext.setTextColor(Color.BLACK);
-            rebootbar.setAction("Yes", new RebootListener());
+            rebootbar.setAction("Yes", new MainActivity.RebootListener());
             rebootbar.show();
         }
         else {
@@ -291,32 +273,10 @@ public class MainActivity extends AppCompatActivity {
             shutdownbar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             TextView messagetext = (TextView) shutdownbar.getView().findViewById(android.support.design.R.id.snackbar_text);
             messagetext.setTextColor(Color.BLACK);
-            shutdownbar.setAction("Yes", new ShutdownListener());
+            shutdownbar.setAction("Yes", new MainActivity.ShutdownListener());
             shutdownbar.show();
         }
         else {
-            network_error_snack(view);
-        }
-    }
-
-    /**
-     * Launches the Settings activity
-     * @param view
-     */
-    public void launch_settings(View view) {
-        Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
-    }
-
-    /**
-     * Launches the FileView activity
-     * @param view
-     */
-    public void launch_fileviewer(final View view) {
-        if(connected_to_network()) {
-            Intent intent = new Intent(this, FileViewer.class);
-            startActivity(intent);
-        } else {
             network_error_snack(view);
         }
     }
