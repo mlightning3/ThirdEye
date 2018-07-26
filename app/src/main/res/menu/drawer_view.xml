@@ -7,9 +7,11 @@
             android:title="Stream" />
         <item
             android:id="@+id/view_files"
+            android:icon="@drawable/ic_folder"
             android:title="Files" />
         <item
             android:id="@+id/device_control"
+            android:icon="@drawable/ic_wrench"
             android:title="Device Control" />
         <item
             android:id="@+id/settings"

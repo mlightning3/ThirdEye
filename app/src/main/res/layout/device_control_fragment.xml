@@ -21,16 +21,20 @@
             android:text="Wifi Control" />
         <Button
             android:id="@+id/wifi_connect"
-            android:layout_width="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_wifi"
             android:text="Connect to Pi"/>
         <Space
             android:layout_width="match_parent"
             android:layout_height="10dp" />
         <Button
             android:id="@+id/wifi_disconnect"
-            android:layout_width="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_signal_wifi_off"
             android:text="Disconnect from Pi"/>
 
         <Space
@@ -45,16 +49,20 @@
 
         <Button
             android:id="@+id/reboot"
-            android:layout_width="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_refresh"
             android:text="Reboot Pi" />
         <Space
             android:layout_width="match_parent"
             android:layout_height="10dp" />
         <Button
             android:id="@+id/poweroff"
-            android:layout_width="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_power"
             android:text="Shutdown Pi" />
     </LinearLayout>
 
