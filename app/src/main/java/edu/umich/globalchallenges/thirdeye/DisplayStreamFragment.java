@@ -4,13 +4,16 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.Window;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.WebView;
+import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -21,7 +24,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-public class DisplayStream extends AppCompatActivity {
+public class DisplayStreamFragment extends Fragment implements View.OnClickListener{
     // Important Globals
     private static boolean grayscale = true;
     private static boolean lowresolution = true;
@@ -33,27 +36,104 @@ public class DisplayStream extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private SeekBar seekbar;
     private RequestQueue queue;
+    private WebView webView;
+    private View view;
 
+    /**
+     * This is called when the fragment is created, but before its view is
+     *
+     * @param savedInstanceState
+     */
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        setContentView(R.layout.activity_display_stream);
-        this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        seekbar = findViewById(R.id.seekBar);
-        seekbar.setOnSeekBarChangeListener(new focusListener());
-        queue = Volley.newRequestQueue(this);
-        // Open video feed
-        final WebView webview = (WebView) this.findViewById(R.id.web);
-        webview.getSettings().setBuiltInZoomControls(true);
-        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
-            webview.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // Disable hardware rendering on KitKat
-        }
-        webview.loadUrl("http://stream.pi:5000/video_feed");
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        queue = Volley.newRequestQueue(getContext());
+        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
+    /**
+     * This is called when the fragment is creating it's view
+     *
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        view = inflater.inflate(R.layout.display_stream_fragment, container, false);
+        initializeButtons(view);
+        seekbar = view.findViewById(R.id.seekBar);
+        seekbar.setOnSeekBarChangeListener(new focusListener());
+        // Open video feed
+        webView = (WebView) view.findViewById(R.id.web);
+        webView.getSettings().setBuiltInZoomControls(true);
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
+            webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // Disable hardware rendering on KitKat
+        }
+        webView.loadUrl("http://stream.pi:5000/video_feed");
+        return view;
+    }
+
+    /**
+     * Here we set up all the buttons so that when they are clicked on they preform an action
+     *
+     * @param view The view these come from (ideally from onCreateView)
+     */
+    private void initializeButtons(View view) {
+        Button snapshot = (Button) view.findViewById(R.id.snapshot);
+        snapshot.setOnClickListener(this);
+        Button grayscale = (Button) view.findViewById(R.id.grayscale);
+        grayscale.setOnClickListener(this);
+        Button resolution = (Button) view.findViewById(R.id.resolution);
+        resolution.setOnClickListener(this);
+        Button record = (Button) view.findViewById(R.id.record);
+        record.setOnClickListener(this);
+        Button autofocus = (Button) view.findViewById(R.id.autofocus);
+        autofocus.setOnClickListener(this);
+    }
+
+    /**
+     * Anything that needs to be saved between use of fragments should be saved here
+     */
+    @Override
+    public void onPause() {
+        getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        webView.onPause();
+        super.onPause();
+    }
+
+    /**
+     * Here we capture all the click events on the buttons and perform the action we need based on their id in the xml
+     *
+     * @param view
+     */
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.snapshot:
+                take_snapshot(view);
+                break;
+            case R.id.grayscale:
+                toggle_grayscale(view);
+                break;
+            case R.id.resolution:
+                toggle_resolution(view);
+                break;
+            case R.id.record:
+                video_capture(view);
+                break;
+            case R.id.autofocus:
+                toggle_autofocus(view);
+                break;
+            default: break;
+        }
+    }
+
+    /**
+     * Class for listening to things done with the seekbar to change the focus
+     */
     public class focusListener implements SeekBar.OnSeekBarChangeListener {
         private double value;
 
@@ -66,7 +146,7 @@ public class DisplayStream extends AppCompatActivity {
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-            snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Focus will change when you let go");
+            snack_message(view, "Focus will change when you let go");
         }
 
         @Override
@@ -76,13 +156,13 @@ public class DisplayStream extends AppCompatActivity {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Adjusting focus...");
+                            snack_message(view, "Adjusting focus...");
                         }
                     },
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Error changing focus");
+                            snack_message(view, "Error changing focus");
                         }
                     }
             );
@@ -230,7 +310,7 @@ public class DisplayStream extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        snack_message(getWindow().getDecorView().findViewById(android.R.id.content), "Error changing autofocus");
+                        snack_message(view, "Error changing autofocus");
                     }
                 }
         );

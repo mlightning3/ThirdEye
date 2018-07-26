@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/display_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DisplayStream">
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+    tools:context=".DisplayStreamFragment">
 
         <WebView
             android:id="@+id/web"
@@ -26,37 +24,31 @@
             android:id="@+id/snapshot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="take_snapshot"
             android:text="Snapshot"
             android:layout_gravity="bottom" />
         <Button
             android:id="@+id/grayscale"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="toggle_grayscale"
             android:text="Grayscale"
             android:layout_gravity="top" />
         <Button
             android:id="@+id/resolution"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="toggle_resolution"
             android:text="Resolution"
             android:layout_gravity="end" />
         <Button
             android:id="@+id/record"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="video_capture"
             android:text="Record"
             android:layout_gravity="end|bottom" />
         <Button
             android:id="@+id/autofocus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="toggle_autofocus"
             android:text="Autofocus"
             android:layout_gravity="center_horizontal" />
-    </FrameLayout>
 
-</android.support.constraint.ConstraintLayout>
+</FrameLayout>

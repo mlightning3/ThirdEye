@@ -41,7 +41,9 @@ public class MainActivity extends AppCompatActivity {
                         // Swap out Fragment
                         Fragment newFragment = null;
                         switch (item.getItemId()) {
-                            case R.id.view_stream : break;
+                            case R.id.view_stream :
+                                newFragment = new DisplayStreamFragment();
+                                break;
                             case R.id.view_files :
                                 newFragment = new FileViewerFragment();
                                 break;
