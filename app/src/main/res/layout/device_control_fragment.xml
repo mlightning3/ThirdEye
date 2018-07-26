@@ -23,7 +23,6 @@
             android:id="@+id/wifi_connect"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="wifi_connect"
             android:text="Connect to Pi"/>
         <Space
             android:layout_width="match_parent"
@@ -32,7 +31,6 @@
             android:id="@+id/wifi_disconnect"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="wifi_disconnect"
             android:text="Disconnect from Pi"/>
 
         <Space
@@ -49,7 +47,6 @@
             android:id="@+id/reboot"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="device_reboot"
             android:text="Reboot Pi" />
         <Space
             android:layout_width="match_parent"
@@ -58,7 +55,6 @@
             android:id="@+id/poweroff"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:onClick="device_shutdown"
             android:text="Shutdown Pi" />
     </LinearLayout>
 
