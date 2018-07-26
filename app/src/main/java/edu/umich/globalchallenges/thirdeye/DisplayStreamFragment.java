@@ -1,7 +1,10 @@
 package edu.umich.globalchallenges.thirdeye;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -24,6 +27,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 public class DisplayStreamFragment extends Fragment implements View.OnClickListener{
     // Important Globals
     private static boolean grayscale = true;
@@ -33,7 +40,11 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     private static int imgCount = 1;
     private static int vidCount = 1;
 
+    private static String ssid;
+    private static String sharedkey;
+
     private SharedPreferences sharedPreferences;
+    private WifiManager wifiManager;
     private SeekBar seekbar;
     private RequestQueue queue;
     private WebView webView;
@@ -50,6 +61,11 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         queue = Volley.newRequestQueue(getContext());
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        // Load settings
+        ssid = "\"" + sharedPreferences.getString("ssid", "Pi_AP") + "\"";
+        sharedkey = "\"" + sharedPreferences.getString("passphrase", "raspberry") + "\"";
     }
 
     /**
@@ -71,6 +87,9 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         webView.getSettings().setBuiltInZoomControls(true);
         if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
             webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // Disable hardware rendering on KitKat
+        }
+        if(!connected_to_network()) {
+            wifi_connect(); // Try to connect to the network with the server automatically
         }
         webView.loadUrl("http://stream.pi:5000/video_feed");
         return view;
@@ -186,13 +205,24 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     }
 
     /**
+     * Builds a string out of the current date
+     *
+     * @return String formatted as YYYY-MM-DD
+     */
+    private String getDate() {
+        Date cur = Calendar.getInstance().getTime();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        return dateFormat.format(cur);
+    }
+
+    /**
      * Sends a message to the server to take a picture. Sends filename to save picture as.
      *
      * @param view
      */
     public void take_snapshot(final View view) {
         final String pictureName = sharedPreferences.getString("filename", "default") + "_picture_" + imgCount;
-        String url = "http://stream.pi:5000/snapshot?filename=" + pictureName;
+        String url = "http://stream.pi:5000/snapshot?filename=" + pictureName + "&date=" + getDate();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -219,7 +249,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     public void video_capture(final View view) {
         videostatus = !videostatus; // Flip video capture status
         final String videoName = sharedPreferences.getString("filename", "default") + "_video_" + vidCount;
-        String url = "http://stream.pi:5000/video_capture?filename=" + videoName + "&status=" + videostatus;
+        String url = "http://stream.pi:5000/video_capture?filename=" + videoName + "&status=" + videostatus + "&date=" + getDate();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -326,5 +356,43 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     public void toggle_autofocus(View view) {
         autofocusStatus = !autofocusStatus; // Flip autofocus status
         set_autofocus_status(autofocusStatus);
+    }
+
+    /**
+     * Creates a new network connection for the camera streaming computer, and connects to that
+     * network. This will also save off the network that we are attached to before changing networks
+     * so that we can try to reconnect to it when we are done.
+     */
+    public void wifi_connect() {
+        if(!connected_to_network()) { // Only connect if we aren't already
+            // setup a wifi configuration
+            WifiConfiguration wc = new WifiConfiguration();
+            wc.SSID = ssid;
+            wc.preSharedKey = sharedkey;
+            wc.status = WifiConfiguration.Status.ENABLED;
+            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+            wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+            wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+            wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+            // connect to and enable the connection
+            int netId = wifiManager.addNetwork(wc);
+            wifiManager.enableNetwork(netId, true);
+            wifiManager.setWifiEnabled(true);
+        }
+    }
+
+    /**
+     * Tests if we are connected to the right network to view the camera stream.
+     *
+     * @return true if connected to the right network, false otherwise
+     */
+    public boolean connected_to_network() {
+        if(wifiManager.getConnectionInfo().getSSID().equals(ssid)) {
+            return true;
+        }
+        return false;
     }
 }

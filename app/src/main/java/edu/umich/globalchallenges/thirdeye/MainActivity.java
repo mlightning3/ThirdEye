@@ -1,5 +1,8 @@
 package edu.umich.globalchallenges.thirdeye;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -42,7 +45,15 @@ public class MainActivity extends AppCompatActivity {
                         Fragment newFragment = null;
                         switch (item.getItemId()) {
                             case R.id.view_stream :
-                                newFragment = new DisplayStreamFragment();
+                                if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
+                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://stream.pi:5000"));
+                                    if (browserIntent.resolveActivity(getPackageManager()) != null) {
+                                        startActivity(browserIntent); // For KitKat based devices, just open a browser
+                                    }
+                                }
+                                else {
+                                    newFragment = new DisplayStreamFragment();
+                                }
                                 break;
                             case R.id.view_files :
                                 newFragment = new FileViewerFragment();
