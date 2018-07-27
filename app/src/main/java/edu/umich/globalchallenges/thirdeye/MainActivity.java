@@ -52,17 +52,29 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                                 else {
-                                    newFragment = new DisplayStreamFragment();
+                                    newFragment = getSupportFragmentManager().findFragmentById(R.id.display_frame);
+                                    if (newFragment == null) {
+                                        newFragment = new DisplayStreamFragment();
+                                    }
                                 }
                                 break;
                             case R.id.view_files :
-                                newFragment = new FileViewerFragment();
+                                newFragment = getSupportFragmentManager().findFragmentById(R.id.recycle_view);
+                                if(newFragment == null) {
+                                    newFragment = new FileViewerFragment();
+                                }
                                 break;
                             case R.id.device_control :
-                                newFragment = new DeviceControlFragment();
+                                newFragment = getSupportFragmentManager().findFragmentById(R.id.DeviceControlFragment);
+                                if(newFragment == null) {
+                                    newFragment = new DeviceControlFragment();
+                                }
                                 break;
                             case R.id.settings :
-                                newFragment = new SettingsFragment();
+                                newFragment = getSupportFragmentManager().findFragmentById(R.id.settings);
+                                if(newFragment == null) {
+                                    newFragment = new SettingsFragment();
+                                }
                                 break;
                             default : break;
                         }
@@ -76,10 +88,12 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        // Load initial fragment
         fragmentManager = getSupportFragmentManager();
-        activeFragment = new DeviceControlFragment();
-        fragmentManager.beginTransaction().add(R.id.fragment_container, activeFragment).commit();
+        if(savedInstanceState == null) {
+            // Load initial fragment
+            activeFragment = new DeviceControlFragment();
+            fragmentManager.beginTransaction().add(R.id.fragment_container, activeFragment).commit();
+        }
     }
 
     @Override
