@@ -9,6 +9,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -73,12 +74,13 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     }
 
     /**
-     * Adds refresh button to actionbar
+     * Adds option buttons to actionbar
      * @param menu
      * @param inflater
      */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.edit_menu, menu);
         inflater.inflate(R.menu.refresh_menu, menu);
     }
 
@@ -171,6 +173,10 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.edit:
+                DialogFragment dialog = new ChangeFilenameDialog();
+                dialog.show(getFragmentManager(), "editfilename");
+                break;
             case R.id.refresh:
                 wifi_connect();
                 webView.loadUrl("http://stream.pi:5000/video_feed");
