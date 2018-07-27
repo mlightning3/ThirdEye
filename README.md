@@ -6,7 +6,8 @@ for the University of Michigan.
 
 ### Features
 
-Currently the app supports most of the features available on the server's web-view
+Currently the app supports all of the features available on the server's web-view
+such as:
 
 * Viewing the video stream
 * Saving pictures and video
@@ -19,6 +20,11 @@ Installing
 
 This app required Android version 4.4 (aka Kit Kat) or higher. Otherwise you
 will have an error during installation.
+
+Also note that if you are going to use this on Kit Kat, the built in web view
+does not support the streaming format. To get around this, the app launches a
+web browser when you go to view the stream, giving you the normal web-view from
+the server.
 
 Currently the only way to install the app is to sideload it. Either you need
 to build the app from source, or you grab a finished apk from src/releases
@@ -46,10 +52,11 @@ need a copy of the the keystore with the android development key for this app
 can follow the steps for building a signed apk in Android Studio.
 
 Here is a short summation of how the project is layed out. The app currently
-uses different activities for each of the different main parts (Main view,
-video stream view, setting view, filelisting view). As such, there is at
-least one java file for each of the activities, as well as a resource file
-that defines the layout that will be displayed on the screen. Some things,
+uses one main activity for everything to live in. Then each of the different
+main parts (device control, video stream view, setting view, filelisting view),
+are implemented as fragments (mini activities that can be swapped out). As such,
+there is at least one java file for each of the fragments, as well as a resource
+file that defines the layout that will be displayed on the screen. Some things,
 like the filelisting activity, also call on other third party libraries, so
 be prepared to look in other places than Google's Android development pages.
 
@@ -58,3 +65,9 @@ Copyright
 University of Michigan 2018
 
 All rights reserved.
+
+### Licenses
+
+Vector icon assests from Google under Apache License 2.0
+[Flexable Adapter](https://github.com/davideas/FlexibleAdapter) from davidea
+under Apache License 2.0
