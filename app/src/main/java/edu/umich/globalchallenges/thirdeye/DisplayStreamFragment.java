@@ -181,7 +181,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 break;
             case R.id.refresh:
                 wifi_connect();
-                webView.loadUrl("http://stream.pi:5000/video_feed");
+                webView.reload();
                 break;
             default: break;
         }
