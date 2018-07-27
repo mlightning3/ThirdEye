@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 break;
                             case R.id.view_files :
-                                newFragment = getSupportFragmentManager().findFragmentById(R.id.recycle_view);
+                                newFragment = getSupportFragmentManager().findFragmentById(R.id.file_view);
                                 if(newFragment == null) {
                                     newFragment = new FileViewerFragment();
                                 }

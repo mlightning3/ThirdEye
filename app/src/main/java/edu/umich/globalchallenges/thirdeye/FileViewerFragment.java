@@ -96,8 +96,8 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         wifi_connect(); // Try to connect to network automatically
-        View view = inflater.inflate(R.layout.activity_file_viewer, container, false);
-        recyclerView = (RecyclerView) view.findViewById(R.id.recycle_view);
+        View view = inflater.inflate(R.layout.file_viewer_fragment, container, false);
+        recyclerView = (RecyclerView) view.findViewById(R.id.file_view);
         recyclerView.setHasFixedSize(true);
         // Set the layout we want for the list
         layoutManager = new LinearLayoutManager(getContext());
