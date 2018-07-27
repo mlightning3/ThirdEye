@@ -3,6 +3,7 @@ package edu.umich.globalchallenges.thirdeye;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.LightingColorFilter;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -125,6 +126,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         record.setOnClickListener(this);
         Button autofocus = (Button) view.findViewById(R.id.autofocus);
         autofocus.setOnClickListener(this);
+        autofocus.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
     }
 
     /**
@@ -212,6 +214,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         @Override
                         public void onResponse(String response) {
                             snack_message(view, "Adjusting focus...");
+                            Button autofocus = (Button) view.findViewById(R.id.autofocus);
+                            autofocus.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
                         }
                     },
                     new Response.ErrorListener() {
@@ -293,9 +297,15 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         if(videostatus) {
                             snack_message(view, "Done recoding, saved as " + videoName);
                             vidCount++;
+                            Button recording = (Button) view.findViewById(R.id.record);
+                            recording.setText("Record");
+                            recording.getBackground().clearColorFilter();
                         }
                         else {
                             snack_message(view, "Recording...");
+                            Button recording = (Button) view.findViewById(R.id.record);
+                            recording.setText("Recording...");
+                            recording.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
                         }
                     }
                 },
@@ -392,6 +402,13 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     public void toggle_autofocus(View view) {
         autofocusStatus = !autofocusStatus; // Flip autofocus status
         set_autofocus_status(autofocusStatus);
+        Button autofocus = (Button) view.findViewById(R.id.autofocus);
+        if(autofocusStatus) {
+            autofocus.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
+        }
+        else {
+            autofocus.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
+        }
     }
 
     /**
