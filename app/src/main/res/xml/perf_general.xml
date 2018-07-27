@@ -19,6 +19,25 @@
             android:title="Default Filename" />
     </PreferenceCategory>
     <PreferenceCategory
+        android:title="Video Settings"
+        android:key="perf_video" >
+        <CheckBoxPreference
+            android:key="media_saving"
+            android:title="Media Saving"
+            android:summary="Take snapshots and record video"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="image_manip"
+            android:title="Image Manipulation"
+            android:summary="Change resolution and enable filters"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="focus_control"
+            android:title="Focus Controls"
+            android:summary="Change focal length of camera"
+            android:defaultValue="false" />
+    </PreferenceCategory>
+    <PreferenceCategory
         android:title="User Settings"
         android:key="perf_user">
         <EditTextPreference

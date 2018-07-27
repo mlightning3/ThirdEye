@@ -83,6 +83,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.edit_menu, menu);
         inflater.inflate(R.menu.refresh_menu, menu);
+        inflater.inflate(R.menu.extra_menu, menu);
     }
 
     /**
@@ -96,9 +97,9 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.display_stream_fragment, container, false);
-        initializeButtons(view);
         seekbar = view.findViewById(R.id.seekBar);
         seekbar.setOnSeekBarChangeListener(new focusListener());
+        initializeButtons(view);
         // Open video feed
         webView = (WebView) view.findViewById(R.id.web);
         webView.getSettings().setBuiltInZoomControls(true);
@@ -117,16 +118,31 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      */
     private void initializeButtons(View view) {
         Button snapshot = (Button) view.findViewById(R.id.snapshot);
-        snapshot.setOnClickListener(this);
-        Button grayscale = (Button) view.findViewById(R.id.grayscale);
-        grayscale.setOnClickListener(this);
-        Button resolution = (Button) view.findViewById(R.id.resolution);
-        resolution.setOnClickListener(this);
         Button record = (Button) view.findViewById(R.id.record);
-        record.setOnClickListener(this);
+        if(sharedPreferences.getBoolean("media_saving", true)) {
+            snapshot.setOnClickListener(this);
+            record.setOnClickListener(this);
+        } else {
+            snapshot.setVisibility(View.GONE);
+            record.setVisibility(View.GONE);
+        }
+        Button grayscale = (Button) view.findViewById(R.id.grayscale);
+        Button resolution = (Button) view.findViewById(R.id.resolution);
+        if(sharedPreferences.getBoolean("image_manip", true)) {
+            grayscale.setOnClickListener(this);
+            resolution.setOnClickListener(this);
+        } else {
+            grayscale.setVisibility(View.GONE);
+            resolution.setVisibility(View.GONE);
+        }
         Button autofocus = (Button) view.findViewById(R.id.autofocus);
-        autofocus.setOnClickListener(this);
-        autofocus.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
+        if(sharedPreferences.getBoolean("focus_control", false)) {
+            autofocus.setOnClickListener(this);
+            autofocus.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
+        } else {
+            autofocus.setVisibility(View.GONE);
+            seekbar.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -176,12 +192,16 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.edit:
-                DialogFragment dialog = new ChangeFilenameDialog();
-                dialog.show(getFragmentManager(), "editfilename");
+                DialogFragment filenameDialog = new ChangeFilenameDialog();
+                filenameDialog.show(getFragmentManager(), "editfilename");
                 break;
             case R.id.refresh:
                 wifi_connect();
                 webView.reload();
+                break;
+            case R.id.extra:
+                DialogFragment videoSettingsDialog = new ChangeVideoSettingsDialog();
+                videoSettingsDialog.show(getFragmentManager(), "editvideosettings");
                 break;
             default: break;
         }
