@@ -16,6 +16,7 @@ public class ChangeFilenameDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Edit Filename");
         final EditText textField = new EditText(getContext());
+        textField.setText(PreferenceManager.getDefaultSharedPreferences(getContext()).getString("filename", ""));
         builder.setView(textField);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
