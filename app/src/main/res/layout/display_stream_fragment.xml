@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/display_frame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DisplayStreamFragment">
+
+    <WebView
+        android:id="@+id/web"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+    </WebView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="top">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/grayscale"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Grayscale"
+                android:layout_gravity="start" />
+            <Button
+                android:id="@+id/autofocus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Autofocus"
+                android:layout_gravity="center_horizontal" />
+            <Button
+                android:id="@+id/resolution"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Resolution"
+                android:layout_gravity="end" />
+        </FrameLayout>
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="10dp" />
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="0"/>
+    </LinearLayout>
+    <Button
+        android:id="@+id/snapshot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Snapshot"
+        android:layout_gravity="start|bottom" />
+    <Button
+        android:id="@+id/record"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Record"
+        android:layout_gravity="end|bottom" />
+
+</FrameLayout>

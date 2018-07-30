@@ -8,4 +8,8 @@
     <color name="primary_dark_material_light">#00274c</color>
     <color name="primary_material_light">#ffcb05</color>
     <color name="accent_material_light">#1a237e</color>
+    <color name="red_light">#ff3333</color>
+    <color name="red_dark">#b30000</color>
+    <color name="green_light">#4dff4d</color>
+    <color name="green_dark">#009900</color>
 </resources>

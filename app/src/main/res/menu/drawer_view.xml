@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single" >
+        <item
+            android:id="@+id/view_stream"
+            android:icon="@drawable/ic_videocam"
+            android:title="Stream" />
+        <item
+            android:id="@+id/view_files"
+            android:icon="@drawable/ic_folder"
+            android:title="Files" />
+        <item
+            android:id="@+id/device_control"
+            android:icon="@drawable/ic_wrench"
+            android:title="Device Control" />
+        <item
+            android:id="@+id/settings"
+            android:icon="@drawable/ic_settings"
+            android:title="Settings" />
+    </group>
+
+</menu>
