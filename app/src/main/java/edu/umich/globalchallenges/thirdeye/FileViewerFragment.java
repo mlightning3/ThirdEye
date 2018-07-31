@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
+import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -28,6 +29,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -57,6 +60,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     private SharedPreferences sharedPreferences;
     private WifiManager wifiManager;
     private RecyclerView recyclerView;
+    private LinearLayout loadingHeader;
     private FlexibleAdapter<IFlexible> adapter;
     private LinearLayoutManager layoutManager;
     private RequestQueue queue;
@@ -77,7 +81,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
         wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         toDelete = "";
         database = new ArrayList<>();
-        database.add(new FileItem("Nothing here yet!", "Loading..."));
+        database.add(new FileItem("Nothing here yet!", "Try refreshing"));
         setHasOptionsMenu(true);
 
         // Load settings
@@ -97,6 +101,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         wifi_connect(); // Try to connect to network automatically
         View view = inflater.inflate(R.layout.file_viewer_fragment, container, false);
+        loadingHeader = (LinearLayout) view.findViewById(R.id.LoadingHeader);
         recyclerView = (RecyclerView) view.findViewById(R.id.file_view);
         recyclerView.setHasFixedSize(true);
         // Set the layout we want for the list
@@ -299,17 +304,24 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
      */
     public void fetchData() {
         String url = "http://stream.pi:5000/get_database";
+        loadingHeader.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.INVISIBLE);
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 jsonMessage = response.toString();
                 rebuildDataSet();
                 adapter.updateDataSet(database);
+                loadingHeader.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                snack_message(getView(), "Error retrieving file listing from server");
                 jsonMessage = "null";
+                loadingHeader.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.VISIBLE);
             }
         });
         queue.add(jsonArrayRequest);
