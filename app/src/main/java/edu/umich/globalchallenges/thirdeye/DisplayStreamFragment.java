@@ -323,7 +323,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      */
     public void take_snapshot(final View view) {
         final String pictureName = sharedPreferences.getString("filename", "default") + "_picture_" + imgCount;
-        String url = "http://stream.pi:5000/snapshotButton?filename=" + pictureName + "&date=" + getDate();
+        String url = "http://stream.pi:5000/snapshot?filename=" + pictureName + "&date=" + getDate();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -412,7 +412,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      */
     public void toggle_resolution(final View view) {
         lowresolution = !lowresolution; // Flip resolutionButton status
-        String url = "http://stream.pi:5000/resolutionButton?status=" + lowresolution;
+        String url = "http://stream.pi:5000/resolution?status=" + lowresolution;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -436,7 +436,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      * @param status Set status of autofocusButton. True turns off autofocusButton, False turns autofocusButton on
      */
     private void set_autofocus_status(boolean status) {
-        String url = "http://stream.pi:5000/autofocusButton?status=" + status;
+        String url = "http://stream.pi:5000/autofocus?status=" + status;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
