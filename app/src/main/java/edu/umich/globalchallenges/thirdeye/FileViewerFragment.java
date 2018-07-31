@@ -20,6 +20,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
+import android.support.v4.content.MimeTypeFilter;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -28,6 +29,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -164,25 +166,42 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
         // Build needed strings
         String filename = adapter.getItem(position).toString();
         filename = filename.substring(filename.indexOf(" ") + 1, filename.length());
-        String url = "http://stream.pi:5000/media/" + filename;
-        // Set up download and queue it up
-        try {
-            getContext().registerReceiver(downloadCompleteReceive, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-            request.setTitle("Downloading " + filename);
-            request.allowScanningByMediaScanner();
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
-            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
-            DownloadManager manager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
-            manager.enqueue(request);
-            // Notify user
-            snack_message(view, "Downloading " + filename);
-            adapter.toggleSelection(position);
-            return true;
-        }
-        catch (IllegalStateException e) {
-            snack_message(view, "Error downloading " + filename + " from server");
-            return true;
+        String extension = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
+        // Check if we already have the file
+        String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + filename;
+        File file = new File(path);
+        if(file.exists()) { // Open file if we already have it
+            snack_message(view, "Opening " + filename);
+            Intent openAttachmentIntent = new Intent(Intent.ACTION_VIEW);
+            openAttachmentIntent.setDataAndType(Uri.fromFile(file), MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
+            openAttachmentIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            try {
+                getContext().startActivity(openAttachmentIntent);
+                return true;
+            } catch (ActivityNotFoundException e) {
+                snack_message(getActivity().getWindow().getDecorView().findViewById(android.R.id.content), "Unable to open file");
+                return true;
+            }
+        } else { // Otherwise download the file and open it
+            String url = "http://stream.pi:5000/media/" + filename;
+            // Set up download and queue it up
+            try {
+                getContext().registerReceiver(downloadCompleteReceive, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                request.setTitle("Downloading " + filename);
+                request.allowScanningByMediaScanner();
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
+                DownloadManager manager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
+                manager.enqueue(request);
+                // Notify user
+                snack_message(view, "Downloading " + filename);
+                adapter.toggleSelection(position);
+                return true;
+            } catch (IllegalStateException e) {
+                snack_message(view, "Error downloading " + filename + " from server");
+                return true;
+            }
         }
     }
 
