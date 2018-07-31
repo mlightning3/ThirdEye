@@ -1,6 +1,8 @@
 package edu.umich.globalchallenges.thirdeye;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.LightingColorFilter;
@@ -36,7 +38,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class DisplayStreamFragment extends Fragment implements View.OnClickListener{
+public class DisplayStreamFragment extends Fragment implements View.OnClickListener {
     // Important Globals
     private static boolean grayscale = true;
     private static boolean lowresolution = true;
@@ -54,6 +56,13 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     private RequestQueue queue;
     private WebView webView;
     private View view;
+    private Button snapshotButton;
+    private Button recordButton;
+    private Button grayscaleButton;
+    private Button resolutionButton;
+    private Button autofocusButton;
+
+    public static final int CHANGEVIDEOSETTINGS_DIALOG = 1;
 
     /**
      * This is called when the fragment is created, but before its view is
@@ -97,9 +106,14 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.display_stream_fragment, container, false);
+        // Set up things user will interact with
         seekbar = view.findViewById(R.id.seekBar);
-        seekbar.setOnSeekBarChangeListener(new focusListener());
-        initializeButtons(view);
+        snapshotButton = (Button) view.findViewById(R.id.snapshot);
+        recordButton = (Button) view.findViewById(R.id.record);
+        grayscaleButton = (Button) view.findViewById(R.id.grayscale);
+        resolutionButton = (Button) view.findViewById(R.id.resolution);
+        autofocusButton = (Button) view.findViewById(R.id.autofocus);
+        initializeListeners(view);
         // Open video feed
         webView = (WebView) view.findViewById(R.id.web);
         webView.getSettings().setBuiltInZoomControls(true);
@@ -116,31 +130,40 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      *
      * @param view The view these come from (ideally from onCreateView)
      */
-    private void initializeButtons(View view) {
-        Button snapshot = (Button) view.findViewById(R.id.snapshot);
-        Button record = (Button) view.findViewById(R.id.record);
+    private void initializeListeners(View view) {
+        snapshotButton.setOnClickListener(this);
+        recordButton.setOnClickListener(this);
+        grayscaleButton.setOnClickListener(this);
+        resolutionButton.setOnClickListener(this);
+        autofocusButton.setOnClickListener(this);
+        autofocusButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
+        seekbar.setOnSeekBarChangeListener(new focusListener());
+        updateButtons();
+    }
+
+    /**
+     * Updates the viability of buttons based on preferences
+     */
+    private void updateButtons() {
         if(sharedPreferences.getBoolean("media_saving", true)) {
-            snapshot.setOnClickListener(this);
-            record.setOnClickListener(this);
+            snapshotButton.setVisibility(View.VISIBLE);
+            recordButton.setVisibility(View.VISIBLE);
         } else {
-            snapshot.setVisibility(View.GONE);
-            record.setVisibility(View.GONE);
+            snapshotButton.setVisibility(View.GONE);
+            recordButton.setVisibility(View.GONE);
         }
-        Button grayscale = (Button) view.findViewById(R.id.grayscale);
-        Button resolution = (Button) view.findViewById(R.id.resolution);
         if(sharedPreferences.getBoolean("image_manip", true)) {
-            grayscale.setOnClickListener(this);
-            resolution.setOnClickListener(this);
+            grayscaleButton.setVisibility(View.VISIBLE);
+            resolutionButton.setVisibility(View.VISIBLE);
         } else {
-            grayscale.setVisibility(View.GONE);
-            resolution.setVisibility(View.GONE);
+            grayscaleButton.setVisibility(View.GONE);
+            resolutionButton.setVisibility(View.GONE);
         }
-        Button autofocus = (Button) view.findViewById(R.id.autofocus);
         if(sharedPreferences.getBoolean("focus_control", false)) {
-            autofocus.setOnClickListener(this);
-            autofocus.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
+            autofocusButton.setVisibility(View.VISIBLE);
+            seekbar.setVisibility(View.VISIBLE);
         } else {
-            autofocus.setVisibility(View.GONE);
+            autofocusButton.setVisibility(View.GONE);
             seekbar.setVisibility(View.GONE);
         }
     }
@@ -183,6 +206,23 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     }
 
     /**
+     * Callback for after user uses the ChangeVideoSettingsDialog
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case CHANGEVIDEOSETTINGS_DIALOG:
+                if(resultCode == Activity.RESULT_OK) {
+                    updateButtons();
+                } else if(resultCode == Activity.RESULT_CANCELED) {
+                    // Nothing needed
+                }
+                break;
+            default: break;
+        }
+    }
+
+    /**
      * Preforms actions when things in actionbar are clicked
      *
      * @param item
@@ -201,6 +241,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 break;
             case R.id.extra:
                 DialogFragment videoSettingsDialog = new ChangeVideoSettingsDialog();
+                videoSettingsDialog.setTargetFragment(this, CHANGEVIDEOSETTINGS_DIALOG);
                 videoSettingsDialog.show(getFragmentManager(), "editvideosettings");
                 break;
             default: break;
@@ -246,7 +287,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     }
             );
             queue.add(stringRequest);
-            autofocusStatus = true; // Change this so when the user presses the toggle autofocus button, it enables autofocus
+            autofocusStatus = true; // Change this so when the user presses the toggle autofocusButton button, it enables autofocusButton
         }
     }
 
@@ -282,7 +323,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      */
     public void take_snapshot(final View view) {
         final String pictureName = sharedPreferences.getString("filename", "default") + "_picture_" + imgCount;
-        String url = "http://stream.pi:5000/snapshot?filename=" + pictureName + "&date=" + getDate();
+        String url = "http://stream.pi:5000/snapshotButton?filename=" + pictureName + "&date=" + getDate();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -365,13 +406,13 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     }
 
     /**
-     * Sends message to server to toggle resolution of stream.
+     * Sends message to server to toggle resolutionButton of stream.
      *
      * @param view
      */
     public void toggle_resolution(final View view) {
-        lowresolution = !lowresolution; // Flip resolution status
-        String url = "http://stream.pi:5000/resolution?status=" + lowresolution;
+        lowresolution = !lowresolution; // Flip resolutionButton status
+        String url = "http://stream.pi:5000/resolutionButton?status=" + lowresolution;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -390,12 +431,12 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     }
 
     /**
-     * Sends message to server to set autofocus on or off
+     * Sends message to server to set autofocusButton on or off
      *
-     * @param status Set status of autofocus. True turns off autofocus, False turns autofocus on
+     * @param status Set status of autofocusButton. True turns off autofocusButton, False turns autofocusButton on
      */
     private void set_autofocus_status(boolean status) {
-        String url = "http://stream.pi:5000/autofocus?status=" + status;
+        String url = "http://stream.pi:5000/autofocusButton?status=" + status;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -414,13 +455,13 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     }
 
     /**
-     * Sends message to server to toggle autofocus
+     * Sends message to server to toggle autofocusButton
      * ONLY WORKS ON SUPPORTED CAMERAS
      *
      * @param view
      */
     public void toggle_autofocus(View view) {
-        autofocusStatus = !autofocusStatus; // Flip autofocus status
+        autofocusStatus = !autofocusStatus; // Flip autofocusButton status
         set_autofocus_status(autofocusStatus);
         Button autofocus = (Button) view.findViewById(R.id.autofocus);
         if(autofocusStatus) {
