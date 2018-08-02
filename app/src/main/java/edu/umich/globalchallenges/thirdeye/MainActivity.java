@@ -1,8 +1,10 @@
 package edu.umich.globalchallenges.thirdeye;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -20,12 +22,25 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private FragmentManager fragmentManager;
     private Fragment activeFragment;
+    private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        listener =
+            new SharedPreferences.OnSharedPreferenceChangeListener() {
+                public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+                    if(key.contentEquals("filename")) { // Convert all spaces to underscore whenever we get a new filename
+                        String filename = prefs.getString("filename", "");
+                        filename = filename.replaceAll(" ", "_");
+                        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit();
+                        editor.putString("filename", filename);
+                        editor.apply();
+                    }
+                }
+            };
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(listener);
         // Set up layout
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -94,6 +109,18 @@ public class MainActivity extends AppCompatActivity {
             activeFragment = new DeviceControlFragment();
             fragmentManager.beginTransaction().add(R.id.fragment_container, activeFragment).commit();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(listener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(listener);
     }
 
     @Override
