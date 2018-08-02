@@ -1,7 +1,11 @@
 package edu.umich.globalchallenges.thirdeye;
 
+import android.support.v4.app.Fragment;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 
 import java.util.List;
 
@@ -14,10 +18,14 @@ public class FileItem  extends AbstractFlexibleItem<FileItem.FileViewHolder> {
 
     private String filename;
     private String date;
+    private boolean isDownloadable;
+    private Fragment fragment;
 
-    public FileItem(String date, String filename) {
+    public FileItem(Fragment fragment, String date, String filename, boolean isDownloadable) {
         this.date = date;
         this.filename = filename;
+        this.fragment = fragment;
+        this.isDownloadable = isDownloadable;
     }
 
     @Override
@@ -44,11 +52,22 @@ public class FileItem  extends AbstractFlexibleItem<FileItem.FileViewHolder> {
         holder.filename.setText(filename);
         holder.date.setEnabled(isEnabled());
         holder.filename.setEnabled(isEnabled());
+        if(isDownloadable) {
+            String url = "http://stream.pi:5000/media/" + filename;
+            Glide.with(fragment).load(url).into(holder.image);
+        }
     }
 
     @Override
     public String toString() {
         return date + " " + filename;
+    }
+
+    /**
+     * @return If this item can be downloaded from server or not
+     */
+    public boolean isDownloadable() {
+        return isDownloadable;
     }
 
     /**
@@ -58,11 +77,13 @@ public class FileItem  extends AbstractFlexibleItem<FileItem.FileViewHolder> {
 
         public TextView date;
         public TextView filename;
+        public ImageView image;
 
         public FileViewHolder(View view, FlexibleAdapter adapter) {
             super(view, adapter);
             this.date = (TextView) view.findViewById(R.id.date);
             this.filename = (TextView) view.findViewById(R.id.filename);
+            this.image = (ImageView) view.findViewById(R.id.image);
         }
     }
 }

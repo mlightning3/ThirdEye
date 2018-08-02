@@ -81,7 +81,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
         wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         toDelete = "";
         database = new ArrayList<>();
-        database.add(new FileItem("Nothing here yet!", "Try refreshing"));
+        database.add(new FileItem(this,"Nothing here yet!", "Try refreshing", false));
         setHasOptionsMenu(true);
 
         // Load settings
@@ -356,7 +356,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                 databaseMessage = databaseParser.genDatabaseArray(jsonMessage);
                 database = new ArrayList<>();
                 for(int i = 0; i < databaseMessage.size(); i++) {
-                    database.add(new FileItem(databaseMessage.get(i).get(0), databaseMessage.get(i).get(1)));
+                    database.add(new FileItem(this, databaseMessage.get(i).get(0), databaseMessage.get(i).get(1), false));
                 }
             } catch (IOException e) { // Here we swallow the exception without doing anything about it
                 snack_message(getActivity().getWindow().getDecorView().findViewById(android.R.id.content), "Error parsing json message");

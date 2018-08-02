@@ -24,6 +24,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="60dp"
+            android:layout_height="match_parent" />
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
 
         <android.widget.TextView xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/filename"

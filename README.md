@@ -69,5 +69,8 @@ All rights reserved.
 ### Licenses
 
 Vector icon assests from Google under Apache License 2.0
+
 [Flexable Adapter](https://github.com/davideas/FlexibleAdapter) from davidea
 under Apache License 2.0
+
+[Glide](https://github.com/bumptech/glide) from bumptech under Apache License 2.0, BSD and MIT
