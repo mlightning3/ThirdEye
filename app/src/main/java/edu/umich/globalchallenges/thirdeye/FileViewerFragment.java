@@ -81,7 +81,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
         wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         toDelete = "";
         database = new ArrayList<>();
-        database.add(new FileItem("Nothing here yet!", "Try refreshing"));
+        database.add(new FileItem(this,"Nothing here yet!", "Try refreshing", false));
         setHasOptionsMenu(true);
 
         // Load settings
@@ -214,7 +214,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     public void onItemLongClick(int position) {
         toDelete = databaseMessage.get(position).get(1); // Grab filename of thing we want deleted
         if(!toDelete.contentEquals("Try refreshing")) { // Don't try to remove the empty list message
-            Snackbar deletebar = Snackbar.make(getActivity().getWindow().getDecorView().findViewById(android.R.id.content), "Delete file on server?", Snackbar.LENGTH_LONG);
+            Snackbar deletebar = Snackbar.make(getActivity().getWindow().getDecorView().findViewById(android.R.id.content), "Delete " + toDelete + " on server?", Snackbar.LENGTH_LONG);
             deletebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
             TextView messagetext = (TextView) deletebar.getView().findViewById(android.support.design.R.id.snackbar_text);
             messagetext.setTextColor(Color.BLACK);
@@ -356,7 +356,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                 databaseMessage = databaseParser.genDatabaseArray(jsonMessage);
                 database = new ArrayList<>();
                 for(int i = 0; i < databaseMessage.size(); i++) {
-                    database.add(new FileItem(databaseMessage.get(i).get(0), databaseMessage.get(i).get(1)));
+                    database.add(new FileItem(this, databaseMessage.get(i).get(0), databaseMessage.get(i).get(1), true));
                 }
             } catch (IOException e) { // Here we swallow the exception without doing anything about it
                 snack_message(getActivity().getWindow().getDecorView().findViewById(android.R.id.content), "Error parsing json message");
