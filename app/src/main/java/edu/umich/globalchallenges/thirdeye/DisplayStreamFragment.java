@@ -312,7 +312,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      */
     private String getDate() {
         Date cur = Calendar.getInstance().getTime();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return dateFormat.format(cur);
     }
 

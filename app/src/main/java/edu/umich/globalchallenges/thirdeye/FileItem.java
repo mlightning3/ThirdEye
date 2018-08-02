@@ -38,7 +38,7 @@ public class FileItem  extends AbstractFlexibleItem<FileItem.FileViewHolder> {
 
     @Override
     public int getLayoutRes() {
-        return R.layout.text_view;
+        return R.layout.file_item_view;
     }
 
     @Override
@@ -61,13 +61,6 @@ public class FileItem  extends AbstractFlexibleItem<FileItem.FileViewHolder> {
     @Override
     public String toString() {
         return date + " " + filename;
-    }
-
-    /**
-     * @return If this item can be downloaded from server or not
-     */
-    public boolean isDownloadable() {
-        return isDownloadable;
     }
 
     /**
