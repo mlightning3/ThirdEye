@@ -330,7 +330,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
             public void onResponse(JSONArray response) {
                 jsonMessage = response.toString();
                 rebuildDataSet();
-                adapter.updateDataSet(database);
+                adapter.updateDataSet(database, true);
                 loadingHeader.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);
             }

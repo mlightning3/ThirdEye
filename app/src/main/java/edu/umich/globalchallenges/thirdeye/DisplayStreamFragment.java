@@ -92,7 +92,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.edit_menu, menu);
         inflater.inflate(R.menu.refresh_menu, menu);
-        inflater.inflate(R.menu.extra_menu, menu);
+        inflater.inflate(R.menu.zoom_out_menu, menu);
+        inflater.inflate(R.menu.extra_settings_menu, menu);
     }
 
     /**
@@ -241,10 +242,13 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 wifi_connect();
                 webView.reload();
                 break;
-            case R.id.extra:
+            case R.id.extra_settings:
                 DialogFragment videoSettingsDialog = new ChangeVideoSettingsDialog();
                 videoSettingsDialog.setTargetFragment(this, CHANGEVIDEOSETTINGS_DIALOG);
                 videoSettingsDialog.show(getFragmentManager(), "editvideosettings");
+                break;
+            case R.id.zoomOut:
+                fullZoomOut();
                 break;
             default: break;
         }
@@ -305,6 +309,10 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
         messagetext.setTextColor(Color.WHITE);
         messagebar.show();
+    }
+
+    private void fullZoomOut() {
+        while(webView.zoomOut()){}
     }
 
     /**

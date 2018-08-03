@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/extra"
-        android:title="Extra"
-        android:icon="@drawable/ic_more_horiz"
+    <item android:id="@+id/extra_settings"
+        android:title="Extra Settings"
+        android:icon="@drawable/ic_settings"
         app:showAsAction="ifRoom" />
 </menu>
