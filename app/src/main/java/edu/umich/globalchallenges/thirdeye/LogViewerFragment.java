@@ -152,7 +152,14 @@ public class LogViewerFragment extends Fragment {
             TextView system = (TextView) getView().findViewById(R.id.SystemLog);
             TextView server = (TextView) getView().findViewById(R.id.ServerLog);
             logs = new JsonLogParser(jsonMessage).getLogs();
-            system.setText(logs.get(0).get(0));
+            for(int i = 0; i < logs.size(); i++) {
+                if(logs.get(i).get(0).contentEquals("System")) {
+                    system.setText(logs.get(i).get(1));
+                }
+                else if(logs.get(i).get(0).contentEquals("Server")) {
+                    server.setText(logs.get(i).get(1));
+                }
+            }
         }
     }
 
