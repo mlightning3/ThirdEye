@@ -15,6 +15,7 @@
             android:title="Device Control" />
         <item
             android:id="@+id/view_logs"
+            android:icon="@drawable/ic_log"
             android:title="Logs" />
         <item
             android:id="@+id/settings"

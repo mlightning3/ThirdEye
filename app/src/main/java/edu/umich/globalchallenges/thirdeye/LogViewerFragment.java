@@ -1,14 +1,18 @@
 package edu.umich.globalchallenges.thirdeye;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,7 +32,10 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class LogViewerFragment extends Fragment {
@@ -43,6 +50,8 @@ public class LogViewerFragment extends Fragment {
     private RequestQueue queue;
     private String jsonMessage;
     private List<List<String>> logs;
+
+    public static final int EMAILLOGSDIALOG = 1;
 
     /**
      * This is called when the fragment is created, but before its view is
@@ -81,13 +90,48 @@ public class LogViewerFragment extends Fragment {
     }
 
     /**
-     * Adds refresh button to actionbar
+     * Callback for after user uses the EmailLogsDialog
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case EMAILLOGSDIALOG:
+                if(resultCode == Activity.RESULT_OK) {
+                    if(logs.size() > 0) { // Only send emails if we have logs
+                        Date cur = Calendar.getInstance().getTime();
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                        String body = "Logs as of " + dateFormat.format(cur) + "\n";
+                        for(int i = 0; i < logs.size(); i++) {
+                            body = body + "\n" + logs.get(i).get(0) + "\n" + logs.get(i).get(1);
+                        }
+                        Intent intent = new Intent(Intent.ACTION_SENDTO);
+                        intent.setType("text/plain");
+                        intent.putExtra(Intent.EXTRA_SUBJECT, "ThridEye Logs");
+                        intent.putExtra(Intent.EXTRA_TEXT, body);
+                        intent.setData(Uri.parse("mailto:"));
+                        startActivity(intent);
+                    } else {
+                        snack_message(getView(), "No logs to send");
+                    }
+                } else if(resultCode == Activity.RESULT_CANCELED) {
+                    // Nothing needed
+                }
+                break;
+            default:
+                snack_message(getView(), "oops");
+                break;
+        }
+    }
+
+    /**
+     * Adds buttons to actionbar
      *
      * @param menu
      * @param inflater
      */
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.email_menu, menu);
         inflater.inflate(R.menu.refresh_menu, menu);
     }
 
@@ -111,6 +155,11 @@ public class LogViewerFragment extends Fragment {
             case R.id.refresh:
                 wifi_connect();
                 fetchData();
+                break;
+            case R.id.email:
+                DialogFragment videoSettingsDialog = new EmailLogsDialog();
+                videoSettingsDialog.setTargetFragment(this, EMAILLOGSDIALOG);
+                videoSettingsDialog.show(getFragmentManager(), "emaillogsdialog");
                 break;
             default: break;
         }
