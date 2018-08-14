@@ -91,6 +91,12 @@ public class MainActivity extends AppCompatActivity {
                                     newFragment = new SettingsFragment();
                                 }
                                 break;
+                            case R.id.view_logs :
+                                newFragment = getSupportFragmentManager().findFragmentById(R.id.LogContent);
+                                if(newFragment == null) {
+                                    newFragment = new LogViewerFragment();
+                                }
+                                break;
                             default : break;
                         }
                         if(newFragment != null) {
