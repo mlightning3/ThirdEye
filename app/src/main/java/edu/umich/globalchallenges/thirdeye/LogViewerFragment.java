@@ -28,6 +28,9 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LogViewerFragment extends Fragment {
 
     private static String ssid;
@@ -39,6 +42,7 @@ public class LogViewerFragment extends Fragment {
     private LinearLayout logContent;
     private RequestQueue queue;
     private String jsonMessage;
+    private List<List<String>> logs;
 
     /**
      * This is called when the fragment is created, but before its view is
@@ -48,6 +52,7 @@ public class LogViewerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        logs = new ArrayList<>();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         setHasOptionsMenu(true);
@@ -145,7 +150,9 @@ public class LogViewerFragment extends Fragment {
     public void updateLogs() {
         if(!jsonMessage.contentEquals("null")) {
             TextView system = (TextView) getView().findViewById(R.id.SystemLog);
-            system.setText(jsonMessage);
+            TextView server = (TextView) getView().findViewById(R.id.ServerLog);
+            logs = new JsonLogParser(jsonMessage).getLogs();
+            system.setText(logs.get(0).get(0));
         }
     }
 
