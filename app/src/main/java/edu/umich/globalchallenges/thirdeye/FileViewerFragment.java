@@ -18,6 +18,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.MimeTypeFilter;
@@ -214,39 +215,37 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     public void onItemLongClick(int position) {
         toDelete = databaseMessage.get(position).get(1); // Grab filename of thing we want deleted
         if(!toDelete.contentEquals("Try refreshing")) { // Don't try to remove the empty list message
-            Snackbar deletebar = Snackbar.make(getActivity().getWindow().getDecorView().findViewById(android.R.id.content), "Delete " + toDelete + " on server?", Snackbar.LENGTH_LONG);
-            deletebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            TextView messagetext = (TextView) deletebar.getView().findViewById(android.support.design.R.id.snackbar_text);
-            messagetext.setTextColor(Color.BLACK);
-            deletebar.setAction("Yes", new FileViewerFragment.DeleteListener());
-            deletebar.show();
+            DialogFragment deleteFileDialog = new DeleteFileDialog();
+            deleteFileDialog.setTargetFragment(this, Dialogs.DELETEFILEDIALOG);
+            deleteFileDialog.show(getFragmentManager(), "deletefiledialog");
         }
     }
 
     /**
-     * Listens for delete action on snackbar and calls remove action on server
+     * Callback for after user uses the EmailLogsDialog
      */
-    public class DeleteListener implements View.OnClickListener {
-
-        @Override
-        public void onClick(final View view) {
-            String url = "http://stream.pi:5000/database/remove?filename=" + toDelete;
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-                            snack_message(view, toDelete + " deleted");
-                            fetchData();
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case Dialogs.DELETEFILEDIALOG:
+                String url = "http://stream.pi:5000/database/remove?filename=" + toDelete;
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                snack_message(getView(), toDelete + " deleted");
+                                fetchData();
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                snack_message(getView(), "Error deleting file on server");
+                            }
                         }
-                    },
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            snack_message(view, "Error deleting file on server");
-                        }
-                    }
-            );
-            queue.add(stringRequest);
+                );
+                queue.add(stringRequest);
+                break;
         }
     }
 

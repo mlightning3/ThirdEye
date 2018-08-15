@@ -51,8 +51,6 @@ public class LogViewerFragment extends Fragment {
     private String jsonMessage;
     private List<List<String>> logs;
 
-    public static final int EMAILLOGSDIALOG = 1;
-
     /**
      * This is called when the fragment is created, but before its view is
      *
@@ -95,7 +93,7 @@ public class LogViewerFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case EMAILLOGSDIALOG:
+            case Dialogs.EMAILLOGSDIALOG:
                 if(resultCode == Activity.RESULT_OK) {
                     if(logs.size() > 0) { // Only send emails if we have logs
                         Date cur = Calendar.getInstance().getTime();
@@ -157,9 +155,9 @@ public class LogViewerFragment extends Fragment {
                 fetchData();
                 break;
             case R.id.email:
-                DialogFragment videoSettingsDialog = new EmailLogsDialog();
-                videoSettingsDialog.setTargetFragment(this, EMAILLOGSDIALOG);
-                videoSettingsDialog.show(getFragmentManager(), "emaillogsdialog");
+                DialogFragment emailLogsDialog = new EmailLogsDialog();
+                emailLogsDialog.setTargetFragment(this, Dialogs.EMAILLOGSDIALOG);
+                emailLogsDialog.show(getFragmentManager(), "emaillogsdialog");
                 break;
             default: break;
         }

@@ -63,8 +63,6 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     private Button resolutionButton;
     private Button autofocusButton;
 
-    public static final int CHANGEVIDEOSETTINGS_DIALOG = 1;
-
     /**
      * This is called when the fragment is created, but before its view is
      *
@@ -215,7 +213,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case CHANGEVIDEOSETTINGS_DIALOG:
+            case Dialogs.CHANGEVIDEOSETTINGS_DIALOG:
                 if(resultCode == Activity.RESULT_OK) {
                     updateButtons();
                 } else if(resultCode == Activity.RESULT_CANCELED) {
@@ -245,7 +243,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 break;
             case R.id.extra_settings:
                 DialogFragment videoSettingsDialog = new ChangeVideoSettingsDialog();
-                videoSettingsDialog.setTargetFragment(this, CHANGEVIDEOSETTINGS_DIALOG);
+                videoSettingsDialog.setTargetFragment(this, Dialogs.CHANGEVIDEOSETTINGS_DIALOG);
                 videoSettingsDialog.show(getFragmentManager(), "editvideosettings");
                 break;
             case R.id.zoomOut:

@@ -1,6 +1,7 @@
 package edu.umich.globalchallenges.thirdeye;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.wifi.WifiConfiguration;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -106,12 +108,33 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
                                     break;
             case R.id.wifi_disconnect : wifi_disconnect(view);
                                     break;
-            case R.id.reboot : device_reboot(view);
-                                    break;
-            case R.id.poweroff : device_shutdown(view);
-                                    break;
-
+            case R.id.poweroff :
+                DialogFragment shutdownServerDialog = new ShutdownServerDialog();
+                shutdownServerDialog.setTargetFragment(this, Dialogs.SHUTDOWNDIALOG);
+                shutdownServerDialog.show(getFragmentManager(), "shutdownserverdialog");
+                break;
+            case R.id.reboot :
+                DialogFragment rebootServerDialog = new RebootServerDialog();
+                rebootServerDialog.setTargetFragment(this, Dialogs.REBOOTDIALOG);
+                rebootServerDialog.show(getFragmentManager(), "rebootserverdialog");
+                break;
             default: break;
+        }
+    }
+
+
+    /**
+     * Callback for after user uses the EmailLogsDialog
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case Dialogs.SHUTDOWNDIALOG:
+                device_shutdown(getView());
+                break;
+            case Dialogs.REBOOTDIALOG:
+                device_reboot(getView());
+                break;
         }
     }
 
@@ -213,12 +236,12 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
     }
 
     /**
-     * Listens for a reboot action and tries to reboot the server
+     * Tells the computer running the server to reboot. It will display a snackbar with the status
+     * of the request (everything ok, or error)
+     * @param view
      */
-    public class RebootListener implements View.OnClickListener {
-
-        @Override
-        public void onClick(final View view) {
+    public void device_reboot(final View view) {
+        if (connected_to_network()) {
             String url = "http://stream.pi:5000/reboot?key=" + userkey;
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
@@ -251,15 +274,18 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
             );
             queue.add(stringRequest);
         }
+        else {
+            network_error_snack(view);
+        }
     }
 
     /**
-     * Listens for a shutdown action and tries to shutdown the server
+     * Tells the computer running the server to shutdown. It will display a snackbar with the status
+     * of the request (everything ok, or error)
+     * @param view
      */
-    public class ShutdownListener implements View.OnClickListener {
-
-        @Override
-        public void onClick(final View view) {
+    public void device_shutdown(final View view) {
+        if (connected_to_network()) {
             String url = "http://stream.pi:5000/shutdown?key=" + userkey;
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
@@ -291,41 +317,6 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
                     }
             );
             queue.add(stringRequest);
-        }
-    }
-
-    /**
-     * Tells the computer running the server to reboot. It will display a snackbar with the status
-     * of the request (everything ok, or error)
-     * @param view
-     */
-    public void device_reboot(final View view) {
-        if (connected_to_network()) {
-            Snackbar rebootbar = Snackbar.make(view, "Reboot Pi?", Snackbar.LENGTH_LONG);
-            rebootbar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            TextView messagetext = (TextView) rebootbar.getView().findViewById(android.support.design.R.id.snackbar_text);
-            messagetext.setTextColor(Color.BLACK);
-            rebootbar.setAction("Yes", new DeviceControlFragment.RebootListener());
-            rebootbar.show();
-        }
-        else {
-            network_error_snack(view);
-        }
-    }
-
-    /**
-     * Tells the computer running the server to shutdown. It will display a snackbar with the status
-     * of the request (everything ok, or error)
-     * @param view
-     */
-    public void device_shutdown(final View view) {
-        if (connected_to_network()) {
-            Snackbar shutdownbar = Snackbar.make(view, "Shutdown Pi?", Snackbar.LENGTH_LONG);
-            shutdownbar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-            TextView messagetext = (TextView) shutdownbar.getView().findViewById(android.support.design.R.id.snackbar_text);
-            messagetext.setTextColor(Color.BLACK);
-            shutdownbar.setAction("Yes", new DeviceControlFragment.ShutdownListener());
-            shutdownbar.show();
         }
         else {
             network_error_snack(view);
