@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -288,7 +289,25 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            snack_message(view, "Error changing focus");
+                            NetworkResponse response = error.networkResponse;
+                            if(response != null && response.data != null) {
+                                switch(response.statusCode) {
+                                    case 401:
+                                        snack_message(view, "Invalid User Key");
+                                        break;
+                                    case 403:
+                                        snack_message(view, "Server does not support changing focus");
+                                        break;
+                                    case 500:
+                                        snack_message(view, "Server unable to change focus");
+                                        break;
+                                    default:
+                                        snack_message(view, "Unknown error while changing focus");
+                                        break;
+                                }
+                            } else {
+                                snack_message(view, "Unknown error while changing focus");
+                            }
                         }
                     }
             );
@@ -345,7 +364,22 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        snack_message(view, "Error taking snapshot");
+                        NetworkResponse response = error.networkResponse;
+                        if(response != null && response.data != null) {
+                            switch(response.statusCode) {
+                                case 401:
+                                    snack_message(view, "Invalid User Key");
+                                    break;
+                                case 500:
+                                    snack_message(view, "Server unable to save snapshot");
+                                    break;
+                                default:
+                                    snack_message(view, "Unknown error while taking snapshot");
+                                    break;
+                            }
+                        } else {
+                            snack_message(view, "Unknown error while taking snapshot");
+                        }
                     }
                 }
         );
@@ -383,7 +417,22 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        snack_message(view, "Error recording video");
+                        NetworkResponse response = error.networkResponse;
+                        if(response != null && response.data != null) {
+                            switch(response.statusCode) {
+                                case 401:
+                                    snack_message(view, "Invalid User Key");
+                                    break;
+                                case 500:
+                                    snack_message(view, "Server unable to save video");
+                                    break;
+                                default:
+                                    snack_message(view, "Unknown error while recording video");
+                                    break;
+                            }
+                        } else {
+                            snack_message(view, "Unknown error while recording video");
+                        }
                     }
                 }
         );
@@ -457,7 +506,25 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        snack_message(view, "Error changing autofocus");
+                        NetworkResponse response = error.networkResponse;
+                        if(response != null && response.data != null) {
+                            switch(response.statusCode) {
+                                case 401:
+                                    snack_message(view, "Invalid User Key");
+                                    break;
+                                case 403:
+                                    snack_message(view, "Server does not support changing focus");
+                                    break;
+                                case 500:
+                                    snack_message(view, "Server unable to change autofocus");
+                                    break;
+                                default:
+                                    snack_message(view, "Unknown error while changing autofocus");
+                                    break;
+                            }
+                        } else {
+                            snack_message(view, "Unknown error while changing autofocus");
+                        }
                     }
                 }
         );

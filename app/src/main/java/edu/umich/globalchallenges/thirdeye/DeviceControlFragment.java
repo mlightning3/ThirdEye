@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -229,7 +230,22 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            snack_message(view, "Error rebooting Pi");
+                            NetworkResponse response = error.networkResponse;
+                            if(response != null && response.data != null) {
+                                switch(response.statusCode) {
+                                    case 401:
+                                        snack_message(view, "Invalid User Key");
+                                        break;
+                                    case 500:
+                                        snack_message(view, "Server unable to reboot pi");
+                                        break;
+                                    default:
+                                        snack_message(view, "Unknown error while rebooting pi");
+                                        break;
+                                }
+                            } else {
+                                snack_message(view, "Unknown error while rebooting pi");
+                            }
                         }
                     }
             );
@@ -255,7 +271,22 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
                     new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            snack_message(view, "Error shutting down Pi");
+                            NetworkResponse response = error.networkResponse;
+                            if(response != null && response.data != null) {
+                                switch(response.statusCode) {
+                                    case 401:
+                                        snack_message(view, "Invalid User Key");
+                                        break;
+                                    case 500:
+                                        snack_message(view, "Server unable to shutdown pi");
+                                        break;
+                                    default:
+                                        snack_message(view, "Unknown error while shutting down pi");
+                                        break;
+                                }
+                            } else {
+                                snack_message(view, "Unknown error while shutting down pi");
+                            }
                         }
                     }
             );
