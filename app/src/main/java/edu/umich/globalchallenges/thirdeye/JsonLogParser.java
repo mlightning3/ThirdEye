@@ -85,11 +85,9 @@ public class JsonLogParser {
             if(name.contentEquals("System")) {
                 text.add("System");
                 text.add(reader.nextString());
-                break;
             } else if(name.contentEquals("Server")) {
                 text.add("Server");
                 text.add(reader.nextString());
-                break;
             } else {
                 reader.skipValue();
             }
