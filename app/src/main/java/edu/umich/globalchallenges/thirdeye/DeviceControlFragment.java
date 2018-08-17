@@ -28,12 +28,10 @@ import com.android.volley.toolbox.Volley;
 
 public class DeviceControlFragment extends Fragment implements View.OnClickListener{
 
-    public static int last_net_id = 0;                // Network previously attached to
-    private static String ssid;
-    private static String sharedkey;
-    //private static String ssid = "\"MD-02\"";          // SSID of network with camera stream
-    //private static String sharedkey = "\"WoN1ukARBG81EWI\"";  // Password to above network
-    private static String userkey; // = "QtM0lly02RH18";  // A preshared key that allows for elevated privileges on server
+    public static int last_net_id = 0; // Network previously attached to
+    private static String ssid;        // Name of network with camera stream
+    private static String sharedkey;   // Password to above network
+    private static String userkey;     // A preshared key that allows for elevated privileges on server
 
     private SharedPreferences sharedPreferences;
     private RequestQueue queue;
