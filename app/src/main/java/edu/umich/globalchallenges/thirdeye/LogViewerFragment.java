@@ -107,6 +107,7 @@ public class LogViewerFragment extends Fragment {
                         intent.putExtra(Intent.EXTRA_SUBJECT, "ThridEye Logs");
                         intent.putExtra(Intent.EXTRA_TEXT, body);
                         intent.setData(Uri.parse("mailto:"));
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
                         startActivity(intent);
                     } else {
                         snack_message(getView(), "No logs to send");
