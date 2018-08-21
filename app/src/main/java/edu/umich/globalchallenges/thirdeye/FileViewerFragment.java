@@ -31,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -62,6 +63,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     private WifiManager wifiManager;
     private RecyclerView recyclerView;
     private LinearLayout loadingHeader;
+    private FrameLayout noFilesHeader;
     private FlexibleAdapter<IFlexible> adapter;
     private LinearLayoutManager layoutManager;
     private RequestQueue queue;
@@ -103,6 +105,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
         wifi_connect(); // Try to connect to network automatically
         View view = inflater.inflate(R.layout.file_viewer_fragment, container, false);
         loadingHeader = (LinearLayout) view.findViewById(R.id.LoadingHeader);
+        noFilesHeader = (FrameLayout) view.findViewById(R.id.NoFilesHeader);
         recyclerView = (RecyclerView) view.findViewById(R.id.file_view);
         recyclerView.setHasFixedSize(true);
         // Set the layout we want for the list
@@ -323,15 +326,21 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     public void fetchData() {
         String url = "http://stream.pi:5000/get_database";
         loadingHeader.setVisibility(View.VISIBLE);
+        noFilesHeader.setVisibility(View.INVISIBLE);
         recyclerView.setVisibility(View.INVISIBLE);
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 jsonMessage = response.toString();
                 rebuildDataSet();
-                adapter.updateDataSet(database, true);
-                loadingHeader.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.VISIBLE);
+                if(database.size() == 0) {
+                    loadingHeader.setVisibility(View.GONE);
+                    noFilesHeader.setVisibility(View.VISIBLE);
+                } else {
+                    adapter.updateDataSet(database, true);
+                    loadingHeader.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                }
             }
         }, new Response.ErrorListener() {
             @Override
