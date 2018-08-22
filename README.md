@@ -27,7 +27,7 @@ web browser when you go to view the stream, giving you the normal web-view from
 the server.
 
 Currently the only way to install the app is to sideload it. Either you need
-to build the app from source, or you grab a finished apk from src/releases
+to build the app from source, or you grab a finished apk from app/releases
 which ideally will have tagged releases in. On the device you wish to install
 the app on, you need to enable Unknown Sources in device settings (the exact
 location of this setting will change depending on the phone you have, Google
@@ -43,18 +43,19 @@ Building
 To the poor soul that is tasked with updating this app, I am sorry. While the
 process of setting up the build environment isn't too painful, understanding
 how everything works together is more involved. All you need to do to get
-started is install Android Studio, and follow it's instructions about how to
+started is install [Android Studio](https://developer.android.com/studio/install)
+, and follow it's instructions about how to
 use it (such as loading development builds onto a real device).
 
 Any time you need to make a new release build (aka publish an apk) you will
 need a copy of the the keystore with the android development key for this app
 (Which will be kept in a different location than this repository). Then you
-can follow the steps for building a signed apk in Android Studio.
+can follow the steps for [building a signed apk in Android Studio](https://developer.android.com/studio/publish/app-signing).
 
 Here is a short summation of how the project is layed out. The app currently
-uses one main activity for everything to live in. Then each of the different
+uses one main [activity](https://developer.android.com/guide/components/activities/intro-activities) for everything to live in. Then each of the different
 main parts (device control, video stream view, setting view, filelisting view),
-are implemented as fragments (mini activities that can be swapped out). As such,
+are implemented as [fragments](https://developer.android.com/guide/components/fragments) (mini activities that can be swapped out). As such,
 there is at least one java file for each of the fragments, as well as a resource
 file that defines the layout that will be displayed on the screen. Some things,
 like the filelisting activity, also call on other third party libraries, so

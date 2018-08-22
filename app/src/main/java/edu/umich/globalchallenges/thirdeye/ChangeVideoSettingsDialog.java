@@ -11,6 +11,11 @@ import android.support.v7.app.AlertDialog;
 
 import java.util.ArrayList;
 
+/**
+ * A dialog that allows the user to change the controls that are visible when viewing the stream.
+ * This will also make a callback to the activity/fragment that makes this dialog, so it can update
+ * itself as needed.
+ */
 public class ChangeVideoSettingsDialog extends DialogFragment {
 
     private SharedPreferences sharedPreferences;

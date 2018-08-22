@@ -17,6 +17,11 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
+/**
+ * This is the first part of the app to be loaded. It is responsible for drawing the navigation drawer
+ * as well as updating the fragment that is shown. The fragments replace the frame layout in the
+ * resource file.
+ */
 public class MainActivity extends AppCompatActivity {
     // Important Globals
     private DrawerLayout drawerLayout;

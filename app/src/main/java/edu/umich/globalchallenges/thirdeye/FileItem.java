@@ -14,6 +14,10 @@ import eu.davidea.flexibleadapter.items.AbstractFlexibleItem;
 import eu.davidea.flexibleadapter.items.IFlexible;
 import eu.davidea.viewholders.FlexibleViewHolder;
 
+/**
+ * This holds all the information of one file that lives on the server so that it can be used in a
+ * RecycleView.
+ */
 public class FileItem  extends AbstractFlexibleItem<FileItem.FileViewHolder> {
 
     private String filename;

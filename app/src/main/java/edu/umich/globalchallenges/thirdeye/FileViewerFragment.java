@@ -54,6 +54,10 @@ import eu.davidea.flexibleadapter.FlexibleAdapter;
 import eu.davidea.flexibleadapter.SelectableAdapter;
 import eu.davidea.flexibleadapter.items.IFlexible;
 
+/**
+ * This fragment displays the list of pictures and videos that are on the server. The user can then
+ * download and view them on their device by selecting an item, or delete a file off the server.
+ */
 public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnItemClickListener, FlexibleAdapter.OnItemLongClickListener {
 
     private static String ssid;

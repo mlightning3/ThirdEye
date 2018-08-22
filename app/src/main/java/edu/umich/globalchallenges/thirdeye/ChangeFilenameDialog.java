@@ -9,6 +9,9 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.widget.EditText;
 
+/**
+ * A dialog that allows the user to change the filename used for saving pictures and video on the server.
+ */
 public class ChangeFilenameDialog extends DialogFragment {
 
     @Override

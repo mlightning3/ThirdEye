@@ -9,6 +9,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class parses the database information sent by the server into a list of strings so an
+ * activity/fragment is able to display the information
+ */
 public class JsonDatabaseParser {
 
     private List<List<String>> database;

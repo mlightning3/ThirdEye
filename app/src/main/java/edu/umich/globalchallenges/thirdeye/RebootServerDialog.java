@@ -7,6 +7,10 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
+/**
+ * A dialog that asks if the user wishes to reboot the server. This will also make a callback to the
+ * activity/fragment that makes this dialog, so it can update itself as needed.
+ */
 public class RebootServerDialog extends DialogFragment {
 
     @Override

@@ -26,6 +26,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+/**
+ * This fragment gives the user convenient buttons to control both their device as well as the server.
+ * Buttons for connecting and disconnecting to the server's wifi network as well as buttons to power-off
+ * and reboot the server live here.
+ */
 public class DeviceControlFragment extends Fragment implements View.OnClickListener{
 
     public static int last_net_id = 0; // Network previously attached to

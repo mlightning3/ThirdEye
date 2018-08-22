@@ -39,6 +39,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * This fragment provides a view of the stream to the user. It also has a lot of controls for doing
+ * various things on the server (take pictures, video, etc.) but also has shortcuts to change some
+ * settings so the user doesn't have to leave the stream.
+ */
 public class DisplayStreamFragment extends Fragment implements View.OnClickListener {
     // Important Globals
     private static boolean grayscale = true;

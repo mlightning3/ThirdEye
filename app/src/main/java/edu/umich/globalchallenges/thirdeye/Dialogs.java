@@ -1,5 +1,9 @@
 package edu.umich.globalchallenges.thirdeye;
 
+/**
+ * This class holds values for all the dialogs used in the app so they can be tracked and used across
+ * multiple fragments
+ */
 public class Dialogs{
     public final static int SHUTDOWNDIALOG = 0;
     public final static int REBOOTDIALOG = 1;

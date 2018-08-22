@@ -9,6 +9,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class parses the log messages sent from the server and generates lists of strings for use by
+ * activities/fragments to display.
+ */
 public class JsonLogParser {
 
     private List<List<String>> logs;

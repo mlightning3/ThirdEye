@@ -38,6 +38,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * This fragment provides the user with a way to see information about the server, as well as email
+ * it to another party. THIS SHOULD ONLY BE USED FOR DEBUGGING AND SHOULD BE REMOVED FOR PUBLIC RELEASE
+ */
 public class LogViewerFragment extends Fragment {
 
     private static String ssid;
