@@ -50,6 +50,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     private static boolean lowresolution = true;
     private static boolean videostatus = true;
     private static boolean autofocusStatus = true;
+    private static boolean lightStatus = true;
     private static int imgCount = 1;
     private static int vidCount = 1;
 
@@ -67,6 +68,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     private Button grayscaleButton;
     private Button resolutionButton;
     private Button autofocusButton;
+    private Button lightButton;
 
     /**
      * This is called when the fragment is created, but before its view is
@@ -118,6 +120,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         grayscaleButton = (Button) view.findViewById(R.id.grayscale);
         resolutionButton = (Button) view.findViewById(R.id.resolution);
         autofocusButton = (Button) view.findViewById(R.id.autofocus);
+        lightButton = (Button) view.findViewById(R.id.light);
         initializeListeners(view);
         // Open video feed
         webView = (WebView) view.findViewById(R.id.web);
@@ -145,6 +148,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         autofocusButton.setOnClickListener(this);
         autofocusButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
         seekbar.setOnSeekBarChangeListener(new focusListener());
+        lightButton.setOnClickListener(this);
         updateButtons();
     }
 
@@ -172,6 +176,11 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         } else {
             autofocusButton.setVisibility(View.GONE);
             seekbar.setVisibility(View.GONE);
+        }
+        if(sharedPreferences.getBoolean("light_control", true)) {
+            lightButton.setVisibility(View.VISIBLE);
+        } else {
+            lightButton.setVisibility(View.GONE);
         }
     }
 
@@ -207,6 +216,9 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 break;
             case R.id.autofocus:
                 toggle_autofocus(view);
+                break;
+            case R.id.light:
+                toggle_light(view);
                 break;
             default: break;
         }
@@ -493,9 +505,9 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     }
 
     /**
-     * Sends message to server to set autofocusButton on or off
+     * Sends message to server to set autofocus on or off
      *
-     * @param status Set status of autofocusButton. True turns off autofocusButton, False turns autofocusButton on
+     * @param status Set status of autofocus. True turns off autofocus, False turns autofocus on
      */
     private void set_autofocus_status(boolean status) {
         String url = "http://stream.pi:5000/autofocus?status=" + status;
@@ -535,7 +547,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     }
 
     /**
-     * Sends message to server to toggle autofocusButton
+     * Sends message to server to toggle autofocus
      * ONLY WORKS ON SUPPORTED CAMERAS
      *
      * @param view
@@ -549,6 +561,64 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         }
         else {
             autofocus.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
+        }
+    }
+
+    /**
+     * Sends message to server to set light on or off
+     *
+     * @param status Set status of light. True turns off light, False turns light on
+     */
+    private void  set_light_status(boolean status) {
+        String url = "http://stream.pi:5000/light?status=" + status;
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Nothing needed
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        NetworkResponse response = error.networkResponse;
+                        if(response != null && response.data != null) {
+                            switch(response.statusCode) {
+                                case 401:
+                                    snack_message(view, "Invalid User Key");
+                                    break;
+                                case 403:
+                                    snack_message(view, "Server does not support changing light");
+                                    break;
+                                case 500:
+                                    snack_message(view, "Server unable to change light");
+                                    break;
+                                default:
+                                    snack_message(view, "Unknown error while changing light");
+                                    break;
+                            }
+                        } else {
+                            snack_message(view, "Unknown error while changing light");
+                        }
+                    }
+                }
+        );
+        queue.add(stringRequest);
+    }
+
+    /**
+     * Sends message to server to toggle the light on and off
+     *
+     * @param view
+     */
+    public void toggle_light(View view) {
+        lightStatus = !lightStatus;
+        set_light_status(lightStatus);
+        if(lightStatus) {
+            lightButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
+        }
+        else {
+            lightButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
         }
     }
 

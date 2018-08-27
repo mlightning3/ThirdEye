@@ -36,6 +36,11 @@
             android:title="Focus Controls"
             android:summary="Change focal length of camera"
             android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="light_control"
+            android:title="Light Control"
+            android:summary="Adjust lights on device"
+            android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="User Settings"

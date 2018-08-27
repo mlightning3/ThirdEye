@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class ChangeVideoSettingsDialog extends DialogFragment {
 
     private SharedPreferences sharedPreferences;
-    private int NUMBEROFSETTINGS = 3;
+    private int NUMBEROFSETTINGS = 4;
 
     /**
      * Anything we need to do on the creation of the dialog
@@ -67,6 +67,9 @@ public class ChangeVideoSettingsDialog extends DialogFragment {
                         case 2:
                             editor.putBoolean("focus_control", true);
                             break;
+                        case 3:
+                            editor.putBoolean("light_control", true);
+                            break;
                         default:
                             break;
                     }
@@ -82,6 +85,8 @@ public class ChangeVideoSettingsDialog extends DialogFragment {
                         case 2:
                             editor.putBoolean("focus_control", false);
                             break;
+                        case 3:
+                            editor.putBoolean("light_control", false);
                         default:
                             break;
                     }
@@ -110,6 +115,7 @@ public class ChangeVideoSettingsDialog extends DialogFragment {
         settings.add("Media Saving");
         settings.add("Image Manipulation");
         settings.add("Focus Control");
+        settings.add("Light Control");
         String[] strings = new String[settings.size()];
         for(int i = 0; i < settings.size(); i++) {
             strings[i] = settings.get(i);
@@ -127,6 +133,7 @@ public class ChangeVideoSettingsDialog extends DialogFragment {
         bools[0] = sharedPreferences.getBoolean("media_saving", true);
         bools[1] = sharedPreferences.getBoolean("image_manip", true);
         bools[2] = sharedPreferences.getBoolean("focus_control", false);
+        bools[3] = sharedPreferences.getBoolean("light_control", true);
         return bools;
     }
 }
