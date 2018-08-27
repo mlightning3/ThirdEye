@@ -15,6 +15,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.widget.AppCompatSeekBar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -59,7 +60,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
 
     private SharedPreferences sharedPreferences;
     private WifiManager wifiManager;
-    private SeekBar seekbar;
+    private VerticalSeekBar focusBar;
+    private VerticalSeekBar lightBar;
     private RequestQueue queue;
     private WebView webView;
     private View view;
@@ -114,7 +116,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.display_stream_fragment, container, false);
         // Set up things user will interact with
-        seekbar = view.findViewById(R.id.seekBar);
+        focusBar = (VerticalSeekBar) view.findViewById(R.id.focus_bar);
+        lightBar = (VerticalSeekBar) view.findViewById(R.id.light_bar);
         snapshotButton = (Button) view.findViewById(R.id.snapshot);
         recordButton = (Button) view.findViewById(R.id.record);
         grayscaleButton = (Button) view.findViewById(R.id.grayscale);
@@ -147,7 +150,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         resolutionButton.setOnClickListener(this);
         autofocusButton.setOnClickListener(this);
         autofocusButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
-        seekbar.setOnSeekBarChangeListener(new focusListener());
+        focusBar.setOnSeekBarChangeListener(new focusListener());
+        lightBar.setOnSeekBarChangeListener(new lightListener());
         lightButton.setOnClickListener(this);
         updateButtons();
     }
@@ -172,15 +176,17 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         }
         if(sharedPreferences.getBoolean("focus_control", false)) {
             autofocusButton.setVisibility(View.VISIBLE);
-            seekbar.setVisibility(View.VISIBLE);
+            focusBar.setVisibility(View.VISIBLE);
         } else {
             autofocusButton.setVisibility(View.GONE);
-            seekbar.setVisibility(View.GONE);
+            focusBar.setVisibility(View.GONE);
         }
         if(sharedPreferences.getBoolean("light_control", true)) {
             lightButton.setVisibility(View.VISIBLE);
+            lightBar.setVisibility(View.VISIBLE);
         } else {
             lightButton.setVisibility(View.GONE);
+            lightBar.setVisibility(View.GONE);
         }
     }
 
@@ -274,7 +280,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     /**
      * Class for listening to things done with the seekbar to change the focus
      */
-    public class focusListener implements SeekBar.OnSeekBarChangeListener {
+    public class focusListener implements AppCompatSeekBar.OnSeekBarChangeListener {
         private double value;
 
         @Override
@@ -297,8 +303,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         @Override
                         public void onResponse(String response) {
                             snack_message(view, "Adjusting focus...");
-                            Button autofocus = (Button) view.findViewById(R.id.autofocus);
-                            autofocus.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
+                            autofocusButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
                         }
                     },
                     new Response.ErrorListener() {
@@ -327,7 +332,63 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     }
             );
             queue.add(stringRequest);
-            autofocusStatus = true; // Change this so when the user presses the toggle autofocusButton button, it enables autofocusButton
+            autofocusStatus = true; // Change this so when the user presses the toggle autofocus button, it enables autofocus
+        }
+    }
+
+    public class lightListener implements AppCompatSeekBar.OnSeekBarChangeListener {
+        private double value;
+
+        @Override
+        public void onProgressChanged(SeekBar bar, int progress, boolean user) {
+            if(user) {
+                value = progress;
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            snack_message(view, "Light brightness will change when you let go");
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekbar) {
+            String url = "http://stream.pi:5000/slidervalue?value=" + value;
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            snack_message(view, "Adjusting brightness...");
+                            lightButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            NetworkResponse response = error.networkResponse;
+                            if(response != null && response.data != null) {
+                                switch(response.statusCode) {
+                                    case 401:
+                                        snack_message(view, "Invalid User Key");
+                                        break;
+                                    case 403:
+                                        snack_message(view, "Server does not support changing brightness");
+                                        break;
+                                    case 500:
+                                        snack_message(view, "Server unable to change brightness");
+                                        break;
+                                    default:
+                                        snack_message(view, "Unknown error while changing brightness");
+                                        break;
+                                }
+                            } else {
+                                snack_message(view, "Unknown error while changing brightness");
+                            }
+                        }
+                    }
+            );
+            queue.add(stringRequest);
+            lightStatus = true; // Change this so when the user presses the toggle light button, it enables light
         }
     }
 
@@ -555,12 +616,11 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     public void toggle_autofocus(View view) {
         autofocusStatus = !autofocusStatus; // Flip autofocusButton status
         set_autofocus_status(autofocusStatus);
-        Button autofocus = (Button) view.findViewById(R.id.autofocus);
         if(autofocusStatus) {
-            autofocus.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
+            autofocusButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
         }
         else {
-            autofocus.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
+            autofocusButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
         }
     }
 

@@ -13,43 +13,56 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
     </WebView>
-    <LinearLayout
+    <Button
+        android:id="@+id/grayscale"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Grayscale"
+        android:layout_gravity="start" />
+    <Button
+        android:id="@+id/autofocus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Autofocus"
+        android:layout_gravity="center_horizontal" />
+    <Button
+        android:id="@+id/resolution"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Resolution"
+        android:layout_gravity="end" />
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_gravity="top">
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <Button
-                android:id="@+id/grayscale"
+        android:layout_gravity="center_vertical">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_gravity="start|center_vertical">
+            <Space
+                android:layout_width="10dp"
+                android:layout_height="match_parent"/>
+            <edu.umich.globalchallenges.thirdeye.VerticalSeekBar
+                android:id="@+id/focus_bar"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Grayscale"
-                android:layout_gravity="start" />
-            <Button
-                android:id="@+id/autofocus"
+                android:layout_height="400dp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_gravity="end|center_vertical">
+            <edu.umich.globalchallenges.thirdeye.VerticalSeekBar
+                android:id="@+id/light_bar"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Autofocus"
-                android:layout_gravity="center_horizontal" />
-            <Button
-                android:id="@+id/resolution"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Resolution"
-                android:layout_gravity="end" />
-        </FrameLayout>
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
-        <SeekBar
-            android:id="@+id/seekBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="100"
-            android:progress="0"/>
-    </LinearLayout>
+                android:layout_height="400dp"
+                android:max="255"/>
+            <Space
+                android:layout_width="10dp"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+    </FrameLayout>
     <Button
         android:id="@+id/snapshot"
         android:layout_width="wrap_content"
