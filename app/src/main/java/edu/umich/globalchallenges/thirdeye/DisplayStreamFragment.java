@@ -51,7 +51,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     private static boolean lowresolution = true;
     private static boolean videostatus = true;
     private static boolean autofocusStatus = true;
-    private static boolean lightStatus = true;
+    private static boolean lightStatus = false;
     private static int imgCount = 1;
     private static int vidCount = 1;
 
@@ -153,6 +153,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         focusBar.setOnSeekBarChangeListener(new focusListener());
         lightBar.setOnSeekBarChangeListener(new lightListener());
         lightButton.setOnClickListener(this);
+        lightButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
         updateButtons();
     }
 
@@ -359,7 +360,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         @Override
                         public void onResponse(String response) {
                             snack_message(view, "Adjusting brightness...");
-                            lightButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
+                            lightButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
                         }
                     },
                     new Response.ErrorListener() {
@@ -388,7 +389,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     }
             );
             queue.add(stringRequest);
-            lightStatus = true; // Change this so when the user presses the toggle light button, it enables light
+            lightStatus = true; // Change this so when the user presses the toggle light button, it turns off the light
         }
     }
 
