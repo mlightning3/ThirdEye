@@ -35,6 +35,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.pes.androidmaterialcolorpickerdialog.ColorPicker;
+import com.pes.androidmaterialcolorpickerdialog.ColorPickerCallback;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -101,6 +103,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         inflater.inflate(R.menu.edit_menu, menu);
         inflater.inflate(R.menu.refresh_menu, menu);
         inflater.inflate(R.menu.zoom_out_menu, menu);
+        inflater.inflate(R.menu.color_menu, menu);
         inflater.inflate(R.menu.extra_settings_menu, menu);
     }
 
@@ -272,6 +275,17 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 break;
             case R.id.zoomOut:
                 fullZoomOut();
+                break;
+            case R.id.color_picker:
+                ColorPicker colorPicker = new ColorPicker(getActivity(), 0, 0, 255);
+                colorPicker.show();
+                colorPicker.enableAutoClose();
+                colorPicker.setCallback(new ColorPickerCallback() {
+                    @Override
+                    public void onColorChosen(int color) {
+                        set_light_color(Integer.toHexString(color));
+                    }
+                });
                 break;
             default: break;
         }
@@ -681,6 +695,50 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         else {
             lightButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
         }
+    }
+
+    /**
+     * Sends message to server to change color to that encoded as a hex string
+     *
+     * @param color A string with the hex code for a color
+     */
+    private void set_light_color(String color) {
+        String url = "http://stream.pi:5000/set_color?value=" + color;
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Nothing needed
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        NetworkResponse response = error.networkResponse;
+                        if(response != null && response.data != null) {
+                            switch(response.statusCode) {
+                                case 401:
+                                    snack_message(view, "Invalid User Key");
+                                    break;
+                                case 403:
+                                    snack_message(view, "Server does not support changing light color");
+                                    break;
+                                case 500:
+                                    snack_message(view, "Server unable to change light color");
+                                    break;
+                                default:
+                                    snack_message(view, "Unknown error while changing light color");
+                                    break;
+                            }
+                        } else {
+                            snack_message(view, "Unknown error while changing light color");
+                        }
+                    }
+                }
+        );
+        queue.add(stringRequest);
+        lightStatus = true; // Change this so when the user presses the toggle light button, it turns off the light
+        lightButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
     }
 
     /**
