@@ -353,7 +353,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
 
         @Override
         public void onStopTrackingTouch(SeekBar seekbar) {
-            String url = "http://stream.pi:5000/slidervalue?value=" + value;
+            String url = "http://stream.pi:5000/set_brightness?value=" + value;
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
                         @Override
