@@ -156,7 +156,6 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         focusBar.setOnSeekBarChangeListener(new focusListener());
         lightBar.setOnSeekBarChangeListener(new lightListener());
         lightButton.setOnClickListener(this);
-        lightButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
         updateButtons();
     }
 
@@ -375,7 +374,6 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         @Override
                         public void onResponse(String response) {
                             snack_message(view, "Adjusting brightness...");
-                            lightButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
                         }
                     },
                     new Response.ErrorListener() {
@@ -690,12 +688,6 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     public void toggle_light(View view) {
         lightStatus = !lightStatus;
         set_light_status(lightStatus);
-        if(lightStatus) {
-            lightButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
-        }
-        else {
-            lightButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
-        }
     }
 
     /**
@@ -739,7 +731,6 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         );
         queue.add(stringRequest);
         lightStatus = true; // Change this so when the user presses the toggle light button, it turns off the light
-        lightButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
     }
 
     /**
