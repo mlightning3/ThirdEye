@@ -300,7 +300,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
 
         @Override
         public void onProgressChanged(SeekBar bar, int progress, boolean user) {
-            if(user) {
+            if(!user) {
                 value = progress / 100.0;
             }
         }
@@ -356,7 +356,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
 
         @Override
         public void onProgressChanged(SeekBar bar, int progress, boolean user) {
-            if(user) {
+            if(!user) {
                 value = progress;
             }
         }
