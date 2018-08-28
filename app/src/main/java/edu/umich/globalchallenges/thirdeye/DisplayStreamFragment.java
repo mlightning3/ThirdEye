@@ -283,7 +283,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 colorPicker.setCallback(new ColorPickerCallback() {
                     @Override
                     public void onColorChosen(int color) {
-                        set_light_color(Integer.toHexString(color));
+                        String hexcolor = Integer.toHexString(color).substring(2, 8);
+                        set_light_color(hexcolor);
                     }
                 });
                 break;
