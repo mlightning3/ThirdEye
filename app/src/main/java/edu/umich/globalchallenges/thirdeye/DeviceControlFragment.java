@@ -41,6 +41,10 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
     private SharedPreferences sharedPreferences;
     private RequestQueue queue;
     private WifiManager wifiManager;
+    private Button wifiConnect;
+    private Button wifiDisconnect;
+    private Button reboot;
+    private Button shutdown;
 
     /**
      * This is called when the fragment is created, but before its view is
@@ -71,23 +75,23 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.device_control_fragment, container, false);
-        initializeButtons(view);
+        wifiConnect = (Button) view.findViewById(R.id.wifi_connect);
+        wifiDisconnect = (Button) view.findViewById(R.id.wifi_disconnect);
+        reboot = (Button) view.findViewById(R.id.reboot);
+        shutdown = (Button) view.findViewById(R.id.poweroff);
+        initializeListeners(view);
         return view;
     }
 
     /**
-     * Here we set up all the buttons so that when they are clicked on they preform an action
+     * Here we set up all the listeners so that when buttons are clicked on they preform an action
      *
      * @param view The view these come from (ideally from onCreateView)
      */
-    private void initializeButtons(View view) {
-        Button wifiConnect = (Button) view.findViewById(R.id.wifi_connect);
+    private void initializeListeners(View view) {
         wifiConnect.setOnClickListener(this);
-        Button wifiDisconnect = (Button) view.findViewById(R.id.wifi_disconnect);
         wifiDisconnect.setOnClickListener(this);
-        Button reboot = (Button) view.findViewById(R.id.reboot);
         reboot.setOnClickListener(this);
-        Button shutdown = (Button) view.findViewById(R.id.poweroff);
         shutdown.setOnClickListener(this);
     }
 
