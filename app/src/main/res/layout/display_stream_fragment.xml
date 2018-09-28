@@ -62,14 +62,14 @@
             android:orientation="horizontal">
 
             <Space
-                android:layout_width="10dp"
+                android:layout_width="20dp"
                 android:layout_height="match_parent" />
 
             <edu.umich.globalchallenges.thirdeye.VerticalSeekBar
                 android:id="@+id/focus_bar"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:thumb="@drawable/ic_center_focus_weak" />
+                android:thumb="@drawable/ic_focus" />
         </LinearLayout>
 
         <LinearLayout
@@ -82,11 +82,11 @@
                 android:id="@+id/light_bar"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:thumb="@drawable/ic_lightbulb"
+                android:thumb="@drawable/ic_brightness"
                 android:max="255" />
 
             <Space
-                android:layout_width="10dp"
+                android:layout_width="20dp"
                 android:layout_height="match_parent" />
         </LinearLayout>
     </FrameLayout>
