@@ -9,6 +9,7 @@ import android.graphics.LightingColorFilter;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -56,10 +57,12 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     private static boolean lightStatus = false;
     private static int imgCount = 1;
     private static int vidCount = 1;
+    private int timeoutDuration = 30000;
 
     private static String ssid;
     private static String sharedkey;
 
+    private CountDownTimer countDownTimer;
     private SharedPreferences sharedPreferences;
     private WifiManager wifiManager;
     private VerticalSeekBar focusBar;
@@ -91,6 +94,18 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         // Load settings
         ssid = "\"" + sharedPreferences.getString("ssid", "Pi_AP") + "\"";
         sharedkey = "\"" + sharedPreferences.getString("passphrase", "raspberry") + "\"";
+
+        // Start countdown timer
+        countDownTimer = new CountDownTimer(timeoutDuration, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                // Nothing needed
+            }
+
+            public void onFinish() {
+                updateButtons(false);
+            }
+        }.start();
     }
 
     /**
@@ -119,6 +134,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.display_stream_fragment, container, false);
         // Set up things user will interact with
+        DisplayStreamLayout ds = (DisplayStreamLayout) view.findViewById(R.id.display_frame);
+        ds.attachDisplayStream(this); // Used so the timer can be reset on touch
         focusBar = (VerticalSeekBar) view.findViewById(R.id.focus_bar);
         lightBar = (VerticalSeekBar) view.findViewById(R.id.light_bar);
         snapshotButton = (Button) view.findViewById(R.id.snapshot);
@@ -156,35 +173,36 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         focusBar.setOnSeekBarChangeListener(new focusListener());
         lightBar.setOnSeekBarChangeListener(new lightListener());
         lightButton.setOnClickListener(this);
-        updateButtons();
+        updateButtons(true);
     }
 
     /**
-     * Updates the viability of buttons based on preferences
+     * Updates the viability of buttons based on preferences and countdown timer
+     * @param visible Should the controls be visible or not
      */
-    private void updateButtons() {
-        if(sharedPreferences.getBoolean("media_saving", true)) {
+    private void updateButtons(boolean visible) {
+        if(sharedPreferences.getBoolean("media_saving", true) && visible) {
             snapshotButton.setVisibility(View.VISIBLE);
             recordButton.setVisibility(View.VISIBLE);
         } else {
             snapshotButton.setVisibility(View.GONE);
             recordButton.setVisibility(View.GONE);
         }
-        if(sharedPreferences.getBoolean("image_manip", true)) {
+        if(sharedPreferences.getBoolean("image_manip", true) && visible) {
             grayscaleButton.setVisibility(View.VISIBLE);
             resolutionButton.setVisibility(View.VISIBLE);
         } else {
             grayscaleButton.setVisibility(View.GONE);
             resolutionButton.setVisibility(View.GONE);
         }
-        if(sharedPreferences.getBoolean("focus_control", false)) {
+        if(sharedPreferences.getBoolean("focus_control", false) && visible) {
             autofocusButton.setVisibility(View.VISIBLE);
             focusBar.setVisibility(View.VISIBLE);
         } else {
             autofocusButton.setVisibility(View.GONE);
             focusBar.setVisibility(View.GONE);
         }
-        if(sharedPreferences.getBoolean("light_control", true)) {
+        if(sharedPreferences.getBoolean("light_control", true) && visible) {
             lightButton.setVisibility(View.VISIBLE);
             lightBar.setVisibility(View.VISIBLE);
         } else {
@@ -241,7 +259,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         switch (requestCode) {
             case Dialogs.CHANGEVIDEOSETTINGS_DIALOG:
                 if(resultCode == Activity.RESULT_OK) {
-                    updateButtons();
+                    updateButtons(true);
                 } else if(resultCode == Activity.RESULT_CANCELED) {
                     // Nothing needed
                 }
@@ -731,6 +749,23 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         );
         queue.add(stringRequest);
         lightStatus = true; // Change this so when the user presses the toggle light button, it turns off the light
+    }
+
+    /**
+     * Resets the timer to make all the controls disappear
+     */
+    public void resetTimer() {
+        updateButtons(true);
+        countDownTimer = new CountDownTimer(timeoutDuration, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                // Nothing needed
+            }
+
+            public void onFinish() {
+                updateButtons(false);
+            }
+        }.start();
     }
 
     /**
