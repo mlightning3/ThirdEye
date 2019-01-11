@@ -14,6 +14,9 @@
             android:icon="@drawable/ic_wrench"
             android:title="Device Control" />
         <item
+            android:id="@+id/external_sensor"
+            android:title="External Sensors" />
+        <item
             android:id="@+id/view_logs"
             android:icon="@drawable/ic_log"
             android:title="Logs" />

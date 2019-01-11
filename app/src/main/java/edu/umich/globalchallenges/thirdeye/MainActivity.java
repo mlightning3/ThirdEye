@@ -96,6 +96,12 @@ public class MainActivity extends AppCompatActivity {
                                     newFragment = new SettingsFragment();
                                 }
                                 break;
+                            case R.id.external_sensor :
+                                newFragment = getSupportFragmentManager().findFragmentById(R.id.external_sensor);
+                                if(newFragment == null) {
+                                    newFragment = new ExternalSensorFragment();
+                                }
+                                break;
                             case R.id.view_logs :
                                 newFragment = getSupportFragmentManager().findFragmentById(R.id.LogContent);
                                 if(newFragment == null) {
