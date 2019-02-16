@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,7 +34,7 @@ public class ExternalSensorFragment extends Fragment {
     private static String ssid;
     private static String sharedkey;
 
-    private int timeoutDuration = 1000;
+    private int timeoutDuration = 5000;
 
     private SharedPreferences sharedPreferences;
     private WifiManager wifiManager;
@@ -110,41 +111,48 @@ public class ExternalSensorFragment extends Fragment {
     }
 
     public void updateHeartRate() {
-        String url = "http://stream.pi:5000/get_controller_data";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        String bpm = response + "bpm";
-                        heartrate.setText(bpm);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        NetworkResponse response = error.networkResponse;
-                        if(response != null && response.data != null) {
-                            switch(response.statusCode) {
-                                case 401:
-                                    snack_message(view, "Invalid User Key");
-                                    break;
-                                case 403:
-                                    snack_message(view, "Server does not support external sensors");
-                                    break;
-                                case 500:
-                                    snack_message(view, "Server unable to get sensor data");
-                                    break;
-                                default:
+        if(connected_to_network()) {
+            String url = "http://stream.pi:5000/get_controller_data";
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            String bpm = response + "bpm";
+                            Log.d("External Sensor", bpm);
+                            heartrate.setText(bpm);
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            NetworkResponse response = error.networkResponse;
+                            if(getView() != null) { // Only try to let us know of problems if we are still looking at fragment
+                                if (response != null && response.data != null) {
+                                    switch (response.statusCode) {
+                                        case 401:
+                                            snack_message(view, "Invalid User Key");
+                                            break;
+                                        case 403:
+                                            snack_message(view, "Server does not support external sensors");
+                                            break;
+                                        case 500:
+                                            snack_message(view, "Server unable to get sensor data");
+                                            break;
+                                        default:
+                                            snack_message(view, "Unknown error while getting sensor data");
+                                            break;
+                                    }
+                                } else {
                                     snack_message(view, "Unknown error while getting sensor data");
-                                    break;
+                                }
                             }
-                        } else {
-                            snack_message(view, "Unknown error while changing brightness");
                         }
                     }
-                }
-        );
-        queue.add(stringRequest);
+            );
+            queue.add(stringRequest);
+        } else {
+            wifi_connect();
+        }
         resetTimer();
     }
 
