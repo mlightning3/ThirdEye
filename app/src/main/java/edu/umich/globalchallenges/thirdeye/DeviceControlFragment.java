@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -33,14 +31,12 @@ import com.android.volley.toolbox.Volley;
  */
 public class DeviceControlFragment extends Fragment implements View.OnClickListener{
 
-    public static int last_net_id = 0; // Network previously attached to
-    private static String ssid;        // Name of network with camera stream
-    private static String sharedkey;   // Password to above network
     private static String userkey;     // A preshared key that allows for elevated privileges on server
 
+    private FragmentCommManager commManager;
+    private FragmentWifiManager wifiManager;
     private SharedPreferences sharedPreferences;
     private RequestQueue queue;
-    private WifiManager wifiManager;
     private Button wifiConnect;
     private Button wifiDisconnect;
     private Button reboot;
@@ -56,11 +52,8 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
         super.onCreate(savedInstanceState);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         queue = Volley.newRequestQueue(getContext());
-        wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         // Load settings
-        ssid = "\"" + sharedPreferences.getString("ssid", "Pi_AP") + "\"";
-        sharedkey = "\"" + sharedPreferences.getString("passphrase", "raspberry") + "\"";
         userkey = sharedPreferences.getString("userkey", "developmentkey");
     }
 
@@ -103,6 +96,25 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
         super.onPause();
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof FragmentWifiManager && context instanceof FragmentCommManager) {
+            wifiManager = (FragmentWifiManager) context;
+            commManager = (FragmentCommManager) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement FragmentCommManager & FragmentWifiManager");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        wifiManager = null;
+        commManager = null;
+    }
+
     /**
      * Here we capture all the click events on the buttons and perform the action we need based on their id in the xml
      *
@@ -111,9 +123,9 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.wifi_connect : wifi_connect(view);
+            case R.id.wifi_connect : wifiManager.wifi_connect();
                                     break;
-            case R.id.wifi_disconnect : wifi_disconnect(view);
+            case R.id.wifi_disconnect : wifiManager.wifi_disconnect();
                                     break;
             case R.id.poweroff :
                 DialogFragment shutdownServerDialog = new ShutdownServerDialog();
@@ -146,78 +158,6 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
     }
 
     /**
-     * Creates a new network connection for the camera streaming computer, and connects to that
-     * network. This will also save off the network that we are attached to before changing networks
-     * so that we can try to reconnect to it when we are done.
-     *
-     * @param view
-     */
-    public void wifi_connect(View view) {
-        if(!connected_to_network()) { // Only connect if we aren't already
-            last_net_id = wifiManager.getConnectionInfo().getNetworkId();
-            // setup a wifi configuration
-            WifiConfiguration wc = new WifiConfiguration();
-            wc.SSID = ssid;
-            wc.preSharedKey = sharedkey;
-            wc.status = WifiConfiguration.Status.ENABLED;
-            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-            wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-            wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-            wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-            // connect to and enable the connection
-            int netId = wifiManager.addNetwork(wc);
-            wifiManager.enableNetwork(netId, true);
-            wifiManager.setWifiEnabled(true);
-        }
-    }
-
-    /**
-     * Disconnects the phone from the camera streaming computer's network and tries to connect to the
-     * network used before. Otherwise it will just leave you unconnected till either the user picks
-     * a new network to attach to, or the OS connects to a network.
-     *
-     * @param view
-     */
-    public void wifi_disconnect(View view) {
-        if(connected_to_network()) { // We only want to disconnect if we were connected to the server's network
-            wifiManager.disconnect();
-            if (last_net_id != 0) { // Try to reconnect to the network previously attached to
-                wifiManager.enableNetwork(last_net_id, true);
-                wifiManager.setWifiEnabled(true);
-            }
-        }
-    }
-
-    /**
-     * Tests if we are connected to the right network to view the camera stream.
-     *
-     * @return true if connected to the right network, false otherwise
-     */
-    public boolean connected_to_network() {
-        if(wifiManager.getConnectionInfo().getSSID().equals(ssid)) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Displays a snackbar with a message
-     *
-     * @param view The view from which we need to send this message
-     * @param message The message we want displayed
-     */
-    private void snack_message(View view, String message) {
-        Snackbar messagebar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
-        messagebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-        TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
-        messagetext.setTextColor(Color.WHITE);
-        messagebar.show();
-    }
-
-    /**
      * Displays a snackbar saying we are not connected to the right network
      *
      * @param view The view from which we need to send this message
@@ -238,7 +178,7 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
 
         @Override
         public void onClick(View view) {
-            wifi_connect(view);
+            wifiManager.wifi_connect();
         }
     }
 
@@ -248,13 +188,14 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
      * @param view
      */
     public void device_reboot(final View view) {
-        if (connected_to_network()) {
+        if (wifiManager != null && wifiManager.connected_to_network()) {
             String url = "http://stream.pi:5000/reboot?key=" + userkey;
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            snack_message(view, "Pi rebooting");
+                            if(commManager != null)
+                                commManager.snack_message("Pi rebooting");
                         }
                     },
                     new Response.ErrorListener() {
@@ -264,17 +205,21 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
                             if(response != null && response.data != null) {
                                 switch(response.statusCode) {
                                     case 401:
-                                        snack_message(view, "Invalid User Key");
+                                        if(commManager != null)
+                                            commManager.snack_message("Invalid User Key");
                                         break;
                                     case 500:
-                                        snack_message(view, "Server unable to reboot pi");
+                                        if(commManager != null)
+                                            commManager.snack_message("Server unable to reboot pi");
                                         break;
                                     default:
-                                        snack_message(view, "Unknown error while rebooting pi");
+                                        if(commManager != null)
+                                            commManager.snack_message("Unknown error while rebooting pi");
                                         break;
                                 }
                             } else {
-                                snack_message(view, "Unknown error while rebooting pi");
+                                if(commManager != null)
+                                    commManager.snack_message("Unknown error while rebooting pi");
                             }
                         }
                     }
@@ -292,13 +237,14 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
      * @param view
      */
     public void device_shutdown(final View view) {
-        if (connected_to_network()) {
+        if (wifiManager != null && wifiManager.connected_to_network()) {
             String url = "http://stream.pi:5000/shutdown?key=" + userkey;
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            snack_message(view, "Pi shutting down");
+                            if(commManager != null)
+                                commManager.snack_message("Pi shutting down");
                         }
                     },
                     new Response.ErrorListener() {
@@ -308,17 +254,21 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
                             if(response != null && response.data != null) {
                                 switch(response.statusCode) {
                                     case 401:
-                                        snack_message(view, "Invalid User Key");
+                                        if(commManager != null)
+                                            commManager.snack_message("Invalid User Key");
                                         break;
                                     case 500:
-                                        snack_message(view, "Server unable to shutdown pi");
+                                        if(commManager != null)
+                                            commManager.snack_message("Server unable to shutdown pi");
                                         break;
                                     default:
-                                        snack_message(view, "Unknown error while shutting down pi");
+                                        if(commManager != null)
+                                            commManager.snack_message("Unknown error while shutting down pi");
                                         break;
                                 }
                             } else {
-                                snack_message(view, "Unknown error while shutting down pi");
+                                if(commManager != null)
+                                    commManager.snack_message("Unknown error while shutting down pi");
                             }
                         }
                     }

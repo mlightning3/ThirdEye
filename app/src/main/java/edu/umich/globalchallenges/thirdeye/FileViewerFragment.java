@@ -7,21 +7,14 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
-import android.support.v4.content.MimeTypeFilter;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -33,7 +26,6 @@ import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -60,11 +52,8 @@ import eu.davidea.flexibleadapter.items.IFlexible;
  */
 public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnItemClickListener, FlexibleAdapter.OnItemLongClickListener {
 
-    private static String ssid;
-    private static String sharedkey;
-
-    private SharedPreferences sharedPreferences;
-    private WifiManager wifiManager;
+    private FragmentCommManager commManager;
+    private FragmentWifiManager wifiManager;
     private RecyclerView recyclerView;
     private LinearLayout loadingHeader;
     private FrameLayout noFilesHeader;
@@ -84,16 +73,10 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         toDelete = "";
         database = new ArrayList<>();
         database.add(new FileItem(this,"Nothing here yet!", "Try refreshing", false));
         setHasOptionsMenu(true);
-
-        // Load settings
-        ssid = "\"" + sharedPreferences.getString("ssid", "Pi_AP") + "\"";
-        sharedkey = "\"" + sharedPreferences.getString("passphrase", "raspberry") + "\"";
     }
 
     /**
@@ -106,7 +89,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        wifi_connect(); // Try to connect to network automatically
+        wifiManager.wifi_connect(); // Try to connect to network automatically
         View view = inflater.inflate(R.layout.file_viewer_fragment, container, false);
         loadingHeader = (LinearLayout) view.findViewById(R.id.LoadingHeader);
         noFilesHeader = (FrameLayout) view.findViewById(R.id.NoFilesHeader);
@@ -154,7 +137,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.refresh:
-                wifi_connect();
+                wifiManager.wifi_connect();
                 fetchData();
                 break;
             default: break;
@@ -179,7 +162,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
         String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + filename;
         File file = new File(path);
         if(file.exists()) { // Open file if we already have it
-            snack_message(view, "Opening " + filename);
+            commManager.snack_message("Opening " + filename);
             Intent openAttachmentIntent = new Intent(Intent.ACTION_VIEW);
             openAttachmentIntent.setDataAndType(Uri.fromFile(file), MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
             openAttachmentIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -187,7 +170,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                 getContext().startActivity(openAttachmentIntent);
                 return true;
             } catch (ActivityNotFoundException e) {
-                snack_message(getActivity().getWindow().getDecorView().findViewById(android.R.id.content), "Unable to open file");
+                commManager.snack_message("Unable to open file");
                 return true;
             }
         } else { // Otherwise download the file and open it
@@ -203,11 +186,11 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                 DownloadManager manager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
                 manager.enqueue(request);
                 // Notify user
-                snack_message(view, "Downloading " + filename);
+                commManager.snack_message("Downloading " + filename);
                 adapter.toggleSelection(position);
                 return true;
             } catch (IllegalStateException e) {
-                snack_message(view, "Error downloading " + filename + " from server");
+                commManager.snack_message("Error downloading " + filename + " from server");
                 return true;
             }
         }
@@ -240,20 +223,39 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                snack_message(getView(), toDelete + " deleted");
+                                commManager.snack_message(toDelete + " deleted");
                                 fetchData();
                             }
                         },
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                snack_message(getView(), "Error deleting file on server");
+                                commManager.snack_message("Error deleting file on server");
                             }
                         }
                 );
                 queue.add(stringRequest);
                 break;
         }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof FragmentWifiManager && context instanceof FragmentCommManager) {
+            wifiManager = (FragmentWifiManager) context;
+            commManager = (FragmentCommManager) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement FragmentCommManager & FragmentWifiManager");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        wifiManager = null;
+        commManager = null;
     }
 
     /**
@@ -302,26 +304,12 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                     try {
                         context.startActivity(openAttachmentIntent);
                     } catch (ActivityNotFoundException e) {
-                        snack_message(getActivity().getWindow().getDecorView().findViewById(android.R.id.content), "Unable to open file");
+                        commManager.snack_message("Unable to open file");
                     }
                 }
             }
         }
         cursor.close();
-    }
-
-    /**
-     * Displays a snackbar with a message
-     *
-     * @param view The view from which we need to send this message
-     * @param message The message we want displayed
-     */
-    private void snack_message(View view, String message) {
-        Snackbar messagebar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
-        messagebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-        TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
-        messagetext.setTextColor(Color.WHITE);
-        messagebar.show();
     }
 
     /**
@@ -349,7 +337,8 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                snack_message(getView(), "Error retrieving file listing from server");
+                if(commManager != null)
+                    commManager.snack_message("Error retrieving file listing from server");
                 jsonMessage = "null";
                 loadingHeader.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);
@@ -371,46 +360,8 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                     database.add(new FileItem(this, databaseMessage.get(i).get(0), databaseMessage.get(i).get(1), true));
                 }
             } catch (IOException e) { // Here we swallow the exception without doing anything about it
-                snack_message(getActivity().getWindow().getDecorView().findViewById(android.R.id.content), "Error parsing json message");
+                commManager.snack_message("Error parsing json message");
             }
         }
-    }
-
-    /**
-     * Creates a new network connection for the camera streaming computer, and connects to that
-     * network. This will also save off the network that we are attached to before changing networks
-     * so that we can try to reconnect to it when we are done.
-     */
-    private void wifi_connect() {
-        if(!connected_to_network()) { // Only connect if we aren't already
-            // setup a wifi configuration
-            WifiConfiguration wc = new WifiConfiguration();
-            wc.SSID = ssid;
-            wc.preSharedKey = sharedkey;
-            wc.status = WifiConfiguration.Status.ENABLED;
-            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-            wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-            wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-            wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-            // connect to and enable the connection
-            int netId = wifiManager.addNetwork(wc);
-            wifiManager.enableNetwork(netId, true);
-            wifiManager.setWifiEnabled(true);
-        }
-    }
-
-    /**
-     * Tests if we are connected to the right network to view the camera stream.
-     *
-     * @return true if connected to the right network, false otherwise
-     */
-    private boolean connected_to_network() {
-        if(wifiManager.getConnectionInfo().getSSID().equals(ssid)) {
-            return true;
-        }
-        return false;
     }
 }

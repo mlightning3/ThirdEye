@@ -3,15 +3,9 @@ package edu.umich.globalchallenges.thirdeye;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.net.Uri;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -44,11 +38,8 @@ import java.util.List;
  */
 public class LogViewerFragment extends Fragment {
 
-    private static String ssid;
-    private static String sharedkey;
-
-    private SharedPreferences sharedPreferences;
-    private WifiManager wifiManager;
+    private FragmentCommManager commManager;
+    private FragmentWifiManager wifiManager;
     private LinearLayout loadingHeader;
     private LinearLayout logContent;
     private RequestQueue queue;
@@ -64,12 +55,7 @@ public class LogViewerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         logs = new ArrayList<>();
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         setHasOptionsMenu(true);
-        // Load settings
-        ssid = "\"" + sharedPreferences.getString("ssid", "Pi_AP") + "\"";
-        sharedkey = "\"" + sharedPreferences.getString("passphrase", "raspberry") + "\"";
     }
 
     /**
@@ -82,7 +68,7 @@ public class LogViewerFragment extends Fragment {
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        wifi_connect(); // Try to connect to network automatically
+        wifiManager.wifi_connect(); // Try to connect to network automatically
         View view = inflater.inflate(R.layout.log_viewer_fragment, container, false);
         loadingHeader = (LinearLayout) view.findViewById(R.id.LoadingHeader);
         logContent = (LinearLayout) view.findViewById(R.id.LogContent);
@@ -114,14 +100,14 @@ public class LogViewerFragment extends Fragment {
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
                         startActivity(intent);
                     } else {
-                        snack_message(getView(), "No logs to send");
+                        commManager.snack_message("No logs to send");
                     }
                 } else if(resultCode == Activity.RESULT_CANCELED) {
                     // Nothing needed
                 }
                 break;
             default:
-                snack_message(getView(), "oops");
+                commManager.snack_message("oops");
                 break;
         }
     }
@@ -156,7 +142,7 @@ public class LogViewerFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.refresh:
-                wifi_connect();
+                wifiManager.wifi_connect();
                 fetchData();
                 break;
             case R.id.email:
@@ -167,6 +153,25 @@ public class LogViewerFragment extends Fragment {
             default: break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof FragmentWifiManager && context instanceof FragmentCommManager) {
+            wifiManager = (FragmentWifiManager) context;
+            commManager = (FragmentCommManager) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement FragmentCommManager & FragmentWifiManager");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        wifiManager = null;
+        commManager = null;
     }
 
     /**
@@ -187,7 +192,8 @@ public class LogViewerFragment extends Fragment {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                snack_message(getView(), "Error retrieving logs from server");
+                if(commManager != null)
+                    commManager.snack_message("Error retrieving logs from server");
                 jsonMessage = "null";
                 loadingHeader.setVisibility(View.GONE);
                 logContent.setVisibility(View.VISIBLE);
@@ -213,57 +219,5 @@ public class LogViewerFragment extends Fragment {
                 }
             }
         }
-    }
-
-    /**
-     * Displays a snackbar with a message
-     *
-     * @param view The view from which we need to send this message
-     * @param message The message we want displayed
-     */
-    private void snack_message(View view, String message) {
-        Snackbar messagebar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
-        messagebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-        TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
-        messagetext.setTextColor(Color.WHITE);
-        messagebar.show();
-    }
-
-    /**
-     * Creates a new network connection for the camera streaming computer, and connects to that
-     * network. This will also save off the network that we are attached to before changing networks
-     * so that we can try to reconnect to it when we are done.
-     */
-    private void wifi_connect() {
-        if(!connected_to_network()) { // Only connect if we aren't already
-            // setup a wifi configuration
-            WifiConfiguration wc = new WifiConfiguration();
-            wc.SSID = ssid;
-            wc.preSharedKey = sharedkey;
-            wc.status = WifiConfiguration.Status.ENABLED;
-            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-            wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-            wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-            wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-            // connect to and enable the connection
-            int netId = wifiManager.addNetwork(wc);
-            wifiManager.enableNetwork(netId, true);
-            wifiManager.setWifiEnabled(true);
-        }
-    }
-
-    /**
-     * Tests if we are connected to the right network to view the camera stream.
-     *
-     * @return true if connected to the right network, false otherwise
-     */
-    private boolean connected_to_network() {
-        if(wifiManager.getConnectionInfo().getSSID().equals(ssid)) {
-            return true;
-        }
-        return false;
     }
 }

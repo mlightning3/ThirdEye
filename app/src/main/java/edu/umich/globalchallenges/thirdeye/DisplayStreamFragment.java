@@ -59,12 +59,10 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     private static int vidCount = 1;
     private int timeoutDuration = 30000;
 
-    private static String ssid;
-    private static String sharedkey;
-
+    private FragmentCommManager commManager;
+    private FragmentWifiManager wifiManager;
     private CountDownTimer countDownTimer;
     private SharedPreferences sharedPreferences;
-    private WifiManager wifiManager;
     private VerticalSeekBar focusBar;
     private VerticalSeekBar lightBar;
     private RequestQueue queue;
@@ -86,14 +84,9 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         queue = Volley.newRequestQueue(getContext());
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        wifiManager = (WifiManager) getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-
-        // Load settings
-        ssid = "\"" + sharedPreferences.getString("ssid", "Pi_AP") + "\"";
-        sharedkey = "\"" + sharedPreferences.getString("passphrase", "raspberry") + "\"";
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         // Start countdown timer
         countDownTimer = new CountDownTimer(timeoutDuration, 1000) {
@@ -153,7 +146,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
             webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // Disable hardware rendering on KitKat
         }
-        wifi_connect(); // Try to connect to the network with the server automatically
+        wifiManager.wifi_connect(); // Try to connect to the network with the server automatically
         webView.loadUrl("http://stream.pi:5000/video_feed");
         return view;
     }
@@ -221,6 +214,25 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         super.onPause();
     }
 
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof FragmentWifiManager && context instanceof FragmentCommManager) {
+            wifiManager = (FragmentWifiManager) context;
+            commManager = (FragmentCommManager) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement FragmentCommManager & FragmentWifiManager");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        wifiManager = null;
+        commManager = null;
+    }
+
     /**
      * Here we capture all the click events on the buttons and perform the action we need based on their id in the xml
      *
@@ -282,7 +294,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 filenameDialog.show(getFragmentManager(), "editfilename");
                 break;
             case R.id.refresh:
-                wifi_connect();
+                wifiManager.wifi_connect();
                 webView.reload();
                 break;
             case R.id.extra_settings:
@@ -325,7 +337,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-            snack_message(view, "Focus will change when you let go");
+            commManager.snack_message("Focus will change when you let go");
         }
 
         @Override
@@ -335,7 +347,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            snack_message(view, "Adjusting focus...");
+                            if(commManager != null)
+                                commManager.snack_message("Adjusting focus...");
                             autofocusButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
                         }
                     },
@@ -346,20 +359,25 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                             if(response != null && response.data != null) {
                                 switch(response.statusCode) {
                                     case 401:
-                                        snack_message(view, "Invalid User Key");
+                                        if(commManager != null)
+                                            commManager.snack_message("Invalid User Key");
                                         break;
                                     case 403:
-                                        snack_message(view, "Server does not support changing focus");
+                                        if(commManager != null)
+                                            commManager.snack_message("Server does not support changing focus");
                                         break;
                                     case 500:
-                                        snack_message(view, "Server unable to change focus");
+                                        if(commManager != null)
+                                            commManager.snack_message("Server unable to change focus");
                                         break;
                                     default:
-                                        snack_message(view, "Unknown error while changing focus");
+                                        if(commManager != null)
+                                            commManager.snack_message("Unknown error while changing focus");
                                         break;
                                 }
                             } else {
-                                snack_message(view, "Unknown error while changing focus");
+                                if(commManager != null)
+                                    commManager.snack_message("Unknown error while changing focus");
                             }
                         }
                     }
@@ -381,7 +399,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-            snack_message(view, "Light brightness will change when you let go");
+            commManager.snack_message("Light brightness will change when you let go");
         }
 
         @Override
@@ -391,7 +409,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            snack_message(view, "Adjusting brightness...");
+                            if(commManager != null)
+                                commManager.snack_message("Adjusting brightness...");
                         }
                     },
                     new Response.ErrorListener() {
@@ -401,20 +420,25 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                             if(response != null && response.data != null) {
                                 switch(response.statusCode) {
                                     case 401:
-                                        snack_message(view, "Invalid User Key");
+                                        if(commManager != null)
+                                            commManager.snack_message("Invalid User Key");
                                         break;
                                     case 403:
-                                        snack_message(view, "Server does not support changing brightness");
+                                        if(commManager != null)
+                                            commManager.snack_message("Server does not support changing brightness");
                                         break;
                                     case 500:
-                                        snack_message(view, "Server unable to change brightness");
+                                        if(commManager != null)
+                                            commManager.snack_message("Server unable to change brightness");
                                         break;
                                     default:
-                                        snack_message(view, "Unknown error while changing brightness");
+                                        if(commManager != null)
+                                            commManager.snack_message("Unknown error while changing brightness");
                                         break;
                                 }
                             } else {
-                                snack_message(view, "Unknown error while changing brightness");
+                                if(commManager != null)
+                                    commManager.snack_message("Unknown error while changing brightness");
                             }
                         }
                     }
@@ -422,20 +446,6 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
             queue.add(stringRequest);
             lightStatus = true; // Change this so when the user presses the toggle light button, it turns off the light
         }
-    }
-
-    /**
-     * Displays a snackbar with a message
-     *
-     * @param view The view from which we need to send this message
-     * @param message The message we want displayed
-     */
-    private void snack_message(View view, String message) {
-        Snackbar messagebar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
-        messagebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-        TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
-        messagetext.setTextColor(Color.WHITE);
-        messagebar.show();
     }
 
     private void fullZoomOut() {
@@ -465,7 +475,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        snack_message(view, "Picture taken, saved as " + pictureName);
+                        if(commManager != null)
+                            commManager.snack_message("Picture taken, saved as " + pictureName);
                         imgCount++;
                     }
                 },
@@ -476,17 +487,21 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         if(response != null && response.data != null) {
                             switch(response.statusCode) {
                                 case 401:
-                                    snack_message(view, "Invalid User Key");
+                                    if(commManager != null)
+                                        commManager.snack_message("Invalid User Key");
                                     break;
                                 case 500:
-                                    snack_message(view, "Server unable to save snapshot");
+                                    if(commManager != null)
+                                        commManager.snack_message("Server unable to save snapshot");
                                     break;
                                 default:
-                                    snack_message(view, "Unknown error while taking snapshot");
+                                    if(commManager != null)
+                                        commManager.snack_message("Unknown error while taking snapshot");
                                     break;
                             }
                         } else {
-                            snack_message(view, "Unknown error while taking snapshot");
+                            if(commManager != null)
+                                commManager.snack_message("Unknown error while taking snapshot");
                         }
                     }
                 }
@@ -508,14 +523,16 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     @Override
                     public void onResponse(String response) {
                         if(videostatus) {
-                            snack_message(view, "Done recoding, saved as " + videoName);
+                            if(commManager != null)
+                                commManager.snack_message("Done recoding, saved as " + videoName);
                             vidCount++;
                             Button recording = (Button) view.findViewById(R.id.record);
                             recording.setText("Record");
                             recording.getBackground().clearColorFilter();
                         }
                         else {
-                            snack_message(view, "Recording...");
+                            if(commManager != null)
+                                commManager.snack_message("Recording...");
                             Button recording = (Button) view.findViewById(R.id.record);
                             recording.setText("Recording...");
                             recording.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
@@ -529,17 +546,21 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         if(response != null && response.data != null) {
                             switch(response.statusCode) {
                                 case 401:
-                                    snack_message(view, "Invalid User Key");
+                                    if(commManager != null)
+                                        commManager.snack_message("Invalid User Key");
                                     break;
                                 case 500:
-                                    snack_message(view, "Server unable to save video");
+                                    if(commManager != null)
+                                        commManager.snack_message("Server unable to save video");
                                     break;
                                 default:
-                                    snack_message(view, "Unknown error while recording video");
+                                    if(commManager != null)
+                                        commManager.snack_message("Unknown error while recording video");
                                     break;
                             }
                         } else {
-                            snack_message(view, "Unknown error while recording video");
+                            if(commManager != null)
+                                commManager.snack_message("Unknown error while recording video");
                         }
                     }
                 }
@@ -565,7 +586,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        snack_message(view, "Error changing grayscale");
+                        if(commManager != null)
+                            commManager.snack_message("Error changing grayscale");
                     }
                 }
         );
@@ -590,7 +612,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        snack_message(view, "Error changing resolution");
+                        if(commManager != null)
+                            commManager.snack_message("Error changing resolution");
                     }
                 }
         );
@@ -618,20 +641,25 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         if(response != null && response.data != null) {
                             switch(response.statusCode) {
                                 case 401:
-                                    snack_message(view, "Invalid User Key");
+                                    if(commManager != null)
+                                        commManager.snack_message("Invalid User Key");
                                     break;
                                 case 403:
-                                    snack_message(view, "Server does not support changing focus");
+                                    if(commManager != null)
+                                        commManager.snack_message("Server does not support changing focus");
                                     break;
                                 case 500:
-                                    snack_message(view, "Server unable to change autofocus");
+                                    if(commManager != null)
+                                        commManager.snack_message("Server unable to change autofocus");
                                     break;
                                 default:
-                                    snack_message(view, "Unknown error while changing autofocus");
+                                    if(commManager != null)
+                                        commManager.snack_message("Unknown error while changing autofocus");
                                     break;
                             }
                         } else {
-                            snack_message(view, "Unknown error while changing autofocus");
+                            if(commManager != null)
+                                commManager.snack_message("Unknown error while changing autofocus");
                         }
                     }
                 }
@@ -677,20 +705,25 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         if(response != null && response.data != null) {
                             switch(response.statusCode) {
                                 case 401:
-                                    snack_message(view, "Invalid User Key");
+                                    if(commManager != null)
+                                        commManager.snack_message("Invalid User Key");
                                     break;
                                 case 403:
-                                    snack_message(view, "Server does not support changing light");
+                                    if(commManager != null)
+                                        commManager.snack_message("Server does not support changing light");
                                     break;
                                 case 500:
-                                    snack_message(view, "Server unable to change light");
+                                    if(commManager != null)
+                                        commManager.snack_message("Server unable to change light");
                                     break;
                                 default:
-                                    snack_message(view, "Unknown error while changing light");
+                                    if(commManager != null)
+                                        commManager.snack_message("Unknown error while changing light");
                                     break;
                             }
                         } else {
-                            snack_message(view, "Unknown error while changing light");
+                            if(commManager != null)
+                                commManager.snack_message("Unknown error while changing light");
                         }
                     }
                 }
@@ -729,20 +762,25 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         if(response != null && response.data != null) {
                             switch(response.statusCode) {
                                 case 401:
-                                    snack_message(view, "Invalid User Key");
+                                    if(commManager != null)
+                                        commManager.snack_message("Invalid User Key");
                                     break;
                                 case 403:
-                                    snack_message(view, "Server does not support changing light color");
+                                    if(commManager != null)
+                                        commManager.snack_message("Server does not support changing light color");
                                     break;
                                 case 500:
-                                    snack_message(view, "Server unable to change light color");
+                                    if(commManager != null)
+                                        commManager.snack_message("Server unable to change light color");
                                     break;
                                 default:
-                                    snack_message(view, "Unknown error while changing light color");
+                                    if(commManager != null)
+                                        commManager.snack_message("Unknown error while changing light color");
                                     break;
                             }
                         } else {
-                            snack_message(view, "Unknown error while changing light color");
+                            if(commManager != null)
+                                commManager.snack_message("Unknown error while changing light color");
                         }
                     }
                 }
@@ -766,43 +804,5 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 updateButtons(false);
             }
         }.start();
-    }
-
-    /**
-     * Creates a new network connection for the camera streaming computer, and connects to that
-     * network. This will also save off the network that we are attached to before changing networks
-     * so that we can try to reconnect to it when we are done.
-     */
-    private void wifi_connect() {
-        if(!connected_to_network()) { // Only connect if we aren't already
-            // setup a wifi configuration
-            WifiConfiguration wc = new WifiConfiguration();
-            wc.SSID = ssid;
-            wc.preSharedKey = sharedkey;
-            wc.status = WifiConfiguration.Status.ENABLED;
-            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-            wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-            wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-            wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-            // connect to and enable the connection
-            int netId = wifiManager.addNetwork(wc);
-            wifiManager.enableNetwork(netId, true);
-            wifiManager.setWifiEnabled(true);
-        }
-    }
-
-    /**
-     * Tests if we are connected to the right network to view the camera stream.
-     *
-     * @return true if connected to the right network, false otherwise
-     */
-    private boolean connected_to_network() {
-        if(wifiManager.getConnectionInfo().getSSID().equals(ssid)) {
-            return true;
-        }
-        return false;
     }
 }
