@@ -15,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -50,7 +51,9 @@ import eu.davidea.flexibleadapter.items.IFlexible;
  * This fragment displays the list of pictures and videos that are on the server. The user can then
  * download and view them on their device by selecting an item, or delete a file off the server.
  */
-public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnItemClickListener, FlexibleAdapter.OnItemLongClickListener {
+public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnItemClickListener,
+                                                            FlexibleAdapter.OnItemLongClickListener,
+                                                            SwipeRefreshLayout.OnRefreshListener {
 
     private FragmentCommManager commManager;
     private FragmentWifiManager wifiManager;
@@ -64,6 +67,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     private List<List<String>> databaseMessage;
     private List<IFlexible> database;
     private String toDelete;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     /**
      * This is called when the fragment is created, but before its view is
@@ -95,6 +99,8 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
         noFilesHeader = (FrameLayout) view.findViewById(R.id.NoFilesHeader);
         recyclerView = (RecyclerView) view.findViewById(R.id.file_view);
         recyclerView.setHasFixedSize(true);
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh);
+        swipeRefreshLayout.setOnRefreshListener(this);
         // Set the layout we want for the list
         layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
@@ -237,6 +243,12 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                 queue.add(stringRequest);
                 break;
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        swipeRefreshLayout.setRefreshing(false); // Stop showing the animation since we have a different one to use
+        fetchData();
     }
 
     @Override
