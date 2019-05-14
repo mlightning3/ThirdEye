@@ -141,6 +141,14 @@ public class ExternalSensorFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() instanceof  MainActivity) {
+            ((MainActivity) getActivity()).setActionBarTitle(R.string.sensor_title);
+        }
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof FragmentWifiManager && context instanceof FragmentCommManager) {

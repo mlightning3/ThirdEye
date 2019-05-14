@@ -2,9 +2,6 @@
     <string name="app_name">ThirdEye</string>
     <string name="title_activity_settings">SettingsActivity</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <!-- Commonly used -->
     <string name="loading">Loading…</string>
     <string name="incorrect_wifi">Not connected to camera device\'s wifi</string>
@@ -15,6 +12,7 @@
     <string name="invalid_user_key">Invalid user key</string>
 
     <!-- Device Control Fragment -->
+    <string name="device_title">Device Control</string>
     <string name="wifi_control">This Device Wifi Control</string>
     <string name="connect_to_pi">Connect to camera</string>
     <string name="disconnect_from_pi">Disconnect from camera</string>
@@ -28,28 +26,8 @@
     <string name="pi_unable_shutdown">Error: Camera unable to shutdown</string>
     <string name="pi_error_shutdown">Unknown error with camera shutting down</string>
 
-    <!-- External Sensors Fragment -->
-    <string name="heart_rate">Heart Rate</string>
-    <string name="bpm">bpm</string>
-    <string name="unsupported_external_sensors">Camera does not support external sensors</string>
-    <string name="error_pi_unable_read_sensors">Camera unable to get sensor data</string>
-    <string name="error_external_sensors">Unknown error while getting sensor data</string>
-
-    <!-- File Viewer Fragment & File Item View -->
-    <string name="no_files_on_server">No files available</string>
-    <string name="file_item_img_description">Thumbnail of image on server</string>
-    <string name="error_opening_file">Unable to open file</string>
-    <string name="error_deleting_file_server">Error deleting file on camera</string>
-    <string name="error_fetching_files_server">Error retrieving file listing from server</string>
-    <string name="error_parsing_json">Error parsing json message</string>
-
-    <!-- Log Viewer Fragment -->
-    <string name="no_server_log">No server log</string>
-    <string name="no_system_log">No system log</string>
-    <string name="error_fetching_logs">Error retrieving logs from server</string>
-    <string name="no_logs_to_send">No logs to send</string>
-
     <!-- Display Stream Fragment -->
+    <string name="stream_title">Stream</string>
     <string name="grayscale">Grayscale</string>
     <string name="autofocus">Autofocus</string>
     <string name="resolution">Resolution</string>
@@ -80,6 +58,33 @@
     <string name="error_server_cant_color">Camera unable to change light color</string>
     <string name="error_camera_color">Unknown error while changing light color</string>
 
+    <!-- External Sensors Fragment -->
+    <string name="sensor_title">External Sensors</string>
+    <string name="heart_rate">Heart Rate</string>
+    <string name="bpm">bpm</string>
+    <string name="unsupported_external_sensors">Camera does not support external sensors</string>
+    <string name="error_pi_unable_read_sensors">Camera unable to get sensor data</string>
+    <string name="error_external_sensors">Unknown error while getting sensor data</string>
+
+    <!-- File Viewer Fragment & File Item View -->
+    <string name="file_title">Files</string>
+    <string name="no_files_on_server">No files available</string>
+    <string name="file_item_img_description">Thumbnail of image on server</string>
+    <string name="error_opening_file">Unable to open file</string>
+    <string name="error_deleting_file_server">Error deleting file on camera</string>
+    <string name="error_fetching_files_server">Error retrieving file listing from server</string>
+    <string name="error_parsing_json">Error parsing json message</string>
+
+    <!-- Log Viewer Fragment -->
+    <string name="log_title">Log Files</string>
+    <string name="no_server_log">No server log</string>
+    <string name="no_system_log">No system log</string>
+    <string name="error_fetching_logs">Error retrieving logs from server</string>
+    <string name="no_logs_to_send">No logs to send</string>
+
+    <!-- Settings Fragment -->
+    <string name="settings">Settings</string>
+
     <!-- Change Filename Dialog -->
     <string name="edit_filename">Edit Filename</string>
 
@@ -98,4 +103,12 @@
 
     <!-- Shutdown Server Dialog -->
     <string name="shutdown_pi_dialog">Shutdown Camera?</string>
+
+    <!-- Menu Items -->
+    <string name="color_picker">Color Picker</string>
+    <string name="edit">Edit</string>
+    <string name="email">Email</string>
+    <string name="extra_settings">Extra Settings</string>
+    <string name="refresh">Refresh</string>
+    <string name="zoom_out">Zoom Out</string>
 </resources>

@@ -251,6 +251,14 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() instanceof  MainActivity) {
+            ((MainActivity) getActivity()).setActionBarTitle(R.string.file_title);
+        }
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof FragmentWifiManager && context instanceof FragmentCommManager) {

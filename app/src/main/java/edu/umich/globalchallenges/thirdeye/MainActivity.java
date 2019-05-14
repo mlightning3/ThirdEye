@@ -286,4 +286,16 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
     public void toast_message(int string_id) {
         Toast.makeText(this, string_id, Toast.LENGTH_SHORT).show();
     }
+
+    /**
+     * Change the title on the action bar of the app
+     *
+     * @param string_id String resource we want to display
+     */
+    public void setActionBarTitle(int string_id) {
+        ActionBar bar = getSupportActionBar();
+        if (bar != null) {
+            bar.setTitle(string_id);
+        }
+    }
 }

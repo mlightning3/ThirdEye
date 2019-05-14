@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/color_picker"
-        android:title="Color Picker"
+        android:title="@string/color_picker"
         android:icon="@drawable/ic_color_pallet"
         app:showAsAction="ifRoom" />
 </menu>

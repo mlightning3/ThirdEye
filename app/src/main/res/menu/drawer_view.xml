@@ -1,30 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:checkableBehavior="single" >
+    <group
+        android:id="@+id/nav_group_top"
+        android:checkableBehavior="single" >
         <item
             android:id="@+id/view_stream"
             android:icon="@drawable/ic_videocam"
-            android:title="Stream" />
+            android:title="@string/stream_title" />
         <item
             android:id="@+id/view_files"
             android:icon="@drawable/ic_folder"
-            android:title="Files" />
+            android:title="@string/file_title" />
         <item
             android:id="@+id/device_control"
             android:icon="@drawable/ic_wrench"
-            android:title="Device Control" />
+            android:title="@string/device_title" />
         <item
             android:id="@+id/external_sensor"
             android:icon="@drawable/ic_external"
-            android:title="External Sensors" />
+            android:title="@string/sensor_title" />
+
+    </group>
+    <group
+        android:id="@+id/nav_group_temp"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/view_logs"
             android:icon="@drawable/ic_log"
-            android:title="Logs" />
+            android:title="@string/log_title" />
+    </group>
+    <group
+        android:id="@+id/nav_group_bottom"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/settings"
             android:icon="@drawable/ic_settings"
-            android:title="Settings" />
+            android:title="@string/settings" />
     </group>
 
 </menu>

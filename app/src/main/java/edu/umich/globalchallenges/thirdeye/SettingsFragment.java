@@ -18,4 +18,12 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.perf_general, rootKey);
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() instanceof  MainActivity) {
+            ((MainActivity) getActivity()).setActionBarTitle(R.string.settings);
+        }
+    }
 }

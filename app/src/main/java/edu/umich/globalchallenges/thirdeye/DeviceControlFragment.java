@@ -97,6 +97,14 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() instanceof  MainActivity) {
+            ((MainActivity) getActivity()).setActionBarTitle(R.string.device_title);
+        }
+    }
+
+    @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof FragmentWifiManager && context instanceof FragmentCommManager) {

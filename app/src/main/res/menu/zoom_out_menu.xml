@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/zoomOut"
-        android:title="ZoomOut"
+        android:title="@string/zoom_out"
         android:icon="@drawable/ic_zoom_out"
         app:showAsAction="ifRoom" />
 </menu>

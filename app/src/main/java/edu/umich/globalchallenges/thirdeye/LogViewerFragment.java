@@ -132,6 +132,14 @@ public class LogViewerFragment extends Fragment {
         super.onPause();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() instanceof  MainActivity) {
+            ((MainActivity) getActivity()).setActionBarTitle(R.string.log_title);
+        }
+    }
+
     /**
      * Preforms actions when things in actionbar are clicked
      *

@@ -3,7 +3,7 @@
     android:id="@+id/settings">
 
     <PreferenceCategory
-        android:title="General Settings"
+        android:title="File Settings"
         android:key="perf_general">
 
         <!-- NOTE: EditTextPreference accepts EditText attributes. -->
