@@ -133,6 +133,9 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
                             default : break;
                         }
                         if(newFragment != null) {
+                            for(int i = 0; i < fragmentManager.getBackStackEntryCount(); i++) {
+                                fragmentManager.popBackStack(); // Clear out anything in the backstack
+                            }
                             fragmentManager.beginTransaction().replace(R.id.fragment_container, newFragment).commit();
                             activeFragment = newFragment;
                         }
@@ -297,5 +300,17 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
         if (bar != null) {
             bar.setTitle(string_id);
         }
+    }
+
+    /**
+     * Show the given fragment, adding it to the back stack
+     * @param fragment The fragment we want to show
+     */
+    public void addFragmentToBackStack(Fragment fragment) {
+        fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit();
+        activeFragment = fragment;
     }
 }

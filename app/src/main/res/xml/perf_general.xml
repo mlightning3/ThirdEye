@@ -71,4 +71,13 @@
             android:singleLine="true"
             android:title="Network Password" />
     </PreferenceCategory>
+    <PreferenceCategory
+        android:title="General Settings"
+        android:key="pref_gen" >
+        <Preference
+            android:key="about"
+            android:title="About"
+            android:summary="More information about the app" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

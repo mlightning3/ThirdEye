@@ -111,4 +111,18 @@
     <string name="extra_settings">Extra Settings</string>
     <string name="refresh">Refresh</string>
     <string name="zoom_out">Zoom Out</string>
+
+    <!-- About Fragment -->
+    <string name="about_title">About</string>
+    <string name="app_info">Application Information</string>
+    <string name="version">Version :</string>
+    <string name="build_date">Build date :</string>
+    <string name="copyright">Copyright and License</string>
+    <string name="copyright_string">© 2019, University of Michigan</string>
+    <string name="license_info">All rights reserved</string>
+    <string name="additional_info">Libraries and Resources Used</string>
+    <string name="google_vector">Vector icon assets from Google under Apache License 2.0</string>
+    <string name="flexible_adapter">Flexable Adapter from davidea under Apache License 2.0</string>
+    <string name="glide">Glide from bumptech under Apache License 2.0, BSD and MIT</string>
+    <string name="color_picker_dialog">Android Material Color Picker Dialog from Pes8 under MIT</string>
 </resources>

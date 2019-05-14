@@ -1,6 +1,7 @@
 package edu.umich.globalchallenges.thirdeye;
 
 import android.os.Bundle;
+import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 
 /**
@@ -17,6 +18,19 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.perf_general, rootKey);
+
+        Preference sendFeedback = findPreference("about");
+        if (sendFeedback != null) {
+            sendFeedback.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    if(getActivity() instanceof  MainActivity) {
+                        ((MainActivity) getActivity()).addFragmentToBackStack(new AboutFragment());
+                    }
+                    return true;
+                }
+            });
+        }
     }
 
     @Override
