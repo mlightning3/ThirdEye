@@ -79,7 +79,6 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
         super.onCreate(savedInstanceState);
         toDelete = "";
         database = new ArrayList<>();
-        database.add(new FileItem(this,"Nothing here yet!", "Try refreshing", false));
         setHasOptionsMenu(true);
     }
 
@@ -176,7 +175,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                 getContext().startActivity(openAttachmentIntent);
                 return true;
             } catch (ActivityNotFoundException e) {
-                commManager.snack_message("Unable to open file");
+                commManager.snack_message(R.string.error_opening_file);
                 return true;
             }
         } else { // Otherwise download the file and open it
@@ -236,7 +235,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                commManager.snack_message("Error deleting file on server");
+                                commManager.snack_message(R.string.error_deleting_file_server);
                             }
                         }
                 );
@@ -316,7 +315,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                     try {
                         context.startActivity(openAttachmentIntent);
                     } catch (ActivityNotFoundException e) {
-                        commManager.snack_message("Unable to open file");
+                        commManager.snack_message(R.string.error_opening_file);
                     }
                 }
             }
@@ -350,10 +349,16 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
             @Override
             public void onErrorResponse(VolleyError error) {
                 if(commManager != null)
-                    commManager.snack_message("Error retrieving file listing from server");
+                    commManager.snack_message(R.string.error_fetching_files_server);
                 jsonMessage = "null";
-                loadingHeader.setVisibility(View.GONE);
-                recyclerView.setVisibility(View.VISIBLE);
+                if(database.size() == 0) {
+                    loadingHeader.setVisibility(View.GONE);
+                    noFilesHeader.setVisibility(View.VISIBLE);
+                } else {
+                    adapter.updateDataSet(database, false);
+                    loadingHeader.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                }
             }
         });
         queue.add(jsonArrayRequest);
@@ -372,8 +377,10 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                     database.add(new FileItem(this, databaseMessage.get(i).get(0), databaseMessage.get(i).get(1), true));
                 }
             } catch (IOException e) { // Here we swallow the exception without doing anything about it
-                commManager.snack_message("Error parsing json message");
+                commManager.snack_message(R.string.error_parsing_json);
             }
+        } else {
+            database = new ArrayList<>();
         }
     }
 }

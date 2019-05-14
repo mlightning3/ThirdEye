@@ -27,21 +27,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:text="Grayscale" />
+            android:text="@string/grayscale" />
 
         <Button
             android:id="@+id/autofocus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Autofocus" />
+            android:text="@string/autofocus" />
 
         <Button
             android:id="@+id/resolution"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:text="Resolution" />
+            android:text="@string/resolution" />
 
     </FrameLayout>
 
@@ -106,21 +106,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"
-            android:text="Snapshot" />
+            android:text="@string/snapshot" />
 
         <Button
             android:id="@+id/record"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:text="Record" />
+            android:text="@string/record" />
 
         <Button
             android:id="@+id/light"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Light" />
+            android:text="@string/light" />
 
     </FrameLayout>
 </edu.umich.globalchallenges.thirdeye.DisplayStreamLayout>

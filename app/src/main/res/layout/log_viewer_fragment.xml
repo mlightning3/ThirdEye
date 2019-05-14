@@ -17,12 +17,13 @@
             android:visibility="visible"
             android:indeterminate="true"
             android:layout_gravity="center_horizontal"/>
+
         <TextView
             android:id="@+id/progress_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Loading..." />
+            android:text="@string/loading" />
     </LinearLayout>
     <ScrollView
         android:layout_width="match_parent"
@@ -33,21 +34,23 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:visibility="visible" >
+
             <TextView
                 android:id="@+id/ServerLog"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="No server log" />
+                android:text="@string/no_server_log" />
             <View
                 android:id="@+id/divider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="?android:attr/listDivider" />
+
             <TextView
                 android:id="@+id/SystemLog"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="No system log" />
+                android:text="@string/no_system_log" />
         </LinearLayout>
     </ScrollView>
 </FrameLayout>

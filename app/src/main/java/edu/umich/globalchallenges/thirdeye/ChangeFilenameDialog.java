@@ -17,11 +17,11 @@ public class ChangeFilenameDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Edit Filename");
+        builder.setTitle(R.string.edit_filename);
         final EditText textField = new EditText(getContext());
         textField.setText(PreferenceManager.getDefaultSharedPreferences(getContext()).getString("filename", ""));
         builder.setView(textField);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getContext()).edit();
@@ -29,7 +29,7 @@ public class ChangeFilenameDialog extends DialogFragment {
                 editor.apply();
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dismiss();

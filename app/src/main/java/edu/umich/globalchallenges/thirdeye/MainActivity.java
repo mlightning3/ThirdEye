@@ -249,6 +249,25 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
     }
 
     /**
+     * Displays a snackbar with a message
+     *
+     * @param string_id The message we want displayed from string resource
+     */
+    @Override
+    public void snack_message(int string_id) {
+        View view = getCurrentFocus();
+        if(view != null) {
+            Snackbar messagebar = Snackbar.make(view, string_id, Snackbar.LENGTH_LONG);
+            messagebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+            TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
+            messagetext.setTextColor(Color.WHITE);
+            messagebar.show();
+        } else {
+            toast_message(string_id);
+        }
+    }
+
+    /**
      * Displays a toast with a message
      *
      * @param message The message we want displayed
@@ -256,5 +275,15 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
     @Override
     public void toast_message(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Displays a toast with a message
+     *
+     * @param string_id The message we want displayed from string resource
+     */
+    @Override
+    public void toast_message(int string_id) {
+        Toast.makeText(this, string_id, Toast.LENGTH_SHORT).show();
     }
 }

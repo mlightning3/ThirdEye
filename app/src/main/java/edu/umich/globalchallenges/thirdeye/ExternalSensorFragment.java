@@ -102,8 +102,7 @@ public class ExternalSensorFragment extends Fragment {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            String bpm = response + "bpm";
-                            Log.d("External Sensor", bpm);
+                            String bpm = response;
                             heartrate.setText(bpm);
                         }
                     },
@@ -115,20 +114,20 @@ public class ExternalSensorFragment extends Fragment {
                                 if (response != null && response.data != null) {
                                     switch (response.statusCode) {
                                         case 401:
-                                            commManager.snack_message("Invalid User Key");
+                                            commManager.snack_message(R.string.invalid_user_key);
                                             break;
                                         case 403:
-                                            commManager.snack_message("Server does not support external sensors");
+                                            commManager.snack_message(R.string.unsupported_external_sensors);
                                             break;
                                         case 500:
-                                            commManager.snack_message("Server unable to get sensor data");
+                                            commManager.snack_message(R.string.error_pi_unable_read_sensors);
                                             break;
                                         default:
-                                            commManager.snack_message("Unknown error while getting sensor data");
+                                            commManager.snack_message(R.string.error_external_sensors);
                                             break;
                                     }
                                 } else {
-                                    commManager.snack_message("Unknown error while getting sensor data");
+                                    commManager.snack_message(R.string.error_external_sensors);
                                 }
                             }
                         }

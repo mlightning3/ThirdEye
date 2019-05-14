@@ -163,11 +163,11 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
      * @param view The view from which we need to send this message
      */
     private void network_error_snack(View view) {
-        Snackbar errorbar = Snackbar.make(view, "Not connected to correct network", Snackbar.LENGTH_LONG);
+        Snackbar errorbar = Snackbar.make(view, R.string.incorrect_wifi, Snackbar.LENGTH_LONG);
         errorbar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         TextView messagetext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
         messagetext.setTextColor(Color.BLACK);
-        errorbar.setAction("Connect", new DeviceControlFragment.ConnectListener());
+        errorbar.setAction(R.string.connect, new DeviceControlFragment.ConnectListener());
         errorbar.show();
     }
 
@@ -195,7 +195,7 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
                         @Override
                         public void onResponse(String response) {
                             if(commManager != null)
-                                commManager.snack_message("Pi rebooting");
+                                commManager.snack_message(R.string.pi_rebooting);
                         }
                     },
                     new Response.ErrorListener() {
@@ -206,20 +206,20 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
                                 switch(response.statusCode) {
                                     case 401:
                                         if(commManager != null)
-                                            commManager.snack_message("Invalid User Key");
+                                            commManager.snack_message(R.string.invalid_user_key);
                                         break;
                                     case 500:
                                         if(commManager != null)
-                                            commManager.snack_message("Server unable to reboot pi");
+                                            commManager.snack_message(R.string.pi_unable_reboot);
                                         break;
                                     default:
                                         if(commManager != null)
-                                            commManager.snack_message("Unknown error while rebooting pi");
+                                            commManager.snack_message(R.string.pi_error_reboot);
                                         break;
                                 }
                             } else {
                                 if(commManager != null)
-                                    commManager.snack_message("Unknown error while rebooting pi");
+                                    commManager.snack_message(R.string.pi_error_reboot);
                             }
                         }
                     }
@@ -244,7 +244,7 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
                         @Override
                         public void onResponse(String response) {
                             if(commManager != null)
-                                commManager.snack_message("Pi shutting down");
+                                commManager.snack_message(R.string.pi_shutdown);
                         }
                     },
                     new Response.ErrorListener() {
@@ -255,20 +255,20 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
                                 switch(response.statusCode) {
                                     case 401:
                                         if(commManager != null)
-                                            commManager.snack_message("Invalid User Key");
+                                            commManager.snack_message(R.string.invalid_user_key);
                                         break;
                                     case 500:
                                         if(commManager != null)
-                                            commManager.snack_message("Server unable to shutdown pi");
+                                            commManager.snack_message(R.string.pi_unable_shutdown);
                                         break;
                                     default:
                                         if(commManager != null)
-                                            commManager.snack_message("Unknown error while shutting down pi");
+                                            commManager.snack_message(R.string.pi_error_shutdown);
                                         break;
                                 }
                             } else {
                                 if(commManager != null)
-                                    commManager.snack_message("Unknown error while shutting down pi");
+                                    commManager.snack_message(R.string.pi_error_shutdown);
                             }
                         }
                     }

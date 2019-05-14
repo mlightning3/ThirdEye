@@ -100,14 +100,14 @@ public class LogViewerFragment extends Fragment {
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
                         startActivity(intent);
                     } else {
-                        commManager.snack_message("No logs to send");
+                        commManager.snack_message(R.string.no_logs_to_send);
                     }
                 } else if(resultCode == Activity.RESULT_CANCELED) {
                     // Nothing needed
                 }
                 break;
             default:
-                commManager.snack_message("oops");
+                commManager.snack_message(R.string.oops);
                 break;
         }
     }
@@ -193,7 +193,7 @@ public class LogViewerFragment extends Fragment {
             @Override
             public void onErrorResponse(VolleyError error) {
                 if(commManager != null)
-                    commManager.snack_message("Error retrieving logs from server");
+                    commManager.snack_message(R.string.error_fetching_logs);
                 jsonMessage = "null";
                 loadingHeader.setVisibility(View.GONE);
                 logContent.setVisibility(View.VISIBLE);

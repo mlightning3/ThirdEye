@@ -17,24 +17,27 @@
             android:visibility="visible"
             android:indeterminate="true"
             android:layout_gravity="center_horizontal"/>
+
         <TextView
             android:id="@+id/progress_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Loading..." />
+            android:text="@string/loading" />
     </LinearLayout>
+
     <FrameLayout
         android:id="@+id/NoFilesHeader"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:visibility="gone">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|center_vertical"
-            android:text="No files on server" />
+            android:text="@string/no_files_on_server" />
     </FrameLayout>
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swiperefresh"
