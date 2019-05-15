@@ -3,7 +3,7 @@
     android:id="@+id/settings">
 
     <PreferenceCategory
-        android:title="File Settings"
+        android:title="@string/file_settings_title"
         android:key="perf_general">
 
         <!-- NOTE: EditTextPreference accepts EditText attributes. -->
@@ -16,34 +16,35 @@
             android:maxLines="1"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Default Filename" />
+            android:title="@string/default_filename"
+            android:summary="@string/default_filename_summary"/>
     </PreferenceCategory>
     <PreferenceCategory
-        android:title="Video Settings"
+        android:title="@string/video_settings_title"
         android:key="perf_video" >
         <CheckBoxPreference
             android:key="media_saving"
-            android:title="Media Saving"
-            android:summary="Take snapshots and record video"
+            android:title="@string/media_saving"
+            android:summary="@string/media_saving_summary"
             android:defaultValue="true" />
         <CheckBoxPreference
             android:key="image_manip"
-            android:title="Image Manipulation"
-            android:summary="Change resolution and enable filters"
+            android:title="@string/image_manip"
+            android:summary="@string/image_manip_summary"
             android:defaultValue="true" />
         <CheckBoxPreference
             android:key="focus_control"
-            android:title="Focus Controls"
-            android:summary="Change focal length of camera"
+            android:title="@string/focus_controls"
+            android:summary="@string/focus_controls_summary"
             android:defaultValue="false" />
         <CheckBoxPreference
             android:key="light_control"
-            android:title="Light Control"
-            android:summary="Adjust lights on device"
+            android:title="@string/light_control"
+            android:summary="@string/light_control_summary"
             android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory
-        android:title="User Settings"
+        android:title="@string/user_settings_title"
         android:key="perf_user">
         <EditTextPreference
             android:defaultValue="developmentkey"
@@ -51,10 +52,11 @@
             android:maxLines="1"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="User Key" />
+            android:title="@string/user_key"
+            android:summary="@string/user_key_summary"/>
     </PreferenceCategory>
     <PreferenceCategory
-        android:title="Network Settings"
+        android:title="@string/network_settings_title"
         android:key="perf_network">
         <EditTextPreference
             android:defaultValue="Pi_AP"
@@ -62,22 +64,24 @@
             android:maxLines="1"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Network SSID" />
+            android:title="@string/network_ssid"
+            android:summary="@string/network_ssid_summary"/>
         <EditTextPreference
             android:defaultValue="raspberry"
             android:key="passphrase"
             android:maxLines="1"
             android:selectAllOnFocus="true"
             android:singleLine="true"
-            android:title="Network Password" />
+            android:title="@string/network_password"
+            android:summary="@string/network_password_summary"/>
     </PreferenceCategory>
     <PreferenceCategory
-        android:title="General Settings"
+        android:title="@string/general_settings_title"
         android:key="pref_gen" >
         <Preference
             android:key="about"
-            android:title="About"
-            android:summary="More information about the app" />
+            android:title="@string/about"
+            android:summary="@string/about_summary" />
     </PreferenceCategory>
 
 </PreferenceScreen>

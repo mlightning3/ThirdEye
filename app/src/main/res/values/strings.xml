@@ -125,4 +125,29 @@
     <string name="flexible_adapter">Flexable Adapter from davidea under Apache License 2.0</string>
     <string name="glide">Glide from bumptech under Apache License 2.0, BSD and MIT</string>
     <string name="color_picker_dialog">Android Material Color Picker Dialog from Pes8 under MIT</string>
+
+    <!-- Preferences (Values and summaries) -->
+    <string name="file_settings_title">File Settings</string>
+    <string name="default_filename">Default Filename</string>
+    <string name="default_filename_summary">Filename to use for any saved snapshots or videos</string>
+    <string name="video_settings_title">Video Settings</string>
+    <string name="media_saving">Media Saving</string>
+    <string name="media_saving_summary">Take snapshots and record video</string>
+    <string name="image_manip">Image Manipulation</string>
+    <string name="image_manip_summary">Change resolution and enable filters</string>
+    <string name="focus_controls">Focus Controls</string>
+    <string name="focus_controls_summary">Change focal length of camera</string>
+    <string name="light_control">Light Control</string>
+    <string name="light_control_summary">Adjust lights on camera</string>
+    <string name="user_settings_title">User Settings</string>
+    <string name="user_key">User Key</string>
+    <string name="user_key_summary">Identifier key used to preform admin functions on camera</string>
+    <string name="network_settings_title">Network Settings</string>
+    <string name="network_ssid">Network SSID</string>
+    <string name="network_ssid_summary">Name of the wifi network from camera</string>
+    <string name="network_password">Network Password</string>
+    <string name="network_password_summary">Password to camera\'s wifi network</string>
+    <string name="general_settings_title">General Settings</string>
+    <string name="about">About</string>
+    <string name="about_summary">More information about the app</string>
 </resources>
