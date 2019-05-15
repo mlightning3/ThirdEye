@@ -124,12 +124,6 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
                                     newFragment = new ExternalSensorFragment();
                                 }
                                 break;
-                            case R.id.view_logs :
-                                newFragment = getSupportFragmentManager().findFragmentById(R.id.LogContent);
-                                if(newFragment == null) {
-                                    newFragment = new LogViewerFragment();
-                                }
-                                break;
                             default : break;
                         }
                         if(newFragment != null) {

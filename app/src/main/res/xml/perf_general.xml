@@ -76,12 +76,16 @@
             android:summary="@string/network_password_summary"/>
     </PreferenceCategory>
     <PreferenceCategory
-        android:title="@string/general_settings_title"
-        android:key="pref_gen" >
+        android:title="@string/extra_bits_title"
+        android:key="extra_bits" >
         <Preference
             android:key="about"
-            android:title="@string/about"
+            android:title="@string/about_title"
             android:summary="@string/about_summary" />
+        <Preference
+            android:key="debug_logs"
+            android:title="@string/log_title"
+            android:summary="@string/debug_logs_summary" />
     </PreferenceCategory>
 
 </PreferenceScreen>

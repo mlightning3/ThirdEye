@@ -22,14 +22,6 @@
 
     </group>
     <group
-        android:id="@+id/nav_group_temp"
-        android:checkableBehavior="single">
-        <item
-            android:id="@+id/view_logs"
-            android:icon="@drawable/ic_log"
-            android:title="@string/log_title" />
-    </group>
-    <group
         android:id="@+id/nav_group_bottom"
         android:checkableBehavior="single">
         <item

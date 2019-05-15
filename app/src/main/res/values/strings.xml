@@ -147,7 +147,7 @@
     <string name="network_ssid_summary">Name of the wifi network from camera</string>
     <string name="network_password">Network Password</string>
     <string name="network_password_summary">Password to camera\'s wifi network</string>
-    <string name="general_settings_title">General Settings</string>
-    <string name="about">About</string>
+    <string name="extra_bits_title">Extra Bits</string>
     <string name="about_summary">More information about the app</string>
+    <string name="debug_logs_summary">Information used to debug issues</string>
 </resources>

@@ -31,6 +31,18 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 }
             });
         }
+        Preference debugLogs = findPreference("debug_logs");
+        if (debugLogs != null) {
+            debugLogs.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    if(getActivity() instanceof  MainActivity) {
+                        ((MainActivity) getActivity()).addFragmentToBackStack(new LogViewerFragment());
+                    }
+                    return true;
+                }
+            });
+        }
     }
 
     @Override
