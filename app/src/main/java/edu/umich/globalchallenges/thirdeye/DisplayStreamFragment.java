@@ -309,7 +309,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 fullZoomOut();
                 break;
             case R.id.color_picker:
-                ColorPicker colorPicker = new ColorPicker(getActivity(), 0, 0, 255);
+                ColorPicker colorPicker = new ColorPicker(getActivity(), 255, 255, 255);
                 colorPicker.show();
                 colorPicker.enableAutoClose();
                 colorPicker.setCallback(new ColorPickerCallback() {

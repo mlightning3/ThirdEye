@@ -120,7 +120,7 @@
     <string name="version">Version :</string>
     <string name="build_date">Build date :</string>
     <string name="copyright">Copyright and License</string>
-    <string name="copyright_string">© 2019, University of Michigan</string>
+    <string name="copyright_string">© 2018 – 2019, University of Michigan</string>
     <string name="license_info">All rights reserved</string>
     <string name="additional_info">Libraries and Resources Used</string>
     <string name="google_vector">Vector icon assets from Google under Apache License 2.0</string>

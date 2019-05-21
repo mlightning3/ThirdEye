@@ -1,7 +1,7 @@
 ThirdEye
 ========
 
-Android app for controling the flask-video-streaming server. Both are projects
+Android app for controlling the [flask-video-streaming server](https://github.com/mlightning3/flask-video-streaming). Both are projects
 for the University of Michigan.
 
 ### Features
@@ -15,16 +15,22 @@ such as:
 * Downloading files from server
 * Camera and image controls
 
+### Hardware Requirements
+
+* Android 4.4 or higher
+* Wifi connectivity
+
+When viewing a video stream, the processing power of the device running the app will make a difference
+in framerate. It is recommended that you use a more modern device, ideally something that came with
+Android 5 (Lollipop) or newer when it launched.
+
 Installing
 ==========
 
-This app required Android version 4.4 (aka Kit Kat) or higher. Otherwise you
-will have an error during installation.
-
-Also note that if you are going to use this on Kit Kat, the built in web view
+Note that if you are going to use this on Kit Kat, the built in web view
 does not support the streaming format. To get around this, the app launches a
 web browser when you go to view the stream, giving you the normal web-view from
-the server.
+the server. *As such, support for Kit Kat may be dropped eventually*
 
 Currently the only way to install the app is to sideload it. Either you need
 to build the app from source, or you grab a finished apk from app/releases
@@ -37,41 +43,17 @@ Selecting the file should start the installation process, and once you are
 done, you can turn off Unknown Sources. The app will now be installed and ready
 to be used, and can be uninstalled like any other app.
 
-Building
-========
-
-To the poor soul that is tasked with updating this app, I am sorry. While the
-process of setting up the build environment isn't too painful, understanding
-how everything works together is more involved. All you need to do to get
-started is install [Android Studio](https://developer.android.com/studio/install)
-, and follow it's instructions about how to
-use it (such as loading development builds onto a real device).
-
-Any time you need to make a new release build (aka publish an apk) you will
-need a copy of the the keystore with the android development key for this app
-(Which will be kept in a different location than this repository). Then you
-can follow the steps for [building a signed apk in Android Studio](https://developer.android.com/studio/publish/app-signing).
-
-Here is a short summation of how the project is layed out. The app currently
-uses one main [activity](https://developer.android.com/guide/components/activities/intro-activities) for everything to live in. Then each of the different
-main parts (device control, video stream view, setting view, filelisting view),
-are implemented as [fragments](https://developer.android.com/guide/components/fragments) (mini activities that can be swapped out). As such,
-there is at least one java file for each of the fragments, as well as a resource
-file that defines the layout that will be displayed on the screen. Some things,
-like the filelisting activity, also call on other third party libraries, so
-be prepared to look in other places than Google's Android development pages.
-
-Copyright
-=========
-University of Michigan 2018
+Copyright and Licenses
+======================
+2018 - 2019, University of Michigan
 
 All rights reserved.
 
-### Licenses
+### Libraries and Resources Used
 
-Vector icon assests from Google under Apache License 2.0
+Vector icon assets from Google under Apache License 2.0
 
-[Flexable Adapter](https://github.com/davideas/FlexibleAdapter) from davidea
+[Flexible Adapter](https://github.com/davideas/FlexibleAdapter) from davidea
 under Apache License 2.0
 
 [Glide](https://github.com/bumptech/glide) from bumptech under Apache License 2.0, BSD and MIT
