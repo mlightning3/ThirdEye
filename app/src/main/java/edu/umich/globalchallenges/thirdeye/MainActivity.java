@@ -17,6 +17,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
     public static int last_net_id = 0; // Network previously attached to
     private WifiManager wifiManager;
 
+    private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerLayout;
     private FragmentManager fragmentManager;
     private Fragment activeFragment;
@@ -71,10 +73,13 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
         // Set up layout
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black);
         drawerLayout = findViewById(R.id.drawer_layout);
+        // Set up drawer icon changing
+        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
+        drawerToggle.setToolbarNavigationClickListener(null);
+        drawerLayout.addDrawerListener(drawerToggle);
+        drawerToggle.syncState();
+        // Set up actions for selecting things in nav menu
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
@@ -285,6 +290,22 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
     }
 
     /**
+     * Change the hamburger menu out for a back arrow when in a sub-menu fragment
+     */
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        fragmentManager.popBackStack();
+        fragmentManager.executePendingTransactions();
+        if(fragmentManager.getBackStackEntryCount() == 0) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            drawerToggle.setDrawerIndicatorEnabled(true);
+            drawerToggle.setToolbarNavigationClickListener(null);
+        }
+    }
+
+    /**
      * Change the title on the action bar of the app
      *
      * @param string_id String resource we want to display
@@ -301,6 +322,19 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
      * @param fragment The fragment we want to show
      */
     public void addFragmentToBackStack(Fragment fragment) {
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        drawerToggle.setDrawerIndicatorEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(drawerToggle.getToolbarNavigationClickListener() == null) {
+            drawerToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onBackPressed();
+                }
+            });
+            drawerToggle.syncState();
+        }
+
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)

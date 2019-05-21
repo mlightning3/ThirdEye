@@ -10,6 +10,8 @@
     <string name="ok">OK</string>
     <string name="oops">oops</string>
     <string name="invalid_user_key">Invalid user key</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
 
     <!-- Device Control Fragment -->
     <string name="device_title">Device Control</string>
