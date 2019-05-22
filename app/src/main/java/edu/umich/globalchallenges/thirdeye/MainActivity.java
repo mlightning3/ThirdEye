@@ -238,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
      */
     @Override
     public void snack_message(String message) {
-        View view = getCurrentFocus();
+        View view = findViewById(R.id.fragment_container);
         if(view != null) {
             Snackbar messagebar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
             messagebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
@@ -257,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
      */
     @Override
     public void snack_message(int string_id) {
-        View view = getCurrentFocus();
+        View view = findViewById(R.id.fragment_container);
         if(view != null) {
             Snackbar messagebar = Snackbar.make(view, string_id, Snackbar.LENGTH_LONG);
             messagebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
