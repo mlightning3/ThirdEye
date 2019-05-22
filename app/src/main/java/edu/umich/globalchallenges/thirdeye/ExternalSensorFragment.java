@@ -13,6 +13,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.volley.NetworkResponse;
@@ -26,13 +30,14 @@ import com.android.volley.toolbox.Volley;
 public class ExternalSensorFragment extends Fragment {
     // Important Globals
     private int timeoutDuration = 5000;
+    private boolean fetchHeartrate;
 
     private FragmentCommManager commManager;
     private FragmentWifiManager wifiManager;
     private RequestQueue queue;
     private CountDownTimer countDownTimer;
-    private View view;
     private TextView heartrate;
+    private TextView heartrateUpdate;
 
     /**
      * This is called when the fragment is created, but before its view is
@@ -45,9 +50,8 @@ public class ExternalSensorFragment extends Fragment {
         setHasOptionsMenu(true);
         queue = Volley.newRequestQueue(getContext());
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        // Start countdown timer
-        resetTimer();
+        countDownTimer = null;
+        fetchHeartrate = false;
     }
 
     /**
@@ -70,9 +74,23 @@ public class ExternalSensorFragment extends Fragment {
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.external_sensor_fragment, container, false);
+        View view = inflater.inflate(R.layout.external_sensor_fragment, container, false);
         wifiManager.wifi_connect();
         heartrate = (TextView) view.findViewById(R.id.heartrate);
+        heartrateUpdate = (TextView) view.findViewById(R.id.heart_rate_updated);
+        heartrateUpdate.setVisibility(View.INVISIBLE);
+        Switch heartrateEnable = (Switch) view.findViewById(R.id.heart_rate_switch);
+        heartrateEnable.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked) {
+                    resetTimer();
+                } else {
+                    heartrateUpdate.setVisibility(View.INVISIBLE);
+                }
+                fetchHeartrate = isChecked;
+            }
+        });
         return view;
     }
 
@@ -95,6 +113,10 @@ public class ExternalSensorFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Fetches heart rate information from server, updating view as appropriate.
+     * Currently fetches all controller data and assumes it is only heart rate info
+     */
     public void updateHeartRate() {
         if(wifiManager != null && wifiManager.connected_to_network()) {
             String url = "http://stream.pi:5000/get_controller_data";
@@ -102,8 +124,28 @@ public class ExternalSensorFragment extends Fragment {
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            String bpm = response;
-                            heartrate.setText(bpm);
+                            // Only update if we get a single number (don't display an empty line or multiple numbers in same line)
+                            if(response.matches("^[0-9]+[ \t\n\f\r]*$")) {
+                                String bpm = response;
+                                heartrate.setText(bpm);
+                                Animation fadeout = new AlphaAnimation(1.0f, 0.0f);
+                                fadeout.setDuration(3000);
+                                fadeout.setAnimationListener(new Animation.AnimationListener() {
+                                    @Override
+                                    public void onAnimationStart(Animation animation) { }
+
+                                    @Override
+                                    public void onAnimationEnd(Animation animation) {
+                                        heartrateUpdate.clearAnimation();
+                                        heartrateUpdate.setVisibility(View.INVISIBLE);
+                                    }
+
+                                    @Override
+                                    public void onAnimationRepeat(Animation animation) { }
+                                });
+                                heartrateUpdate.setVisibility(View.VISIBLE);
+                                heartrateUpdate.startAnimation(fadeout);
+                            }
                         }
                     },
                     new Response.ErrorListener() {
@@ -137,7 +179,9 @@ public class ExternalSensorFragment extends Fragment {
         } else if(wifiManager != null) {
             wifiManager.wifi_connect();
         }
-        resetTimer();
+        if(fetchHeartrate) { // Only start a new timer if switch for fetching heart rate is enabled
+            resetTimer();
+        }
     }
 
     @Override
@@ -168,18 +212,23 @@ public class ExternalSensorFragment extends Fragment {
     }
 
     /**
-     * Resets the timer to get updated sensor data
+     * Resets the timer to get updated sensor data if there isn't a timer running
      */
     public void resetTimer() {
-        countDownTimer = new CountDownTimer(timeoutDuration, 1000) {
+        if(countDownTimer == null) {
+            countDownTimer = new CountDownTimer(timeoutDuration, 1000) {
 
-            public void onTick(long millisUntilFinished) {
-                // Nothing needed
-            }
+                public void onTick(long millisUntilFinished) {
+                    // Nothing needed
+                }
 
-            public void onFinish() {
-                updateHeartRate();
-            }
-        }.start();
+                public void onFinish() {
+                    countDownTimer = null;
+                    if (fetchHeartrate) {
+                        updateHeartRate();
+                    }
+                }
+            }.start();
+        }
     }
 }

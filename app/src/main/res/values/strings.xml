@@ -12,6 +12,7 @@
     <string name="invalid_user_key">Invalid user key</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
+    <string name="updated">Updated</string>
 
     <!-- Device Control Fragment -->
     <string name="device_title">Device Control</string>
