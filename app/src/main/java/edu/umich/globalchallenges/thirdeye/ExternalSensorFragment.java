@@ -3,9 +3,6 @@ package edu.umich.globalchallenges.thirdeye;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,6 +15,9 @@ import android.view.animation.Animation;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;

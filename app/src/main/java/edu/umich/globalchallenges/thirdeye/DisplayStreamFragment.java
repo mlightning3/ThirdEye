@@ -8,11 +8,7 @@ import android.graphics.LightingColorFilter;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.v7.widget.AppCompatSeekBar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,6 +19,11 @@ import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.SeekBar;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.appcompat.widget.AppCompatSeekBar;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;

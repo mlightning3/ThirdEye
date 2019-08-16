@@ -6,15 +6,17 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -173,7 +175,7 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
     private void network_error_snack(View view) {
         Snackbar errorbar = Snackbar.make(view, R.string.incorrect_wifi, Snackbar.LENGTH_LONG);
         errorbar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-        TextView messagetext = (TextView) errorbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+        TextView messagetext = (TextView) errorbar.getView().findViewById(R.id.snackbar_text);
         messagetext.setTextColor(Color.BLACK);
         errorbar.setAction(R.string.connect, new DeviceControlFragment.ConnectListener());
         errorbar.show();

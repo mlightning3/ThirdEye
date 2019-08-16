@@ -1,6 +1,7 @@
 package edu.umich.globalchallenges.thirdeye;
 
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
+
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;

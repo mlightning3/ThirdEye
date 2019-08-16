@@ -8,23 +8,25 @@ import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.preference.PreferenceManager;
+
+import androidx.annotation.NonNull;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
 
 /**
  * This is the first part of the app to be loaded. It is responsible for drawing the navigation drawer
@@ -242,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
         if(view != null) {
             Snackbar messagebar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
             messagebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-            TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
+            TextView messagetext = (TextView) messagebar.getView().findViewById(R.id.snackbar_text);
             messagetext.setTextColor(Color.WHITE);
             messagebar.show();
         } else {
@@ -261,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
         if(view != null) {
             Snackbar messagebar = Snackbar.make(view, string_id, Snackbar.LENGTH_LONG);
             messagebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-            TextView messagetext = (TextView) messagebar.getView().findViewById(android.support.design.R.id.snackbar_text);
+            TextView messagetext = (TextView) messagebar.getView().findViewById(R.id.snackbar_text);
             messagetext.setTextColor(Color.WHITE);
             messagebar.show();
         } else {
