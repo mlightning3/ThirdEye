@@ -1,19 +1,15 @@
 package edu.umich.globalchallenges.thirdeye;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.preference.PreferenceManager;
 
 import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
@@ -24,6 +20,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.preference.PreferenceManager;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
@@ -33,38 +30,27 @@ import com.google.android.material.snackbar.Snackbar;
  * as well as updating the fragment that is shown. The fragments replace the frame layout in the
  * resource file.
  */
-public class MainActivity extends AppCompatActivity implements FragmentWifiManager, FragmentCommManager {
+public class MainActivity extends AppCompatActivity implements FragmentWifiManager, FragmentCommManager,
+                                                        NavigationView.OnNavigationItemSelectedListener,
+                                                        SharedPreferences.OnSharedPreferenceChangeListener {
     // Important Globals
     private static String ssid;
     private static String sharedkey;
     public static int last_net_id = 0; // Network previously attached to
-    private WifiManager wifiManager;
 
+    private WifiManager wifiManager;
     private ActionBarDrawerToggle drawerToggle;
     private DrawerLayout drawerLayout;
     private FragmentManager fragmentManager;
     private Fragment activeFragment;
     private SharedPreferences sharedPreferences;
-    private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        listener =
-            new SharedPreferences.OnSharedPreferenceChangeListener() {
-                public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
-                    if(key.contentEquals("filename")) { // Convert all spaces to underscore whenever we get a new filename
-                        String filename = prefs.getString("filename", "");
-                        filename = filename.replaceAll(" ", "_");
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString("filename", filename);
-                        editor.apply();
-                    }
-                }
-            };
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         // Load settings
@@ -83,68 +69,7 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
         drawerToggle.syncState();
         // Set up actions for selecting things in nav menu
         NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        item.setChecked(true);
-                        drawerLayout.closeDrawers();
-
-                        // Swap out Fragment
-                        Fragment newFragment = null;
-                        switch (item.getItemId()) {
-                            case R.id.view_stream :
-                                if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
-                                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://stream.pi:5000"));
-                                    if (browserIntent.resolveActivity(getPackageManager()) != null) {
-                                        startActivity(browserIntent); // For KitKat based devices, just open a browser
-                                    }
-                                }
-                                else {
-                                    newFragment = getSupportFragmentManager().findFragmentById(R.id.display_frame);
-                                    if (newFragment == null) {
-                                        newFragment = new DisplayStreamFragment();
-                                    }
-                                }
-                                break;
-                            case R.id.view_files :
-                                newFragment = getSupportFragmentManager().findFragmentById(R.id.file_view);
-                                if(newFragment == null) {
-                                    newFragment = new FileViewerFragment();
-                                }
-                                break;
-                            case R.id.device_control :
-                                newFragment = getSupportFragmentManager().findFragmentById(R.id.DeviceControlFragment);
-                                if(newFragment == null) {
-                                    newFragment = new DeviceControlFragment();
-                                }
-                                break;
-                            case R.id.settings :
-                                newFragment = getSupportFragmentManager().findFragmentById(R.id.settings);
-                                if(newFragment == null) {
-                                    newFragment = new SettingsFragment();
-                                }
-                                break;
-                            case R.id.external_sensor :
-                                newFragment = getSupportFragmentManager().findFragmentById(R.id.external_sensor);
-                                if(newFragment == null) {
-                                    newFragment = new ExternalSensorFragment();
-                                }
-                                break;
-                            default : break;
-                        }
-                        if(newFragment != null) {
-                            for(int i = 0; i < fragmentManager.getBackStackEntryCount(); i++) {
-                                fragmentManager.popBackStack(); // Clear out anything in the backstack
-                            }
-                            fragmentManager.beginTransaction().replace(R.id.fragment_container, newFragment).commit();
-                            activeFragment = newFragment;
-                        }
-
-                        return true;
-                    }
-                }
-        );
+        navigationView.setNavigationItemSelectedListener(this);
 
         fragmentManager = getSupportFragmentManager();
         if(savedInstanceState == null) {
@@ -157,13 +82,13 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
     @Override
     protected void onResume() {
         super.onResume();
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        sharedPreferences.registerOnSharedPreferenceChangeListener(listener);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -174,6 +99,78 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * When something on the DrawerMenu gets selected, this decides what happens
+     * @param item Item from DrawerMenu
+     * @return true, always
+     */
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        item.setChecked(true);
+        drawerLayout.closeDrawers();
+
+        // Swap out Fragment
+        Fragment newFragment = null;
+        switch (item.getItemId()) {
+            case R.id.view_stream :
+                newFragment = getSupportFragmentManager().findFragmentById(R.id.display_frame);
+                if (newFragment == null) {
+                    newFragment = new DisplayStreamFragment();
+                }
+                break;
+            case R.id.view_files :
+                newFragment = getSupportFragmentManager().findFragmentById(R.id.file_view);
+                if(newFragment == null) {
+                    newFragment = new FileViewerFragment();
+                }
+                break;
+            case R.id.device_control :
+                newFragment = getSupportFragmentManager().findFragmentById(R.id.DeviceControlFragment);
+                if(newFragment == null) {
+                    newFragment = new DeviceControlFragment();
+                }
+                break;
+            case R.id.settings :
+                newFragment = getSupportFragmentManager().findFragmentById(R.id.settings);
+                if(newFragment == null) {
+                    newFragment = new SettingsFragment();
+                }
+                break;
+            case R.id.external_sensor :
+                newFragment = getSupportFragmentManager().findFragmentById(R.id.external_sensor);
+                if(newFragment == null) {
+                    newFragment = new ExternalSensorFragment();
+                }
+                break;
+            default : break;
+        }
+        if(newFragment != null) {
+            for(int i = 0; i < fragmentManager.getBackStackEntryCount(); i++) {
+                fragmentManager.popBackStack(); // Clear out anything in the backstack
+            }
+            fragmentManager.beginTransaction().replace(R.id.fragment_container, newFragment).commit();
+            activeFragment = newFragment;
+        }
+
+        return true;
+    }
+
+    /**
+     * Whenever a preference for the app changes, this gets called
+     * @param sharedPreferences The app's preference object
+     * @param key The preference that changed
+     */
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        switch (key) {
+            case "filename" :
+                cleanFilename();
+                break;
+            default:
+                break;
+        }
     }
 
     /**
@@ -191,8 +188,6 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
 
     /**
      * Tests if we are connected to the right network to view the camera stream.
-     *
-     * @return true if connected to the right network, false otherwise
      */
     @Override
     public void wifi_connect() {
@@ -259,16 +254,7 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
      */
     @Override
     public void snack_message(int string_id) {
-        View view = findViewById(R.id.fragment_container);
-        if(view != null) {
-            Snackbar messagebar = Snackbar.make(view, string_id, Snackbar.LENGTH_LONG);
-            messagebar.getView().setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-            TextView messagetext = (TextView) messagebar.getView().findViewById(R.id.snackbar_text);
-            messagetext.setTextColor(Color.WHITE);
-            messagebar.show();
-        } else {
-            toast_message(string_id);
-        }
+        snack_message(getString(string_id));
     }
 
     /**
@@ -288,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
      */
     @Override
     public void toast_message(int string_id) {
-        Toast.makeText(this, string_id, Toast.LENGTH_SHORT).show();
+        toast_message(getString(string_id));
     }
 
     /**
@@ -342,5 +328,19 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
                 .addToBackStack(null)
                 .commit();
         activeFragment = fragment;
+    }
+
+    /**
+     * Cleans whatever filename the user wants to use for saving images and video
+     * Currently only needs to strip out whitespace
+     */
+    private void cleanFilename() {
+        String filename = sharedPreferences.getString("filename", "");
+        if(filename != null) {
+            filename = filename.replaceAll(" ", "_");
+        }
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("filename", filename);
+        editor.apply();
     }
 }

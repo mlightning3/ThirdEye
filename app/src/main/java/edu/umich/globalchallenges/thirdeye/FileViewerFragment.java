@@ -44,16 +44,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.davidea.flexibleadapter.FlexibleAdapter;
-import eu.davidea.flexibleadapter.SelectableAdapter;
-import eu.davidea.flexibleadapter.items.IFlexible;
-
 /**
  * This fragment displays the list of pictures and videos that are on the server. The user can then
  * download and view them on their device by selecting an item, or delete a file off the server.
  */
-public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnItemClickListener,
-                                                            FlexibleAdapter.OnItemLongClickListener,
+public class FileViewerFragment extends Fragment implements OnRecycleItemInteractionListener,
                                                             SwipeRefreshLayout.OnRefreshListener {
 
     private FragmentCommManager commManager;
@@ -61,12 +56,11 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     private RecyclerView recyclerView;
     private LinearLayout loadingHeader;
     private FrameLayout noFilesHeader;
-    private FlexibleAdapter<IFlexible> adapter;
-    private LinearLayoutManager layoutManager;
+    private FileItemAdapter adapter;
     private RequestQueue queue;
     private String jsonMessage;
     private List<List<String>> databaseMessage;
-    private List<IFlexible> database;
+    private List<FileItem> database;
     private String toDelete;
     private SwipeRefreshLayout swipeRefreshLayout;
 
@@ -102,13 +96,10 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh);
         swipeRefreshLayout.setOnRefreshListener(this);
         // Set the layout we want for the list
-        layoutManager = new LinearLayoutManager(getContext());
-        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         // Load in data
         queue = Volley.newRequestQueue(getContext());
-        adapter = new FlexibleAdapter<>(database);
-        adapter.addListener(this);
-        adapter.setMode(SelectableAdapter.Mode.SINGLE);
+        adapter = new FileItemAdapter(this, this);
         recyclerView.setAdapter(adapter);
         fetchData();
         return view;
@@ -154,12 +145,10 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
     /**
      * When there is just a short touch, we download and open the file from the server
      *
-     * @param view View item was touched on
      * @param position The position of the item touched
-     * @return True, always
      */
     @Override
-    public boolean onItemClick(View view, int position) {
+    public void onRecycleItemClick(int position) {
         // Build needed strings
         String filename = adapter.getItem(position).toString();
         filename = filename.substring(filename.indexOf(" ") + 1, filename.length());
@@ -174,10 +163,8 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
             openAttachmentIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             try {
                 getContext().startActivity(openAttachmentIntent);
-                return true;
             } catch (ActivityNotFoundException e) {
                 commManager.snack_message(R.string.error_opening_file);
-                return true;
             }
         } else { // Otherwise download the file and open it
             String url = "http://stream.pi:5000/media/" + filename;
@@ -193,11 +180,8 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                 manager.enqueue(request);
                 // Notify user
                 commManager.snack_message("Downloading " + filename);
-                adapter.toggleSelection(position);
-                return true;
             } catch (IllegalStateException e) {
                 commManager.snack_message("Error downloading " + filename + " from server");
-                return true;
             }
         }
     }
@@ -208,7 +192,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
      * @param position The position of the item touched
      */
     @Override
-    public void onItemLongClick(int position) {
+    public void onRecycleItemLongClick(int position) {
         toDelete = databaseMessage.get(position).get(1); // Grab filename of thing we want deleted
         if(!toDelete.contentEquals("Try refreshing")) { // Don't try to remove the empty list message
             DialogFragment deleteFileDialog = new DeleteFileDialog();
@@ -349,7 +333,9 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                     loadingHeader.setVisibility(View.GONE);
                     noFilesHeader.setVisibility(View.VISIBLE);
                 } else {
-                    adapter.updateDataSet(database, true);
+                    for(FileItem item : database) {
+                        adapter.addItem(item);
+                    }
                     loadingHeader.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
                 }
@@ -364,7 +350,6 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                     loadingHeader.setVisibility(View.GONE);
                     noFilesHeader.setVisibility(View.VISIBLE);
                 } else {
-                    adapter.updateDataSet(database, false);
                     loadingHeader.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
                 }
@@ -383,7 +368,7 @@ public class FileViewerFragment extends Fragment implements FlexibleAdapter.OnIt
                 databaseMessage = databaseParser.genDatabaseArray(jsonMessage);
                 database = new ArrayList<>();
                 for(int i = 0; i < databaseMessage.size(); i++) {
-                    database.add(new FileItem(this, databaseMessage.get(i).get(0), databaseMessage.get(i).get(1), true));
+                    database.add(new FileItem(databaseMessage.get(i).get(0), databaseMessage.get(i).get(1), true));
                 }
             } catch (IOException e) { // Here we swallow the exception without doing anything about it
                 commManager.snack_message(R.string.error_parsing_json);

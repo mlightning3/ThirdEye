@@ -17,7 +17,7 @@ such as:
 
 ### Hardware Requirements
 
-* Android 4.4 or higher
+* Android 5.0 or higher
 * Wifi connectivity
 
 When viewing a video stream, the processing power of the device running the app will make a difference
@@ -26,11 +26,6 @@ Android 5 (Lollipop) or newer when it launched.
 
 Installing
 ==========
-
-Note that if you are going to use this on Kit Kat, the built in web view
-does not support the streaming format. To get around this, the app launches a
-web browser when you go to view the stream, giving you the normal web-view from
-the server. *As such, support for Kit Kat may be dropped eventually*
 
 Currently the only way to install the app is to sideload it. Either you need
 to build the app from source, or you grab a finished apk from app/releases
@@ -53,8 +48,7 @@ All rights reserved.
 
 Vector icon assets from Google under Apache License 2.0
 
-[Flexible Adapter](https://github.com/davideas/FlexibleAdapter) from davidea
-under Apache License 2.0
+[Volly](https://github.com/google/volly) from Google under Apache License 2.0
 
 [Glide](https://github.com/bumptech/glide) from bumptech under Apache License 2.0, BSD and MIT
 

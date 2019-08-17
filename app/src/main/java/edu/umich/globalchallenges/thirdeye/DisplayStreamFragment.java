@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.graphics.LightingColorFilter;
 import android.os.Build;
 import android.os.CountDownTimer;
-import android.preference.PreferenceManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.AppCompatSeekBar;
+import androidx.preference.PreferenceManager;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;

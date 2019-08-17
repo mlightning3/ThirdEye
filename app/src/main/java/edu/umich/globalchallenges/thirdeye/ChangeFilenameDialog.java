@@ -4,11 +4,11 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.widget.EditText;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
+import androidx.preference.PreferenceManager;
 
 /**
  * A dialog that allows the user to change the filename used for saving pictures and video on the server.

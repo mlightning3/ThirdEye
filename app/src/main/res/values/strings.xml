@@ -125,7 +125,7 @@
     <string name="license_info">All rights reserved</string>
     <string name="additional_info">Libraries and Resources Used</string>
     <string name="google_vector">Vector icon assets from Google under Apache License 2.0</string>
-    <string name="flexible_adapter">Flexable Adapter from davidea under Apache License 2.0</string>
+    <string name="google_volly">Volly from Google under Apache License 2.0</string>
     <string name="glide">Glide from bumptech under Apache License 2.0, BSD and MIT</string>
     <string name="color_picker_dialog">Android Material Color Picker Dialog from Pes8 under MIT</string>
 
