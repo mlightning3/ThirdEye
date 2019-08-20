@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,7 +100,7 @@ public class FileItemAdapter extends RecyclerView.Adapter<FileItemAdapter.FileIt
             ImageView image = (ImageView) view.findViewById(R.id.image);
             if(fileItem.isDownloadable()) {
                 String url = "http://stream.pi:5000/media/" + fileItem.getFilename();
-                //Glide.with(parentFragment).load(url).into(image); // TODO: Fix this boi (probably only needs the library to update and we be good, but we will see)
+                Glide.with(parentFragment).load(url).into(image);
             }
         }
 
