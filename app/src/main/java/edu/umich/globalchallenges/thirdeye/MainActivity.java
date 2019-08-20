@@ -25,13 +25,18 @@ import androidx.preference.PreferenceManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
+import edu.umich.globalchallenges.thirdeye.fragment.DeviceControlFragment;
+import edu.umich.globalchallenges.thirdeye.fragment.DisplayStreamFragment;
+import edu.umich.globalchallenges.thirdeye.fragment.ExternalSensorFragment;
+import edu.umich.globalchallenges.thirdeye.fragment.FileViewerFragment;
+import edu.umich.globalchallenges.thirdeye.fragment.SettingsFragment;
+
 /**
  * This is the first part of the app to be loaded. It is responsible for drawing the navigation drawer
  * as well as updating the fragment that is shown. The fragments replace the frame layout in the
  * resource file.
  */
-public class MainActivity extends AppCompatActivity implements FragmentWifiManager, FragmentCommManager,
-                                                        NavigationView.OnNavigationItemSelectedListener,
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
                                                         SharedPreferences.OnSharedPreferenceChangeListener {
     // Important Globals
     private static String ssid;
@@ -174,22 +179,38 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
     }
 
     /**
+     * Change the hamburger menu out for a back arrow when in a sub-menu fragment
+     */
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        fragmentManager.popBackStack();
+        fragmentManager.executePendingTransactions();
+        if(fragmentManager.getBackStackEntryCount() == 0) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            drawerToggle.setDrawerIndicatorEnabled(true);
+            drawerToggle.setToolbarNavigationClickListener(null);
+        }
+    }
+
+    /*
+     * Anything that isn't an overload lives below here
+     *
+     */
+
+    /**
      * Creates a new network connection for the camera streaming computer, and connects to that
      * network. This will also save off the network that we are attached to before changing networks
      * so that we can try to reconnect to it when we are done.
      */
-    @Override
     public boolean connected_to_network() {
-        if(wifiManager.getConnectionInfo().getSSID().equals(ssid)) {
-            return true;
-        }
-        return false;
+        return wifiManager.getConnectionInfo().getSSID().equals(ssid);
     }
 
     /**
      * Tests if we are connected to the right network to view the camera stream.
      */
-    @Override
     public void wifi_connect() {
         if(!connected_to_network()) { // Only connect if we aren't already
             last_net_id = wifiManager.getConnectionInfo().getNetworkId();
@@ -217,7 +238,6 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
      * network used before. Otherwise it will just leave you unconnected till either the user picks
      * a new network to attach to, or the OS connects to a network.
      */
-    @Override
     public void wifi_disconnect() {
         if(connected_to_network()) { // We only want to disconnect if we were connected to the server's network
             wifiManager.disconnect();
@@ -233,7 +253,6 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
      *
      * @param message The message we want displayed
      */
-    @Override
     public void snack_message(String message) {
         View view = findViewById(R.id.fragment_container);
         if(view != null) {
@@ -252,7 +271,6 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
      *
      * @param string_id The message we want displayed from string resource
      */
-    @Override
     public void snack_message(int string_id) {
         snack_message(getString(string_id));
     }
@@ -262,7 +280,6 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
      *
      * @param message The message we want displayed
      */
-    @Override
     public void toast_message(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
@@ -272,25 +289,8 @@ public class MainActivity extends AppCompatActivity implements FragmentWifiManag
      *
      * @param string_id The message we want displayed from string resource
      */
-    @Override
     public void toast_message(int string_id) {
         toast_message(getString(string_id));
-    }
-
-    /**
-     * Change the hamburger menu out for a back arrow when in a sub-menu fragment
-     */
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        fragmentManager.popBackStack();
-        fragmentManager.executePendingTransactions();
-        if(fragmentManager.getBackStackEntryCount() == 0) {
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            drawerToggle.setDrawerIndicatorEnabled(true);
-            drawerToggle.setToolbarNavigationClickListener(null);
-        }
     }
 
     /**

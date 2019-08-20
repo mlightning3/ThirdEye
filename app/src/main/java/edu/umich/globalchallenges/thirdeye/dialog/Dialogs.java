@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.dialog;
 
 /**
  * This class holds values for all the dialogs used in the app so they can be tracked and used across

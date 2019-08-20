@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.fragment;
 
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
@@ -44,6 +44,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.umich.globalchallenges.thirdeye.adapter.FileItem;
+import edu.umich.globalchallenges.thirdeye.adapter.FileItemAdapter;
+import edu.umich.globalchallenges.thirdeye.json.JsonDatabaseParser;
+import edu.umich.globalchallenges.thirdeye.MainActivity;
+import edu.umich.globalchallenges.thirdeye.adapter.OnRecycleItemInteractionListener;
+import edu.umich.globalchallenges.thirdeye.R;
+import edu.umich.globalchallenges.thirdeye.dialog.DeleteFileDialog;
+import edu.umich.globalchallenges.thirdeye.dialog.Dialogs;
+
 /**
  * This fragment displays the list of pictures and videos that are on the server. The user can then
  * download and view them on their device by selecting an item, or delete a file off the server.
@@ -51,8 +60,7 @@ import java.util.List;
 public class FileViewerFragment extends Fragment implements OnRecycleItemInteractionListener,
                                                             SwipeRefreshLayout.OnRefreshListener {
 
-    private FragmentCommManager commManager;
-    private FragmentWifiManager wifiManager;
+    private MainActivity mainActivity;
     private RecyclerView recyclerView;
     private LinearLayout loadingHeader;
     private FrameLayout noFilesHeader;
@@ -87,7 +95,7 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        wifiManager.wifi_connect(); // Try to connect to network automatically
+        mainActivity.wifi_connect(); // Try to connect to network automatically
         View view = inflater.inflate(R.layout.file_viewer_fragment, container, false);
         loadingHeader = (LinearLayout) view.findViewById(R.id.LoadingHeader);
         noFilesHeader = (FrameLayout) view.findViewById(R.id.NoFilesHeader);
@@ -134,7 +142,7 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.refresh:
-                wifiManager.wifi_connect();
+                mainActivity.wifi_connect();
                 fetchData();
                 break;
             default: break;
@@ -157,14 +165,14 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
         String path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + filename;
         File file = new File(path);
         if(file.exists()) { // Open file if we already have it
-            commManager.snack_message("Opening " + filename);
+            mainActivity.snack_message("Opening " + filename);
             Intent openAttachmentIntent = new Intent(Intent.ACTION_VIEW);
             openAttachmentIntent.setDataAndType(Uri.fromFile(file), MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension));
             openAttachmentIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             try {
                 getContext().startActivity(openAttachmentIntent);
             } catch (ActivityNotFoundException e) {
-                commManager.snack_message(R.string.error_opening_file);
+                mainActivity.snack_message(R.string.error_opening_file);
             }
         } else { // Otherwise download the file and open it
             String url = "http://stream.pi:5000/media/" + filename;
@@ -179,9 +187,9 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
                 DownloadManager manager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
                 manager.enqueue(request);
                 // Notify user
-                commManager.snack_message("Downloading " + filename);
+                mainActivity.snack_message("Downloading " + filename);
             } catch (IllegalStateException e) {
-                commManager.snack_message("Error downloading " + filename + " from server");
+                mainActivity.snack_message("Error downloading " + filename + " from server");
             }
         }
     }
@@ -213,14 +221,14 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
-                                commManager.snack_message(toDelete + " deleted");
+                                mainActivity.snack_message(toDelete + " deleted");
                                 fetchData();
                             }
                         },
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                commManager.snack_message(R.string.error_deleting_file_server);
+                                mainActivity.snack_message(R.string.error_deleting_file_server);
                             }
                         }
                 );
@@ -238,7 +246,7 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
     @Override
     public void onResume() {
         super.onResume();
-        if (getActivity() instanceof  MainActivity) {
+        if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).setActionBarTitle(R.string.file_title);
         }
     }
@@ -246,20 +254,18 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof FragmentWifiManager && context instanceof FragmentCommManager) {
-            wifiManager = (FragmentWifiManager) context;
-            commManager = (FragmentCommManager) context;
+        if (context instanceof MainActivity) {
+            mainActivity = (MainActivity) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement FragmentCommManager & FragmentWifiManager");
+                    + " context is wrong (should be attached to MainActivity)");
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        wifiManager = null;
-        commManager = null;
+        mainActivity = null;
     }
 
     /**
@@ -308,7 +314,7 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
                     try {
                         context.startActivity(openAttachmentIntent);
                     } catch (ActivityNotFoundException e) {
-                        commManager.snack_message(R.string.error_opening_file);
+                        mainActivity.snack_message(R.string.error_opening_file);
                     }
                 }
             }
@@ -319,7 +325,7 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
     /**
      * Fetches the data from the server and parses the data before reloading activity view
      */
-    public void fetchData() {
+    private void fetchData() {
         String url = "http://stream.pi:5000/get_database";
         loadingHeader.setVisibility(View.VISIBLE);
         noFilesHeader.setVisibility(View.INVISIBLE);
@@ -343,8 +349,8 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                if(commManager != null)
-                    commManager.snack_message(R.string.error_fetching_files_server);
+                if(mainActivity != null)
+                    mainActivity.snack_message(R.string.error_fetching_files_server);
                 jsonMessage = "null";
                 if(database.size() == 0) {
                     loadingHeader.setVisibility(View.GONE);
@@ -361,7 +367,7 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
     /**
      * Reparses the JSON message and builds new database
      */
-    public void rebuildDataSet() {
+    private void rebuildDataSet() {
         if(!jsonMessage.contentEquals("null")) { // Only try to parse the message if we actually got something
             JsonDatabaseParser databaseParser = new JsonDatabaseParser();
             try {
@@ -371,7 +377,7 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
                     database.add(new FileItem(databaseMessage.get(i).get(0), databaseMessage.get(i).get(1), true));
                 }
             } catch (IOException e) { // Here we swallow the exception without doing anything about it
-                commManager.snack_message(R.string.error_parsing_json);
+                mainActivity.snack_message(R.string.error_parsing_json);
             }
         } else {
             database = new ArrayList<>();

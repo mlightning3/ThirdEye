@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<edu.umich.globalchallenges.thirdeye.DisplayStreamLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<edu.umich.globalchallenges.thirdeye.gui.DisplayStreamLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/display_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".DisplayStreamFragment">
+    tools:context=".fragment.DisplayStreamFragment">
 
     <WebView
         android:id="@+id/web"
@@ -65,7 +65,7 @@
                 android:layout_width="20dp"
                 android:layout_height="match_parent" />
 
-            <edu.umich.globalchallenges.thirdeye.VerticalSeekBar
+            <edu.umich.globalchallenges.thirdeye.gui.VerticalSeekBar
                 android:id="@+id/focus_bar"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -78,7 +78,7 @@
             android:layout_gravity="end|center_vertical"
             android:orientation="horizontal">
 
-            <edu.umich.globalchallenges.thirdeye.VerticalSeekBar
+            <edu.umich.globalchallenges.thirdeye.gui.VerticalSeekBar
                 android:id="@+id/light_bar"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -123,4 +123,4 @@
             android:text="@string/light" />
 
     </FrameLayout>
-</edu.umich.globalchallenges.thirdeye.DisplayStreamLayout>
+</edu.umich.globalchallenges.thirdeye.gui.DisplayStreamLayout>

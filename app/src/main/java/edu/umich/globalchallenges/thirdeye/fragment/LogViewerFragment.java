@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.fragment;
 
 import android.app.Activity;
 import android.content.Context;
@@ -33,14 +33,19 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import edu.umich.globalchallenges.thirdeye.json.JsonLogParser;
+import edu.umich.globalchallenges.thirdeye.MainActivity;
+import edu.umich.globalchallenges.thirdeye.R;
+import edu.umich.globalchallenges.thirdeye.dialog.Dialogs;
+import edu.umich.globalchallenges.thirdeye.dialog.EmailLogsDialog;
+
 /**
  * This fragment provides the user with a way to see information about the server, as well as email
  * it to another party. THIS SHOULD ONLY BE USED FOR DEBUGGING AND SHOULD BE REMOVED FOR PUBLIC RELEASE
  */
 public class LogViewerFragment extends Fragment {
 
-    private FragmentCommManager commManager;
-    private FragmentWifiManager wifiManager;
+    private MainActivity mainActivity;
     private LinearLayout loadingHeader;
     private LinearLayout logContent;
     private RequestQueue queue;
@@ -69,7 +74,7 @@ public class LogViewerFragment extends Fragment {
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        wifiManager.wifi_connect(); // Try to connect to network automatically
+        mainActivity.wifi_connect(); // Try to connect to network automatically
         View view = inflater.inflate(R.layout.log_viewer_fragment, container, false);
         loadingHeader = (LinearLayout) view.findViewById(R.id.LoadingHeader);
         logContent = (LinearLayout) view.findViewById(R.id.LogContent);
@@ -101,14 +106,14 @@ public class LogViewerFragment extends Fragment {
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
                         startActivity(intent);
                     } else {
-                        commManager.snack_message(R.string.no_logs_to_send);
+                        mainActivity.snack_message(R.string.no_logs_to_send);
                     }
                 } else if(resultCode == Activity.RESULT_CANCELED) {
                     // Nothing needed
                 }
                 break;
             default:
-                commManager.snack_message(R.string.oops);
+                mainActivity.snack_message(R.string.oops);
                 break;
         }
     }
@@ -136,7 +141,7 @@ public class LogViewerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (getActivity() instanceof  MainActivity) {
+        if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).setActionBarTitle(R.string.log_title);
         }
     }
@@ -151,7 +156,7 @@ public class LogViewerFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.refresh:
-                wifiManager.wifi_connect();
+                mainActivity.wifi_connect();
                 fetchData();
                 break;
             case R.id.email:
@@ -167,26 +172,24 @@ public class LogViewerFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof FragmentWifiManager && context instanceof FragmentCommManager) {
-            wifiManager = (FragmentWifiManager) context;
-            commManager = (FragmentCommManager) context;
+        if (context instanceof MainActivity) {
+            mainActivity = (MainActivity) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement FragmentCommManager & FragmentWifiManager");
+                    + " context is wrong (should be attached to MainActivity)");
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        wifiManager = null;
-        commManager = null;
+        mainActivity = null;
     }
 
     /**
      * Fetches the data from the server and parses the data before reloading activity view
      */
-    public void fetchData() {
+    private void fetchData() {
         String url = "http://stream.pi:5000/logs";
         loadingHeader.setVisibility(View.VISIBLE);
         logContent.setVisibility(View.INVISIBLE);
@@ -201,8 +204,8 @@ public class LogViewerFragment extends Fragment {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                if(commManager != null)
-                    commManager.snack_message(R.string.error_fetching_logs);
+                if(mainActivity != null)
+                    mainActivity.snack_message(R.string.error_fetching_logs);
                 jsonMessage = "null";
                 loadingHeader.setVisibility(View.GONE);
                 logContent.setVisibility(View.VISIBLE);
@@ -214,7 +217,7 @@ public class LogViewerFragment extends Fragment {
     /**
      * Updates the textviews for the logs from the server
      */
-    public void updateLogs() {
+    private void updateLogs() {
         if(!jsonMessage.contentEquals("null")) {
             TextView system = (TextView) getView().findViewById(R.id.SystemLog);
             TextView server = (TextView) getView().findViewById(R.id.ServerLog);

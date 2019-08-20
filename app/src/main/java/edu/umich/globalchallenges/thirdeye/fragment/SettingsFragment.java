@@ -1,9 +1,12 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.fragment;
 
 import android.os.Bundle;
 
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+
+import edu.umich.globalchallenges.thirdeye.MainActivity;
+import edu.umich.globalchallenges.thirdeye.R;
 
 /**
  * This provides a way for the user to see and edit the settings of the app
@@ -25,7 +28,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             sendFeedback.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    if(getActivity() instanceof  MainActivity) {
+                    if(getActivity() instanceof MainActivity) {
                         ((MainActivity) getActivity()).addFragmentToBackStack(new AboutFragment());
                     }
                     return true;

@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.fragment;
 
 import android.app.Activity;
 import android.content.Context;
@@ -39,6 +39,14 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import edu.umich.globalchallenges.thirdeye.MainActivity;
+import edu.umich.globalchallenges.thirdeye.R;
+import edu.umich.globalchallenges.thirdeye.dialog.ChangeFilenameDialog;
+import edu.umich.globalchallenges.thirdeye.dialog.ChangeVideoSettingsDialog;
+import edu.umich.globalchallenges.thirdeye.dialog.Dialogs;
+import edu.umich.globalchallenges.thirdeye.gui.DisplayStreamLayout;
+import edu.umich.globalchallenges.thirdeye.gui.VerticalSeekBar;
+
 /**
  * This fragment provides a view of the stream to the user. It also has a lot of controls for doing
  * various things on the server (take pictures, video, etc.) but also has shortcuts to change some
@@ -55,8 +63,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     private static int vidCount = 1;
     private int timeoutDuration = 30000;
 
-    private FragmentCommManager commManager;
-    private FragmentWifiManager wifiManager;
+    private MainActivity mainActivity;
     private CountDownTimer countDownTimer;
     private SharedPreferences sharedPreferences;
     private VerticalSeekBar focusBar;
@@ -142,7 +149,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
             webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // Disable hardware rendering on KitKat
         }
-        wifiManager.wifi_connect(); // Try to connect to the network with the server automatically
+        mainActivity.wifi_connect(); // Try to connect to the network with the server automatically
         webView.loadUrl("http://stream.pi:5000/video_feed");
         return view;
     }
@@ -213,7 +220,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     @Override
     public void onResume() {
         super.onResume();
-        if (getActivity() instanceof  MainActivity) {
+        if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).setActionBarTitle(R.string.stream_title);
         }
     }
@@ -221,20 +228,18 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof FragmentWifiManager && context instanceof FragmentCommManager) {
-            wifiManager = (FragmentWifiManager) context;
-            commManager = (FragmentCommManager) context;
+        if (context instanceof MainActivity) {
+            mainActivity = (MainActivity) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement FragmentCommManager & FragmentWifiManager");
+                    + " context is wrong (should be attached to MainActivity)");
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        wifiManager = null;
-        commManager = null;
+        mainActivity = null;
     }
 
     /**
@@ -298,7 +303,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 filenameDialog.show(getFragmentManager(), "editfilename");
                 break;
             case R.id.refresh:
-                wifiManager.wifi_connect();
+                mainActivity.wifi_connect();
                 webView.reload();
                 break;
             case R.id.extra_settings:
@@ -341,7 +346,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-            commManager.snack_message(R.string.focus_change_let_go);
+            mainActivity.snack_message(R.string.focus_change_let_go);
         }
 
         @Override
@@ -351,8 +356,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            if(commManager != null)
-                                commManager.snack_message(R.string.adjusting_focus);
+                            if(mainActivity != null)
+                                mainActivity.snack_message(R.string.adjusting_focus);
                             autofocusButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
                         }
                     },
@@ -363,25 +368,25 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                             if(response != null && response.data != null) {
                                 switch(response.statusCode) {
                                     case 401:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.invalid_user_key);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.invalid_user_key);
                                         break;
                                     case 403:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.unsupported_camera_focus);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.unsupported_camera_focus);
                                         break;
                                     case 500:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.error_server_cant_focus);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.error_server_cant_focus);
                                         break;
                                     default:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.error_camera_focus);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.error_camera_focus);
                                         break;
                                 }
                             } else {
-                                if(commManager != null)
-                                    commManager.snack_message(R.string.error_camera_focus);
+                                if(mainActivity != null)
+                                    mainActivity.snack_message(R.string.error_camera_focus);
                             }
                         }
                     }
@@ -403,7 +408,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-            commManager.snack_message(R.string.light_change_let_go);
+            mainActivity.snack_message(R.string.light_change_let_go);
         }
 
         @Override
@@ -413,8 +418,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            if(commManager != null)
-                                commManager.snack_message(R.string.adjusting_brightness);
+                            if(mainActivity != null)
+                                mainActivity.snack_message(R.string.adjusting_brightness);
                         }
                     },
                     new Response.ErrorListener() {
@@ -424,25 +429,25 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                             if(response != null && response.data != null) {
                                 switch(response.statusCode) {
                                     case 401:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.invalid_user_key);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.invalid_user_key);
                                         break;
                                     case 403:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.unsupported_camera_light);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.unsupported_camera_light);
                                         break;
                                     case 500:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.error_server_cant_brightness);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.error_server_cant_brightness);
                                         break;
                                     default:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.error_camera_brightness);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.error_camera_brightness);
                                         break;
                                 }
                             } else {
-                                if(commManager != null)
-                                    commManager.snack_message(R.string.error_camera_brightness);
+                                if(mainActivity != null)
+                                    mainActivity.snack_message(R.string.error_camera_brightness);
                             }
                         }
                     }
@@ -472,15 +477,15 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      *
      * @param view
      */
-    public void take_snapshot(final View view) {
+    private void take_snapshot(final View view) {
         final String pictureName = sharedPreferences.getString("filename", "default") + "_picture_" + imgCount;
         String url = "http://stream.pi:5000/snapshot?filename=" + pictureName + "&date=" + getDate();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        if(commManager != null)
-                            commManager.snack_message("Picture taken, saved as " + pictureName);
+                        if(mainActivity != null)
+                            mainActivity.snack_message("Picture taken, saved as " + pictureName);
                         imgCount++;
                     }
                 },
@@ -491,21 +496,21 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         if(response != null && response.data != null) {
                             switch(response.statusCode) {
                                 case 401:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.invalid_user_key);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.invalid_user_key);
                                     break;
                                 case 500:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.error_server_cant_snapshot);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.error_server_cant_snapshot);
                                     break;
                                 default:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.error_camera_snapshot);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.error_camera_snapshot);
                                     break;
                             }
                         } else {
-                            if(commManager != null)
-                                commManager.snack_message(R.string.error_camera_snapshot);
+                            if(mainActivity != null)
+                                mainActivity.snack_message(R.string.error_camera_snapshot);
                         }
                     }
                 }
@@ -518,7 +523,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      *
      * @param view
      */
-    public void video_capture(final View view) {
+    private void video_capture(final View view) {
         videostatus = !videostatus; // Flip video capture status
         final String videoName = sharedPreferences.getString("filename", "default") + "_video_" + vidCount;
         String url = "http://stream.pi:5000/video_capture?filename=" + videoName + "&status=" + videostatus + "&date=" + getDate();
@@ -527,16 +532,16 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     @Override
                     public void onResponse(String response) {
                         if(videostatus) {
-                            if(commManager != null)
-                                commManager.snack_message("Done recoding, saved as " + videoName);
+                            if(mainActivity != null)
+                                mainActivity.snack_message("Done recoding, saved as " + videoName);
                             vidCount++;
                             Button recording = (Button) view.findViewById(R.id.record);
                             recording.setText(R.string.record);
                             recording.getBackground().clearColorFilter();
                         }
                         else {
-                            if(commManager != null)
-                                commManager.snack_message(R.string.recording);
+                            if(mainActivity != null)
+                                mainActivity.snack_message(R.string.recording);
                             Button recording = (Button) view.findViewById(R.id.record);
                             recording.setText(R.string.recording);
                             recording.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
@@ -550,21 +555,21 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         if(response != null && response.data != null) {
                             switch(response.statusCode) {
                                 case 401:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.invalid_user_key);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.invalid_user_key);
                                     break;
                                 case 500:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.error_server_cant_record);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.error_server_cant_record);
                                     break;
                                 default:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.error_camera_record);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.error_camera_record);
                                     break;
                             }
                         } else {
-                            if(commManager != null)
-                                commManager.snack_message(R.string.error_camera_record);
+                            if(mainActivity != null)
+                                mainActivity.snack_message(R.string.error_camera_record);
                         }
                     }
                 }
@@ -577,7 +582,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      *
      * @param view
      */
-    public void toggle_grayscale(final View view) {
+    private void toggle_grayscale(final View view) {
         grayscale = !grayscale; // Flip grayscale status
         String url = "http://stream.pi:5000/grayscale?status=" + grayscale;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -590,8 +595,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if(commManager != null)
-                            commManager.snack_message(R.string.error_grayscale);
+                        if(mainActivity != null)
+                            mainActivity.snack_message(R.string.error_grayscale);
                     }
                 }
         );
@@ -603,7 +608,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      *
      * @param view
      */
-    public void toggle_resolution(final View view) {
+    private void toggle_resolution(final View view) {
         lowresolution = !lowresolution; // Flip resolutionButton status
         String url = "http://stream.pi:5000/resolution?status=" + lowresolution;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -616,8 +621,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if(commManager != null)
-                            commManager.snack_message(R.string.error_resolution);
+                        if(mainActivity != null)
+                            mainActivity.snack_message(R.string.error_resolution);
                     }
                 }
         );
@@ -645,25 +650,25 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         if(response != null && response.data != null) {
                             switch(response.statusCode) {
                                 case 401:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.invalid_user_key);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.invalid_user_key);
                                     break;
                                 case 403:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.unsupported_camera_focus);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.unsupported_camera_focus);
                                     break;
                                 case 500:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.error_server_cant_autofocus);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.error_server_cant_autofocus);
                                     break;
                                 default:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.error_camera_autofocus);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.error_camera_autofocus);
                                     break;
                             }
                         } else {
-                            if(commManager != null)
-                                commManager.snack_message(R.string.error_camera_autofocus);
+                            if(mainActivity != null)
+                                mainActivity.snack_message(R.string.error_camera_autofocus);
                         }
                     }
                 }
@@ -677,7 +682,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      *
      * @param view
      */
-    public void toggle_autofocus(View view) {
+    private void toggle_autofocus(View view) {
         autofocusStatus = !autofocusStatus; // Flip autofocusButton status
         set_autofocus_status(autofocusStatus);
         if(autofocusStatus) {
@@ -709,25 +714,25 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         if(response != null && response.data != null) {
                             switch(response.statusCode) {
                                 case 401:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.invalid_user_key);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.invalid_user_key);
                                     break;
                                 case 403:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.unsupported_camera_light);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.unsupported_camera_light);
                                     break;
                                 case 500:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.error_server_cant_light);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.error_server_cant_light);
                                     break;
                                 default:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.error_camera_light);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.error_camera_light);
                                     break;
                             }
                         } else {
-                            if(commManager != null)
-                                commManager.snack_message(R.string.error_camera_light);
+                            if(mainActivity != null)
+                                mainActivity.snack_message(R.string.error_camera_light);
                         }
                     }
                 }
@@ -740,7 +745,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      *
      * @param view
      */
-    public void toggle_light(View view) {
+    private void toggle_light(View view) {
         lightStatus = !lightStatus;
         set_light_status(lightStatus);
     }
@@ -766,25 +771,25 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                         if(response != null && response.data != null) {
                             switch(response.statusCode) {
                                 case 401:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.invalid_user_key);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.invalid_user_key);
                                     break;
                                 case 403:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.unsupported_camera_light);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.unsupported_camera_light);
                                     break;
                                 case 500:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.error_server_cant_color);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.error_server_cant_color);
                                     break;
                                 default:
-                                    if(commManager != null)
-                                        commManager.snack_message(R.string.error_camera_color);
+                                    if(mainActivity != null)
+                                        mainActivity.snack_message(R.string.error_camera_color);
                                     break;
                             }
                         } else {
-                            if(commManager != null)
-                                commManager.snack_message(R.string.error_camera_color);
+                            if(mainActivity != null)
+                                mainActivity.snack_message(R.string.error_camera_color);
                         }
                     }
                 }

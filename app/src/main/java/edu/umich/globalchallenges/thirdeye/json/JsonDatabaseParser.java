@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.json;
 
 import android.util.JsonReader;
 

@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -27,13 +27,15 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import edu.umich.globalchallenges.thirdeye.MainActivity;
+import edu.umich.globalchallenges.thirdeye.R;
+
 public class ExternalSensorFragment extends Fragment {
     // Important Globals
     private int timeoutDuration = 5000;
     private boolean fetchHeartrate;
 
-    private FragmentCommManager commManager;
-    private FragmentWifiManager wifiManager;
+    private MainActivity mainActivity;
     private RequestQueue queue;
     private CountDownTimer countDownTimer;
     private TextView heartrate;
@@ -75,7 +77,7 @@ public class ExternalSensorFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.external_sensor_fragment, container, false);
-        wifiManager.wifi_connect();
+        mainActivity.wifi_connect();
         heartrate = (TextView) view.findViewById(R.id.heartrate);
         heartrateUpdate = (TextView) view.findViewById(R.id.heart_rate_updated);
         heartrateUpdate.setVisibility(View.INVISIBLE);
@@ -104,7 +106,7 @@ public class ExternalSensorFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.refresh:
-                wifiManager.wifi_connect();
+                mainActivity.wifi_connect();
                 updateHeartRate();
                 // TODO do the refresh thing
                 break;
@@ -118,7 +120,7 @@ public class ExternalSensorFragment extends Fragment {
      * Currently fetches all controller data and assumes it is only heart rate info
      */
     public void updateHeartRate() {
-        if(wifiManager != null && wifiManager.connected_to_network()) {
+        if(mainActivity != null && mainActivity.connected_to_network()) {
             String url = "http://stream.pi:5000/get_controller_data";
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
@@ -152,32 +154,32 @@ public class ExternalSensorFragment extends Fragment {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             NetworkResponse response = error.networkResponse;
-                            if(getView() != null && commManager != null) { // Only try to let us know of problems if we are still looking at fragment
+                            if(getView() != null && mainActivity != null) { // Only try to let us know of problems if we are still looking at fragment
                                 if (response != null && response.data != null) {
                                     switch (response.statusCode) {
                                         case 401:
-                                            commManager.snack_message(R.string.invalid_user_key);
+                                            mainActivity.snack_message(R.string.invalid_user_key);
                                             break;
                                         case 403:
-                                            commManager.snack_message(R.string.unsupported_external_sensors);
+                                            mainActivity.snack_message(R.string.unsupported_external_sensors);
                                             break;
                                         case 500:
-                                            commManager.snack_message(R.string.error_pi_unable_read_sensors);
+                                            mainActivity.snack_message(R.string.error_pi_unable_read_sensors);
                                             break;
                                         default:
-                                            commManager.snack_message(R.string.error_external_sensors);
+                                            mainActivity.snack_message(R.string.error_external_sensors);
                                             break;
                                     }
                                 } else {
-                                    commManager.snack_message(R.string.error_external_sensors);
+                                    mainActivity.snack_message(R.string.error_external_sensors);
                                 }
                             }
                         }
                     }
             );
             queue.add(stringRequest);
-        } else if(wifiManager != null) {
-            wifiManager.wifi_connect();
+        } else if(mainActivity != null) {
+            mainActivity.wifi_connect();
         }
         if(fetchHeartrate) { // Only start a new timer if switch for fetching heart rate is enabled
             resetTimer();
@@ -187,7 +189,7 @@ public class ExternalSensorFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (getActivity() instanceof  MainActivity) {
+        if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).setActionBarTitle(R.string.sensor_title);
         }
     }
@@ -195,26 +197,24 @@ public class ExternalSensorFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof FragmentWifiManager && context instanceof FragmentCommManager) {
-            wifiManager = (FragmentWifiManager) context;
-            commManager = (FragmentCommManager) context;
+        if (context instanceof MainActivity) {
+            mainActivity = (MainActivity) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement FragmentCommManager & FragmentWifiManager");
+                    + " context is wrong (should be attached to MainActivity)");
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        wifiManager = null;
-        commManager = null;
+        mainActivity = null;
     }
 
     /**
      * Resets the timer to get updated sensor data if there isn't a timer running
      */
-    public void resetTimer() {
+    private void resetTimer() {
         if(countDownTimer == null) {
             countDownTimer = new CountDownTimer(timeoutDuration, 1000) {
 

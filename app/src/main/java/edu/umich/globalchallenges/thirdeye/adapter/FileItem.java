@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.adapter;
 
 /**
  * Class that holds the information for each item in the list
@@ -8,7 +8,7 @@ public class FileItem implements Comparable<FileItem> {
     private String date;
     private boolean isDownloadable;
 
-    FileItem(String filename, String date, boolean isDownloadable) {
+    public FileItem(String filename, String date, boolean isDownloadable) {
         this.filename = filename;
         this.date = date;
         this.isDownloadable = isDownloadable;

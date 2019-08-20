@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.dialog;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -8,16 +8,19 @@ import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import edu.umich.globalchallenges.thirdeye.R;
+
 /**
- * A dialog that asks if the user wishes to shutdown the server. This will also make a callback to
- * the activity/fragment that makes this dialog, so it can update itself as needed.
+ * A dialog that asks if the user wishes to send an email of the logs. This will also make a callback
+ * to the activity/fragment that makes this dialog, so it can update itself as needed.
  */
-public class ShutdownServerDialog extends DialogFragment {
+public class EmailLogsDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.shutdown_pi_dialog);
+        builder.setTitle(R.string.email_logs);
+        builder.setMessage(R.string.log_disclaimer);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

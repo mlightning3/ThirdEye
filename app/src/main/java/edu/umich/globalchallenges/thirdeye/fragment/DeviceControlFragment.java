@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.fragment;
 
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +26,12 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import edu.umich.globalchallenges.thirdeye.MainActivity;
+import edu.umich.globalchallenges.thirdeye.R;
+import edu.umich.globalchallenges.thirdeye.dialog.Dialogs;
+import edu.umich.globalchallenges.thirdeye.dialog.RebootServerDialog;
+import edu.umich.globalchallenges.thirdeye.dialog.ShutdownServerDialog;
+
 /**
  * This fragment gives the user convenient buttons to control both their device as well as the server.
  * Buttons for connecting and disconnecting to the server's wifi network as well as buttons to power-off
@@ -35,8 +41,7 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
 
     private static String userkey;     // A preshared key that allows for elevated privileges on server
 
-    private FragmentCommManager commManager;
-    private FragmentWifiManager wifiManager;
+    private MainActivity mainActivity;
     private SharedPreferences sharedPreferences;
     private RequestQueue queue;
     private Button wifiConnect;
@@ -101,7 +106,7 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
     @Override
     public void onResume() {
         super.onResume();
-        if (getActivity() instanceof  MainActivity) {
+        if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).setActionBarTitle(R.string.device_title);
         }
     }
@@ -109,20 +114,18 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof FragmentWifiManager && context instanceof FragmentCommManager) {
-            wifiManager = (FragmentWifiManager) context;
-            commManager = (FragmentCommManager) context;
+        if (context instanceof MainActivity) {
+            mainActivity = (MainActivity) context;
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement FragmentCommManager & FragmentWifiManager");
+                    + " context is wrong (should be attached to MainActivity)");
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        wifiManager = null;
-        commManager = null;
+        mainActivity = null;
     }
 
     /**
@@ -133,9 +136,9 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.wifi_connect : wifiManager.wifi_connect();
+            case R.id.wifi_connect : mainActivity.wifi_connect();
                                     break;
-            case R.id.wifi_disconnect : wifiManager.wifi_disconnect();
+            case R.id.wifi_disconnect : mainActivity.wifi_disconnect();
                                     break;
             case R.id.poweroff :
                 DialogFragment shutdownServerDialog = new ShutdownServerDialog();
@@ -188,7 +191,7 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
 
         @Override
         public void onClick(View view) {
-            wifiManager.wifi_connect();
+            mainActivity.wifi_connect();
         }
     }
 
@@ -197,15 +200,15 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
      * of the request (everything ok, or error)
      * @param view
      */
-    public void device_reboot(final View view) {
-        if (wifiManager != null && wifiManager.connected_to_network()) {
+    private void device_reboot(final View view) {
+        if (mainActivity != null && mainActivity.connected_to_network()) {
             String url = "http://stream.pi:5000/reboot?key=" + userkey;
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            if(commManager != null)
-                                commManager.snack_message(R.string.pi_rebooting);
+                            if(mainActivity != null)
+                                mainActivity.snack_message(R.string.pi_rebooting);
                         }
                     },
                     new Response.ErrorListener() {
@@ -215,21 +218,21 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
                             if(response != null && response.data != null) {
                                 switch(response.statusCode) {
                                     case 401:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.invalid_user_key);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.invalid_user_key);
                                         break;
                                     case 500:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.pi_unable_reboot);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.pi_unable_reboot);
                                         break;
                                     default:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.pi_error_reboot);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.pi_error_reboot);
                                         break;
                                 }
                             } else {
-                                if(commManager != null)
-                                    commManager.snack_message(R.string.pi_error_reboot);
+                                if(mainActivity != null)
+                                    mainActivity.snack_message(R.string.pi_error_reboot);
                             }
                         }
                     }
@@ -246,15 +249,15 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
      * of the request (everything ok, or error)
      * @param view
      */
-    public void device_shutdown(final View view) {
-        if (wifiManager != null && wifiManager.connected_to_network()) {
+    private void device_shutdown(final View view) {
+        if (mainActivity != null && mainActivity.connected_to_network()) {
             String url = "http://stream.pi:5000/shutdown?key=" + userkey;
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
-                            if(commManager != null)
-                                commManager.snack_message(R.string.pi_shutdown);
+                            if(mainActivity != null)
+                                mainActivity.snack_message(R.string.pi_shutdown);
                         }
                     },
                     new Response.ErrorListener() {
@@ -264,21 +267,21 @@ public class DeviceControlFragment extends Fragment implements View.OnClickListe
                             if(response != null && response.data != null) {
                                 switch(response.statusCode) {
                                     case 401:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.invalid_user_key);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.invalid_user_key);
                                         break;
                                     case 500:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.pi_unable_shutdown);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.pi_unable_shutdown);
                                         break;
                                     default:
-                                        if(commManager != null)
-                                            commManager.snack_message(R.string.pi_error_shutdown);
+                                        if(mainActivity != null)
+                                            mainActivity.snack_message(R.string.pi_error_shutdown);
                                         break;
                                 }
                             } else {
-                                if(commManager != null)
-                                    commManager.snack_message(R.string.pi_error_shutdown);
+                                if(mainActivity != null)
+                                    mainActivity.snack_message(R.string.pi_error_shutdown);
                             }
                         }
                     }

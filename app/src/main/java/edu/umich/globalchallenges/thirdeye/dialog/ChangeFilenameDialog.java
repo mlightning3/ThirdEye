@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.dialog;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -9,6 +9,8 @@ import android.widget.EditText;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.preference.PreferenceManager;
+
+import edu.umich.globalchallenges.thirdeye.R;
 
 /**
  * A dialog that allows the user to change the filename used for saving pictures and video on the server.

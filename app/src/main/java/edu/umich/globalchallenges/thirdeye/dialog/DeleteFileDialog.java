@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.dialog;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -7,6 +7,8 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
+
+import edu.umich.globalchallenges.thirdeye.R;
 
 /**
  * A dialog that asks if the user wishes to delete a file. This will also make a callback to the

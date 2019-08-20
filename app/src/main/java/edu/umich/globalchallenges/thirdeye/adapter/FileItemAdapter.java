@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.adapter;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -15,6 +15,8 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.umich.globalchallenges.thirdeye.R;
+
 /**
  * This holds all the information of one file that lives on the server so that it can be used in a
  * RecycleView.
@@ -25,7 +27,7 @@ public class FileItemAdapter extends RecyclerView.Adapter<FileItemAdapter.FileIt
     private final OnRecycleItemInteractionListener listener;
     private final Fragment parentFragment;
 
-    FileItemAdapter(Fragment parentFragment, @NonNull OnRecycleItemInteractionListener listener) {
+    public FileItemAdapter(Fragment parentFragment, @NonNull OnRecycleItemInteractionListener listener) {
         fileItemList = new ArrayList<>();
         this.listener = listener;
         this.parentFragment = parentFragment;

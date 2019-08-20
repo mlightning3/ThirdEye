@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.gui;
 
 import android.content.Context;
 import android.graphics.Canvas;

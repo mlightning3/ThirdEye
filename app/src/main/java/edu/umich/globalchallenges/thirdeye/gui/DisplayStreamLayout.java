@@ -1,10 +1,12 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.gui;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
+
+import edu.umich.globalchallenges.thirdeye.fragment.DisplayStreamFragment;
 
 public class DisplayStreamLayout extends ConstraintLayout {
 

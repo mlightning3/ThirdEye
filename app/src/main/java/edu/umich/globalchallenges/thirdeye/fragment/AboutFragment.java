@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.fragment;
 
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -9,6 +9,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.Date;
+
+import edu.umich.globalchallenges.thirdeye.BuildConfig;
+import edu.umich.globalchallenges.thirdeye.MainActivity;
+import edu.umich.globalchallenges.thirdeye.R;
 
 public class AboutFragment extends Fragment {
 
@@ -29,7 +33,7 @@ public class AboutFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (getActivity() instanceof  MainActivity) {
+        if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).setActionBarTitle(R.string.about_title);
         }
     }

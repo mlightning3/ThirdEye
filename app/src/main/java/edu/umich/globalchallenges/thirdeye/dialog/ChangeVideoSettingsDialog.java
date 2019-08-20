@@ -1,4 +1,4 @@
-package edu.umich.globalchallenges.thirdeye;
+package edu.umich.globalchallenges.thirdeye.dialog;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -11,6 +11,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import java.util.ArrayList;
+
+import edu.umich.globalchallenges.thirdeye.R;
 
 /**
  * A dialog that allows the user to change the controls that are visible when viewing the stream.
