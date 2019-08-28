@@ -1,7 +1,9 @@
 package edu.umich.globalchallenges.thirdeye;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -12,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -24,6 +28,8 @@ import androidx.preference.PreferenceManager;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.util.List;
 
 import edu.umich.globalchallenges.thirdeye.fragment.DeviceControlFragment;
 import edu.umich.globalchallenges.thirdeye.fragment.DisplayStreamFragment;
@@ -38,6 +44,9 @@ import edu.umich.globalchallenges.thirdeye.fragment.SettingsFragment;
  */
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
                                                         SharedPreferences.OnSharedPreferenceChangeListener {
+
+    private static final int FINE_LOCATION_PERMISSION = 338;
+
     // Important Globals
     private static String ssid;
     private static String sharedkey;
@@ -194,6 +203,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case FINE_LOCATION_PERMISSION :
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // TODO : Decide what I want to do with this
+                }
+                break;
+            default: break;
+        }
+    }
+
     /*
      * Anything that isn't an overload lives below here
      *
@@ -205,9 +226,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * so that we can try to reconnect to it when we are done.
      */
     public boolean connected_to_network() {
-        String temp = wifiManager.getConnectionInfo().getSSID();
-        return temp.contentEquals(ssid);
-        //return wifiManager.getConnectionInfo().getSSID().contentEquals(ssid);
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_PERMISSION);
+        }
+        return wifiManager.getConnectionInfo().getSSID().contentEquals(ssid);
     }
 
     /**
@@ -221,17 +243,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             wc.SSID = ssid;
             wc.preSharedKey = sharedkey;
             wc.status = WifiConfiguration.Status.ENABLED;
-            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-            wc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
             wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-            wc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-            wc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
             wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
             // connect to and enable the connection
             int netId = wifiManager.addNetwork(wc);
-            wifiManager.enableNetwork(netId, true);
+            if(netId == -1) { // Find the network id if it already exists
+                List<WifiConfiguration> networks = wifiManager.getConfiguredNetworks();
+                if(networks != null) {
+                    for(WifiConfiguration existing : networks) {
+                        if(existing.SSID.contentEquals(ssid)) {
+                            netId = existing.networkId;
+                        }
+                    }
+                }
+            }
             wifiManager.setWifiEnabled(true);
+            wifiManager.disconnect();
+            wifiManager.enableNetwork(netId, true);
+            wifiManager.reconnect();
         }
     }
 
