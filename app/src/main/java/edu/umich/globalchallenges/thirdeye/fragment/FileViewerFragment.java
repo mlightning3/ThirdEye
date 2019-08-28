@@ -1,5 +1,6 @@
 package edu.umich.globalchallenges.thirdeye.fragment;
 
+import android.Manifest;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -7,6 +8,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,6 +24,8 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -60,6 +64,8 @@ import edu.umich.globalchallenges.thirdeye.dialog.Dialogs;
 public class FileViewerFragment extends Fragment implements OnRecycleItemInteractionListener,
                                                             SwipeRefreshLayout.OnRefreshListener {
 
+    private static final int EXTERNAL_WRITE_PERMISSION = 509;
+
     private MainActivity mainActivity;
     private RecyclerView recyclerView;
     private LinearLayout loadingHeader;
@@ -67,10 +73,10 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
     private FileItemAdapter adapter;
     private RequestQueue queue;
     private String jsonMessage;
-    private List<List<String>> databaseMessage;
     private List<FileItem> database;
     private String toDelete;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private String tempFilename;
 
     /**
      * This is called when the fragment is created, but before its view is
@@ -82,6 +88,7 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
         super.onCreate(savedInstanceState);
         toDelete = "";
         database = new ArrayList<>();
+        tempFilename = "";
         setHasOptionsMenu(true);
     }
 
@@ -175,21 +182,12 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
                 mainActivity.snack_message(R.string.error_opening_file);
             }
         } else { // Otherwise download the file and open it
-            String url = "http://stream.pi:5000/media/" + filename;
-            // Set up download and queue it up
-            try {
-                getContext().registerReceiver(downloadCompleteReceive, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-                request.setTitle("Downloading " + filename);
-                request.allowScanningByMediaScanner();
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
-                DownloadManager manager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
-                manager.enqueue(request);
-                // Notify user
-                mainActivity.snack_message("Downloading " + filename);
-            } catch (IllegalStateException e) {
-                mainActivity.snack_message("Error downloading " + filename + " from server");
+            // Check for ability to save files before download
+            if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                tempFilename = filename;
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, EXTERNAL_WRITE_PERMISSION);
+            } else {
+                startDownload(filename);
             }
         }
     }
@@ -201,7 +199,7 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
      */
     @Override
     public void onRecycleItemLongClick(int position) {
-        toDelete = databaseMessage.get(position).get(1); // Grab filename of thing we want deleted
+        toDelete = database.get(position).getFilename(); // Grab filename of thing we want deleted
         if(!toDelete.contentEquals("Try refreshing")) { // Don't try to remove the empty list message
             DialogFragment deleteFileDialog = new DeleteFileDialog();
             deleteFileDialog.setTargetFragment(this, Dialogs.DELETEFILEDIALOG);
@@ -268,6 +266,19 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
         mainActivity = null;
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case EXTERNAL_WRITE_PERMISSION :
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startDownload(tempFilename);
+                    tempFilename = "";
+                }
+                break;
+            default: break;
+        }
+    }
+
     /**
      * This gets called when a download is completed and opens the file
      */
@@ -282,6 +293,29 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
             }
         }
     };
+
+    /**
+     * Start the download of a file from the server
+     * @param filename Name of file to get
+     */
+    private void startDownload(String filename) {
+        String url = "http://stream.pi:5000/media/" + filename;
+        // Set up download and queue it up
+        try {
+            getContext().registerReceiver(downloadCompleteReceive, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+            request.setTitle("Downloading " + filename);
+            request.allowScanningByMediaScanner();
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, filename);
+            DownloadManager manager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
+            manager.enqueue(request);
+            // Notify user
+            mainActivity.snack_message("Downloading " + filename);
+        } catch (IllegalStateException e) {
+            mainActivity.snack_message("Error downloading " + filename + " from server");
+        }
+    }
 
     /**
      * Opens file after downloading it from the server
@@ -371,11 +405,9 @@ public class FileViewerFragment extends Fragment implements OnRecycleItemInterac
         if(!jsonMessage.contentEquals("null")) { // Only try to parse the message if we actually got something
             JsonDatabaseParser databaseParser = new JsonDatabaseParser();
             try {
-                databaseMessage = databaseParser.genDatabaseArray(jsonMessage);
+                List<FileItem> serverDatabase = databaseParser.genDatabaseArray(jsonMessage);
                 database = new ArrayList<>();
-                for(int i = 0; i < databaseMessage.size(); i++) {
-                    database.add(new FileItem(databaseMessage.get(i).get(0), databaseMessage.get(i).get(1), true));
-                }
+                database.addAll(serverDatabase);
             } catch (IOException e) { // Here we swallow the exception without doing anything about it
                 mainActivity.snack_message(R.string.error_parsing_json);
             }

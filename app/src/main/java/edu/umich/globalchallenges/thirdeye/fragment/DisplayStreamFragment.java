@@ -146,9 +146,6 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         webView.getSettings().setBuiltInZoomControls(true);
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.getSettings().setUseWideViewPort(true);
-        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT_WATCH) {
-            webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null); // Disable hardware rendering on KitKat
-        }
         mainActivity.wifi_connect(); // Try to connect to the network with the server automatically
         webView.loadUrl("http://stream.pi:5000/video_feed");
         return view;

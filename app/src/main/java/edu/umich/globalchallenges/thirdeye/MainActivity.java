@@ -205,7 +205,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * so that we can try to reconnect to it when we are done.
      */
     public boolean connected_to_network() {
-        return wifiManager.getConnectionInfo().getSSID().equals(ssid);
+        String temp = wifiManager.getConnectionInfo().getSSID();
+        return temp.contentEquals(ssid);
+        //return wifiManager.getConnectionInfo().getSSID().contentEquals(ssid);
     }
 
     /**
