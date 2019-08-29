@@ -45,7 +45,9 @@ import edu.umich.globalchallenges.thirdeye.fragment.SettingsFragment;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
                                                         SharedPreferences.OnSharedPreferenceChangeListener {
 
+    // Permission values (they are just any number, as long as we know what we are looking for later)
     private static final int FINE_LOCATION_PERMISSION = 338;
+    private static final int EXTERNAL_WRITE_PERMISSION = 509;
 
     // Important Globals
     private static String ssid;
@@ -90,6 +92,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // Load initial fragment
             activeFragment = new DeviceControlFragment();
             fragmentManager.beginTransaction().add(R.id.fragment_container, activeFragment).commit();
+        }
+
+        // Request permissions the app will need
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_PERMISSION);
+        }
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, EXTERNAL_WRITE_PERMISSION);
         }
     }
 
@@ -203,10 +213,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    /**
+     * When we ask for a permission, the result comes back here
+     * @param requestCode The code we gave when asking for permission
+     * @param permissions Names of all permissions
+     * @param grantResults Results of each permission
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case FINE_LOCATION_PERMISSION :
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // TODO : Decide what I want to do with this
+                }
+                break;
+            case EXTERNAL_WRITE_PERMISSION :
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // TODO : Decide what I want to do with this
                 }
