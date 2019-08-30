@@ -118,6 +118,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 }
             }.start();
+        } else {
+            enableScreenOffTimer = null;
         }
     }
 
@@ -849,7 +851,9 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 updateButtons(false);
             }
         }.start();
-        enableScreenOffTimer.cancel();
+        if(enableScreenOffTimer != null) {
+            enableScreenOffTimer.cancel();
+        }
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if(forceScreenOnDuration > 0) {
             enableScreenOffTimer = new CountDownTimer(forceScreenOnDuration, 1000) {
@@ -863,6 +867,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 }
             }.start();
+        } else {
+            enableScreenOffTimer = null;
         }
     }
 }
