@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Shared Preference Keys -->
+    <string name="key_ssid">ssid</string>
+    <string name="key_passphrase">passphrase</string>
+    <string name="key_filename">filename</string>
+    <string name="key_media_saving">media_saving</string>
+    <string name="key_image_manip">image_manip</string>
+    <string name="key_focus_control">focus_control</string>
+    <string name="key_light_control">light_control</string>
+    <string name="key_screen_timeout">screen_timeout</string>
+    <string name="key_screen_timeout_value">screen_timeout_value</string>
+    <string name="key_userkey">userkey</string>
+    <string name="key_about">about</string>
+    <string name="key_debug_logs">debug_logs</string>
+
+    <!-- Preference Category Keys-->
+    <string name="key_perf_general">perf_general</string>
+    <string name="key_perf_video">perf_video</string>
+    <string name="key_perf_user">perf_user</string>
+    <string name="key_perf_network">perf_network</string>
+    <string name="key_extra_bits">extra_bits</string>
+</resources>

@@ -4,11 +4,11 @@
 
     <PreferenceCategory
         android:title="@string/file_settings_title"
-        android:key="perf_general">
+        android:key="@string/key_perf_general">
         <EditTextPreference
-            android:defaultValue="Default"
+            android:defaultValue="@string/default_save_as_string"
             android:inputType="textCapWords"
-            android:key="filename"
+            android:key="@string/key_filename"
             android:maxLines="1"
             android:selectAllOnFocus="true"
             android:singleLine="true"
@@ -17,40 +17,40 @@
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/video_settings_title"
-        android:key="perf_video" >
+        android:key="@string/key_perf_video" >
         <CheckBoxPreference
-            android:key="media_saving"
+            android:key="@string/key_media_saving"
             android:title="@string/media_saving"
             android:summary="@string/media_saving_summary"
             android:defaultValue="true" />
         <CheckBoxPreference
-            android:key="image_manip"
+            android:key="@string/key_image_manip"
             android:title="@string/image_manip"
             android:summary="@string/image_manip_summary"
             android:defaultValue="true" />
         <CheckBoxPreference
-            android:key="focus_control"
-            android:title="@string/focus_controls"
+            android:key="@string/key_focus_control"
+            android:title="@string/focus_control"
             android:summary="@string/focus_controls_summary"
             android:defaultValue="false" />
         <CheckBoxPreference
-            android:key="light_control"
+            android:key="@string/key_light_control"
             android:title="@string/light_control"
             android:summary="@string/light_control_summary"
             android:defaultValue="true" />
 
         <!-- This will open a dialog asking to set the screen_timeout_value -->
         <Preference
-            android:key="screen_timeout"
+            android:key="@string/key_screen_timeout"
             android:title="@string/screen_timeout_title"
             android:summary="@string/screen_timeout_summary" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/user_settings_title"
-        android:key="perf_user">
+        android:key="@string/key_perf_user">
         <EditTextPreference
-            android:defaultValue="developmentkey"
-            android:key="userkey"
+            android:defaultValue="@string/default_user_key"
+            android:key="@string/key_userkey"
             android:maxLines="1"
             android:selectAllOnFocus="true"
             android:singleLine="true"
@@ -59,18 +59,18 @@
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/network_settings_title"
-        android:key="perf_network">
+        android:key="@string/key_perf_network">
         <EditTextPreference
-            android:defaultValue="Pi_AP"
-            android:key="ssid"
+            android:defaultValue="@string/default_ssid"
+            android:key="@string/key_ssid"
             android:maxLines="1"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:title="@string/network_ssid"
             android:summary="@string/network_ssid_summary"/>
         <EditTextPreference
-            android:defaultValue="raspberry"
-            android:key="passphrase"
+            android:defaultValue="@string/default_passphrase"
+            android:key="@string/key_passphrase"
             android:maxLines="1"
             android:selectAllOnFocus="true"
             android:singleLine="true"
@@ -79,13 +79,13 @@
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/extra_bits_title"
-        android:key="extra_bits" >
+        android:key="@string/key_extra_bits" >
         <Preference
-            android:key="about"
+            android:key="@string/key_about"
             android:title="@string/about_title"
             android:summary="@string/about_summary" />
         <Preference
-            android:key="debug_logs"
+            android:key="@string/key_debug_logs"
             android:title="@string/log_title"
             android:summary="@string/debug_logs_summary" />
     </PreferenceCategory>

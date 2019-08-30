@@ -70,8 +70,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 
         // Load settings
-        ssid = "\"" + sharedPreferences.getString("ssid", "Pi_AP") + "\"";
-        sharedkey = "\"" + sharedPreferences.getString("passphrase", "raspberry") + "\"";
+        ssid = "\"" + sharedPreferences.getString(getString(R.string.key_ssid), getString(R.string.default_ssid)) + "\"";
+        sharedkey = "\"" + sharedPreferences.getString(getString(R.string.key_passphrase), getString(R.string.default_passphrase)) + "\"";
 
 
         // Set up layout
@@ -387,12 +387,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      * Currently only needs to strip out whitespace
      */
     private void cleanFilename() {
-        String filename = sharedPreferences.getString("filename", "");
+        String filename = sharedPreferences.getString(getString(R.string.key_filename), "");
         if(filename != null) {
             filename = filename.replaceAll(" ", "_");
         }
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("filename", filename);
+        editor.putString(getString(R.string.key_filename), filename);
         editor.apply();
     }
 }

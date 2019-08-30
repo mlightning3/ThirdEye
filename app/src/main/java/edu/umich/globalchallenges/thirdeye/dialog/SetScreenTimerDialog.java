@@ -2,6 +2,7 @@ package edu.umich.globalchallenges.thirdeye.dialog;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -22,6 +23,12 @@ import edu.umich.globalchallenges.thirdeye.R;
  */
 public class SetScreenTimerDialog extends DialogFragment {
 
+    private String screen_timeout_value;
+
+    public SetScreenTimerDialog(Context context) {
+        screen_timeout_value = context.getString(R.string.key_screen_timeout_value);
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -34,7 +41,7 @@ public class SetScreenTimerDialog extends DialogFragment {
         final EditText timeoutText = (EditText) view.findViewById(R.id.screen_timeout);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        final int timeout = sharedPreferences.getInt("screen_timeout_value", 2);
+        final int timeout = sharedPreferences.getInt(screen_timeout_value, 2);
 
         if(timeout > 0) {
             timeoutText.setText(Integer.toString(timeout));
@@ -52,10 +59,10 @@ public class SetScreenTimerDialog extends DialogFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getContext()).edit();
                         if(neverTimeout.isChecked()) {
-                            editor.putInt("screen_timeout_value", 0);
+                            editor.putInt(screen_timeout_value, 0);
                         } else {
                             int timeout = Integer.valueOf(timeoutText.getText().toString());
-                            editor.putInt("screen_timeout_value", timeout);
+                            editor.putInt(screen_timeout_value, timeout);
                         }
                         editor.apply();
                         if(getTargetFragment() != null) {

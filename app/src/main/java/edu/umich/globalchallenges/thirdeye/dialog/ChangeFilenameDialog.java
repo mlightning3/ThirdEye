@@ -22,13 +22,13 @@ public class ChangeFilenameDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.edit_filename);
         final EditText textField = new EditText(getContext());
-        textField.setText(PreferenceManager.getDefaultSharedPreferences(getContext()).getString("filename", ""));
+        textField.setText(PreferenceManager.getDefaultSharedPreferences(getContext()).getString(getString(R.string.key_filename), ""));
         builder.setView(textField);
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getContext()).edit();
-                editor.putString("filename", textField.getText().toString());
+                editor.putString(getString(R.string.key_filename), textField.getText().toString());
                 editor.apply();
             }
         });

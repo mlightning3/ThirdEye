@@ -27,14 +27,14 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.perf_general, rootKey);
 
-        Preference setScreenTimeout = findPreference("screen_timeout");
+        Preference setScreenTimeout = findPreference(getString(R.string.key_screen_timeout));
         if (setScreenTimeout != null) {
             setScreenTimeout.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     FragmentManager fragmentManager = getFragmentManager();
                     if(fragmentManager != null) {
-                        DialogFragment fragment = new SetScreenTimerDialog();
+                        DialogFragment fragment = new SetScreenTimerDialog(getContext());
                         fragment.setTargetFragment(null, Dialogs.SCREENTIMERDIALOG);
                         fragment.show(fragmentManager, "setscreentimeout");
                     }
@@ -42,7 +42,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 }
             });
         }
-        Preference sendFeedback = findPreference("about");
+        Preference sendFeedback = findPreference(getString(R.string.key_about));
         if (sendFeedback != null) {
             sendFeedback.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -54,7 +54,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
                 }
             });
         }
-        Preference debugLogs = findPreference("debug_logs");
+        Preference debugLogs = findPreference(getString(R.string.key_debug_logs));
         if (debugLogs != null) {
             debugLogs.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override

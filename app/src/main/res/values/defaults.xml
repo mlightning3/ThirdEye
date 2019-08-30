@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Defaults used throughout app -->
+    <string name="default_ssid">Pi_AP</string>
+    <string name="default_passphrase">raspberry</string>
+    <string name="default_user_key">developmentkey</string>
+    <string name="default_save_as_string">Default</string>
+</resources>

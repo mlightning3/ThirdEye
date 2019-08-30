@@ -142,7 +142,7 @@
     <string name="media_saving_summary">Take snapshots and record video</string>
     <string name="image_manip">Image Manipulation</string>
     <string name="image_manip_summary">Change resolution and enable filters</string>
-    <string name="focus_controls">Focus Controls</string>
+    <string name="focus_control">Focus Control</string>
     <string name="focus_controls_summary">Change focal length of camera</string>
     <string name="light_control">Light Control</string>
     <string name="light_control_summary">Adjust lights on camera</string>

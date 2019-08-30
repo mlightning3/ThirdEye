@@ -2,6 +2,7 @@ package edu.umich.globalchallenges.thirdeye.dialog;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -23,6 +24,18 @@ public class ChangeVideoSettingsDialog extends DialogFragment {
 
     private SharedPreferences sharedPreferences;
     private int NUMBEROFSETTINGS = 4;
+
+    private String media_saving;
+    private String image_manip;
+    private String focus_control;
+    private String light_control;
+
+    public ChangeVideoSettingsDialog(Context context) {
+        media_saving = context.getString(R.string.key_media_saving);
+        image_manip = context.getString(R.string.key_image_manip);
+        focus_control = context.getString(R.string.key_focus_control);
+        light_control = context.getString(R.string.key_light_control);
+    }
 
     /**
      * Anything we need to do on the creation of the dialog
@@ -62,16 +75,16 @@ public class ChangeVideoSettingsDialog extends DialogFragment {
                 for(int i = 0; i < selectedItems.size(); i++) {
                     switch ((int) selectedItems.get(i)) { // Populate settings with all things checked
                         case 0:
-                            editor.putBoolean("media_saving", true);
+                            editor.putBoolean(media_saving, true);
                             break;
                         case 1:
-                            editor.putBoolean("image_manip", true);
+                            editor.putBoolean(image_manip, true);
                             break;
                         case 2:
-                            editor.putBoolean("focus_control", true);
+                            editor.putBoolean(focus_control, true);
                             break;
                         case 3:
-                            editor.putBoolean("light_control", true);
+                            editor.putBoolean(light_control, true);
                             break;
                         default:
                             break;
@@ -80,16 +93,16 @@ public class ChangeVideoSettingsDialog extends DialogFragment {
                 for(int i = 0; i < unselectedItems.size(); i++) {
                     switch ((int) unselectedItems.get(i)) { // Populate settings with all things unchecked
                         case 0:
-                            editor.putBoolean("media_saving", false);
+                            editor.putBoolean(media_saving, false);
                             break;
                         case 1:
-                            editor.putBoolean("image_manip", false);
+                            editor.putBoolean(image_manip, false);
                             break;
                         case 2:
-                            editor.putBoolean("focus_control", false);
+                            editor.putBoolean(focus_control, false);
                             break;
                         case 3:
-                            editor.putBoolean("light_control", false);
+                            editor.putBoolean(light_control, false);
                         default:
                             break;
                     }
@@ -115,10 +128,10 @@ public class ChangeVideoSettingsDialog extends DialogFragment {
      */
     private String[] buildArray() {
         ArrayList<String> settings = new ArrayList<>();
-        settings.add("Media Saving");
-        settings.add("Image Manipulation");
-        settings.add("Focus Control");
-        settings.add("Light Control");
+        settings.add(getString(R.string.media_saving));
+        settings.add(getString(R.string.image_manip));
+        settings.add(getString(R.string.focus_control));
+        settings.add(getString(R.string.light_control));
         String[] strings = new String[settings.size()];
         for(int i = 0; i < settings.size(); i++) {
             strings[i] = settings.get(i);
@@ -133,10 +146,10 @@ public class ChangeVideoSettingsDialog extends DialogFragment {
      */
     private boolean[] getChecked() {
         boolean[] bools = new boolean[NUMBEROFSETTINGS];
-        bools[0] = sharedPreferences.getBoolean("media_saving", true);
-        bools[1] = sharedPreferences.getBoolean("image_manip", true);
-        bools[2] = sharedPreferences.getBoolean("focus_control", false);
-        bools[3] = sharedPreferences.getBoolean("light_control", true);
+        bools[0] = sharedPreferences.getBoolean(media_saving, true);
+        bools[1] = sharedPreferences.getBoolean(image_manip, true);
+        bools[2] = sharedPreferences.getBoolean(focus_control, false);
+        bools[3] = sharedPreferences.getBoolean(light_control, true);
         return bools;
     }
 }

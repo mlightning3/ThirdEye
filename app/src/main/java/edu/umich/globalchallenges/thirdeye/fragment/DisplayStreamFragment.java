@@ -194,28 +194,28 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      * @param visible Should the controls be visible or not
      */
     private void updateButtons(boolean visible) {
-        if(sharedPreferences.getBoolean("media_saving", true) && visible) {
+        if(sharedPreferences.getBoolean(getString(R.string.key_media_saving), true) && visible) {
             snapshotButton.setVisibility(View.VISIBLE);
             recordButton.setVisibility(View.VISIBLE);
         } else {
             snapshotButton.setVisibility(View.GONE);
             recordButton.setVisibility(View.GONE);
         }
-        if(sharedPreferences.getBoolean("image_manip", true) && visible) {
+        if(sharedPreferences.getBoolean(getString(R.string.key_image_manip), true) && visible) {
             grayscaleButton.setVisibility(View.VISIBLE);
             resolutionButton.setVisibility(View.VISIBLE);
         } else {
             grayscaleButton.setVisibility(View.GONE);
             resolutionButton.setVisibility(View.GONE);
         }
-        if(sharedPreferences.getBoolean("focus_control", false) && visible) {
+        if(sharedPreferences.getBoolean(getString(R.string.key_focus_control), false) && visible) {
             autofocusButton.setVisibility(View.VISIBLE);
             focusBar.setVisibility(View.VISIBLE);
         } else {
             autofocusButton.setVisibility(View.GONE);
             focusBar.setVisibility(View.GONE);
         }
-        if(sharedPreferences.getBoolean("light_control", true) && visible) {
+        if(sharedPreferences.getBoolean(getString(R.string.key_light_control), true) && visible) {
             lightButton.setVisibility(View.VISIBLE);
             lightBar.setVisibility(View.VISIBLE);
         } else {
@@ -332,8 +332,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 webView.reload();
                 break;
             case R.id.extra_settings:
-                DialogFragment videoSettingsDialog = new ChangeVideoSettingsDialog();
-                videoSettingsDialog.setTargetFragment(this, Dialogs.CHANGEVIDEOSETTINGS_DIALOG);
+                fragment = new ChangeVideoSettingsDialog(getContext());
+                fragment.setTargetFragment(this, Dialogs.CHANGEVIDEOSETTINGS_DIALOG);
                 tag = "editvideosettings";
                 break;
             case R.id.zoomOut:
@@ -352,7 +352,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 });
                 break;
             case R.id.screenTimeout:
-                fragment = new SetScreenTimerDialog();
+                fragment = new SetScreenTimerDialog(getContext());
                 fragment.setTargetFragment(this, Dialogs.SCREENTIMERDIALOG);
                 tag = "setscreentimeout";
                 break;
@@ -509,7 +509,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      * Sends a message to the server to take a picture. Sends filename to save picture as.
      */
     private void take_snapshot() {
-        final String pictureName = sharedPreferences.getString("filename", "default") + "_picture_" + imgCount;
+        final String pictureName = sharedPreferences.getString(getString(R.string.key_filename), "default") + "_picture_" + imgCount;
         String url = "http://stream.pi:5000/snapshot?filename=" + pictureName + "&date=" + getDate();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -556,7 +556,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      */
     private void video_capture(final View view) {
         videostatus = !videostatus; // Flip video capture status
-        final String videoName = sharedPreferences.getString("filename", "default") + "_video_" + vidCount;
+        final String videoName = sharedPreferences.getString(getString(R.string.key_filename), "default") + "_video_" + vidCount;
         String url = "http://stream.pi:5000/video_capture?filename=" + videoName + "&status=" + videostatus + "&date=" + getDate();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -828,7 +828,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      * Otherwise it sets to the value stored in sharedPreferences (making any negative 0)
      */
     private void updateScreenTimeout() {
-        int temp = sharedPreferences.getInt("screen_timeout_value", 2);
+        int temp = sharedPreferences.getInt(getString(R.string.key_screen_timeout_value), 2);
         if(temp < 1) {
             temp = 0;
         }
