@@ -5,11 +5,7 @@
     <PreferenceCategory
         android:title="@string/file_settings_title"
         android:key="perf_general">
-
-        <!-- NOTE: EditTextPreference accepts EditText attributes. -->
-        <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
         <EditTextPreference
-            android:capitalize="words"
             android:defaultValue="Default"
             android:inputType="textCapWords"
             android:key="filename"
@@ -42,6 +38,12 @@
             android:title="@string/light_control"
             android:summary="@string/light_control_summary"
             android:defaultValue="true" />
+
+        <!-- This will open a dialog asking to set the screen_timeout_value -->
+        <Preference
+            android:key="screen_timeout"
+            android:title="@string/screen_timeout_title"
+            android:summary="@string/screen_timeout_summary" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/user_settings_title"

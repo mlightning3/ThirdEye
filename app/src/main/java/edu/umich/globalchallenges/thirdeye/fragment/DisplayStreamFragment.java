@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.LightingColorFilter;
-import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -23,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.widget.AppCompatSeekBar;
+import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 
 import com.android.volley.NetworkResponse;
@@ -44,6 +44,7 @@ import edu.umich.globalchallenges.thirdeye.R;
 import edu.umich.globalchallenges.thirdeye.dialog.ChangeFilenameDialog;
 import edu.umich.globalchallenges.thirdeye.dialog.ChangeVideoSettingsDialog;
 import edu.umich.globalchallenges.thirdeye.dialog.Dialogs;
+import edu.umich.globalchallenges.thirdeye.dialog.SetScreenTimerDialog;
 import edu.umich.globalchallenges.thirdeye.gui.DisplayStreamLayout;
 import edu.umich.globalchallenges.thirdeye.gui.VerticalSeekBar;
 
@@ -61,16 +62,17 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     private static boolean lightStatus = false;
     private static int imgCount = 1;
     private static int vidCount = 1;
-    private int timeoutDuration = 30000;
+    private int visibleButtonDuration = 30000;
+    private int forceScreenOnDuration;
 
     private MainActivity mainActivity;
-    private CountDownTimer countDownTimer;
+    private CountDownTimer hideButtonsTimer;
+    private CountDownTimer enableScreenOffTimer;
     private SharedPreferences sharedPreferences;
     private VerticalSeekBar focusBar;
     private VerticalSeekBar lightBar;
     private RequestQueue queue;
     private WebView webView;
-    private View view;
     private Button snapshotButton;
     private Button recordButton;
     private Button grayscaleButton;
@@ -91,8 +93,10 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
-        // Start countdown timer
-        countDownTimer = new CountDownTimer(timeoutDuration, 1000) {
+        updateScreenTimeout();
+
+        // Start countdown timers
+        hideButtonsTimer = new CountDownTimer(visibleButtonDuration, 1000) {
 
             public void onTick(long millisUntilFinished) {
                 // Nothing needed
@@ -102,6 +106,19 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 updateButtons(false);
             }
         }.start();
+        if(forceScreenOnDuration > 0) {
+            enableScreenOffTimer = new CountDownTimer(forceScreenOnDuration, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    // Nothing needed
+                }
+
+                @Override
+                public void onFinish() {
+                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
+            }.start();
+        }
     }
 
     /**
@@ -115,6 +132,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         inflater.inflate(R.menu.refresh_menu, menu);
         inflater.inflate(R.menu.zoom_out_menu, menu);
         inflater.inflate(R.menu.color_menu, menu);
+        inflater.inflate(R.menu.screen_timeout_menu, menu);
         inflater.inflate(R.menu.extra_settings_menu, menu);
     }
 
@@ -128,7 +146,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      */
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.display_stream_fragment, container, false);
+        View view = inflater.inflate(R.layout.display_stream_fragment, container, false);
         // Set up things user will interact with
         DisplayStreamLayout ds = (DisplayStreamLayout) view.findViewById(R.id.display_frame);
         ds.attachDisplayStream(this); // Used so the timer can be reset on touch
@@ -248,29 +266,29 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.snapshot:
-                take_snapshot(view);
+                take_snapshot();
                 break;
             case R.id.grayscale:
-                toggle_grayscale(view);
+                toggle_grayscale();
                 break;
             case R.id.resolution:
-                toggle_resolution(view);
+                toggle_resolution();
                 break;
             case R.id.record:
                 video_capture(view);
                 break;
             case R.id.autofocus:
-                toggle_autofocus(view);
+                toggle_autofocus();
                 break;
             case R.id.light:
-                toggle_light(view);
+                toggle_light();
                 break;
             default: break;
         }
     }
 
     /**
-     * Callback for after user uses the ChangeVideoSettingsDialog
+     * Callback for after user uses some dialogs
      */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -282,6 +300,11 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     // Nothing needed
                 }
                 break;
+            case Dialogs.SCREENTIMERDIALOG:
+                if(resultCode == Activity.RESULT_OK) {
+                    updateScreenTimeout();
+                    resetTimer();
+                }
             default: break;
         }
     }
@@ -294,10 +317,13 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        FragmentManager fragmentManager = getFragmentManager();
+        DialogFragment fragment = null;
+        String tag = null;
         switch (item.getItemId()) {
             case R.id.edit:
-                DialogFragment filenameDialog = new ChangeFilenameDialog();
-                filenameDialog.show(getFragmentManager(), "editfilename");
+                fragment = new ChangeFilenameDialog();
+                tag = "editfilename";
                 break;
             case R.id.refresh:
                 mainActivity.wifi_connect();
@@ -306,7 +332,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
             case R.id.extra_settings:
                 DialogFragment videoSettingsDialog = new ChangeVideoSettingsDialog();
                 videoSettingsDialog.setTargetFragment(this, Dialogs.CHANGEVIDEOSETTINGS_DIALOG);
-                videoSettingsDialog.show(getFragmentManager(), "editvideosettings");
+                tag = "editvideosettings";
                 break;
             case R.id.zoomOut:
                 fullZoomOut();
@@ -323,7 +349,15 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                     }
                 });
                 break;
+            case R.id.screenTimeout:
+                fragment = new SetScreenTimerDialog();
+                fragment.setTargetFragment(this, Dialogs.SCREENTIMERDIALOG);
+                tag = "setscreentimeout";
+                break;
             default: break;
+        }
+        if(fragmentManager != null && fragment != null) {
+            fragment.show(fragmentManager, tag);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -459,7 +493,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     }
 
     /**
-     * Builds a string out of the current date
+     * Builds a string out of the current date to send to server
      *
      * @return String formatted as YYYY-MM-DD
      */
@@ -471,10 +505,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
 
     /**
      * Sends a message to the server to take a picture. Sends filename to save picture as.
-     *
-     * @param view
      */
-    private void take_snapshot(final View view) {
+    private void take_snapshot() {
         final String pictureName = sharedPreferences.getString("filename", "default") + "_picture_" + imgCount;
         String url = "http://stream.pi:5000/snapshot?filename=" + pictureName + "&date=" + getDate();
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -576,10 +608,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
 
     /**
      * Sends message to server to toggle grayscale video.
-     *
-     * @param view
      */
-    private void toggle_grayscale(final View view) {
+    private void toggle_grayscale() {
         grayscale = !grayscale; // Flip grayscale status
         String url = "http://stream.pi:5000/grayscale?status=" + grayscale;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -602,10 +632,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
 
     /**
      * Sends message to server to toggle resolutionButton of stream.
-     *
-     * @param view
      */
-    private void toggle_resolution(final View view) {
+    private void toggle_resolution() {
         lowresolution = !lowresolution; // Flip resolutionButton status
         String url = "http://stream.pi:5000/resolution?status=" + lowresolution;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -676,10 +704,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     /**
      * Sends message to server to toggle autofocus
      * ONLY WORKS ON SUPPORTED CAMERAS
-     *
-     * @param view
      */
-    private void toggle_autofocus(View view) {
+    private void toggle_autofocus() {
         autofocusStatus = !autofocusStatus; // Flip autofocusButton status
         set_autofocus_status(autofocusStatus);
         if(autofocusStatus) {
@@ -739,10 +765,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
 
     /**
      * Sends message to server to toggle the light on and off
-     *
-     * @param view
      */
-    private void toggle_light(View view) {
+    private void toggle_light() {
         lightStatus = !lightStatus;
         set_light_status(lightStatus);
     }
@@ -796,11 +820,26 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     }
 
     /**
+     * Update the value for forceScreenOnDuration from the value stored in sharedPreferences
+     *
+     * If there isn't a value, this defaults to a 2 minute timeout.
+     * Otherwise it sets to the value stored in sharedPreferences (making any negative 0)
+     */
+    private void updateScreenTimeout() {
+        int temp = sharedPreferences.getInt("screen_timeout_value", 2);
+        if(temp < 1) {
+            temp = 0;
+        }
+        forceScreenOnDuration = temp * 60000;
+    }
+
+    /**
      * Resets the timer to make all the controls disappear
      */
     public void resetTimer() {
         updateButtons(true);
-        countDownTimer = new CountDownTimer(timeoutDuration, 1000) {
+        hideButtonsTimer.cancel();
+        hideButtonsTimer = new CountDownTimer(visibleButtonDuration, 1000) {
 
             public void onTick(long millisUntilFinished) {
                 // Nothing needed
@@ -810,5 +849,20 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 updateButtons(false);
             }
         }.start();
+        enableScreenOffTimer.cancel();
+        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        if(forceScreenOnDuration > 0) {
+            enableScreenOffTimer = new CountDownTimer(forceScreenOnDuration, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    // Nothing needed
+                }
+
+                @Override
+                public void onFinish() {
+                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
+            }.start();
+        }
     }
 }

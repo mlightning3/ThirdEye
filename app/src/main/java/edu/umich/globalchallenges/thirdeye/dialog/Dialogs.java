@@ -11,4 +11,5 @@ public class Dialogs{
     public final static int CHANGEVIDEOSETTINGS_DIALOG = 3;
     public final static int CHANGEFILENAMEDIALOG = 4;
     public final static int DELETEFILEDIALOG = 5;
+    public final static int SCREENTIMERDIALOG = 6;
 }

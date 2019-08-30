@@ -107,6 +107,10 @@
     <!-- Shutdown Server Dialog -->
     <string name="shutdown_pi_dialog">Shutdown Camera?</string>
 
+    <!-- Set Screen Timer Dialog -->
+    <string name="never_timeout">Never turn off screen</string>
+    <string name="allow_timeout">Allow screen to turn off after set minutes:</string>
+
     <!-- Menu Items -->
     <string name="color_picker">Color Picker</string>
     <string name="edit">Edit</string>
@@ -142,6 +146,8 @@
     <string name="focus_controls_summary">Change focal length of camera</string>
     <string name="light_control">Light Control</string>
     <string name="light_control_summary">Adjust lights on camera</string>
+    <string name="screen_timeout_title">Screen timeout</string>
+    <string name="screen_timeout_summary">Set screen timeout when viewing stream</string>
     <string name="user_settings_title">User Settings</string>
     <string name="user_key">User Key</string>
     <string name="user_key_summary">Identifier key used to preform admin functions on camera</string>

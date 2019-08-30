@@ -2,11 +2,15 @@ package edu.umich.globalchallenges.thirdeye.fragment;
 
 import android.os.Bundle;
 
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import edu.umich.globalchallenges.thirdeye.MainActivity;
 import edu.umich.globalchallenges.thirdeye.R;
+import edu.umich.globalchallenges.thirdeye.dialog.Dialogs;
+import edu.umich.globalchallenges.thirdeye.dialog.SetScreenTimerDialog;
 
 /**
  * This provides a way for the user to see and edit the settings of the app
@@ -23,6 +27,21 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.perf_general, rootKey);
 
+        Preference setScreenTimeout = findPreference("screen_timeout");
+        if (setScreenTimeout != null) {
+            setScreenTimeout.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    FragmentManager fragmentManager = getFragmentManager();
+                    if(fragmentManager != null) {
+                        DialogFragment fragment = new SetScreenTimerDialog();
+                        fragment.setTargetFragment(null, Dialogs.SCREENTIMERDIALOG);
+                        fragment.show(fragmentManager, "setscreentimeout");
+                    }
+                    return true;
+                }
+            });
+        }
         Preference sendFeedback = findPreference("about");
         if (sendFeedback != null) {
             sendFeedback.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
