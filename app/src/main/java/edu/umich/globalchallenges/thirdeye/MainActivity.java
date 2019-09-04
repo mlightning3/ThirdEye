@@ -29,6 +29,7 @@ import androidx.preference.PreferenceManager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import edu.umich.globalchallenges.thirdeye.fragment.DeviceControlFragment;
@@ -46,8 +47,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                         SharedPreferences.OnSharedPreferenceChangeListener {
 
     // Permission values (they are just any number, as long as we know what we are looking for later)
-    private static final int FINE_LOCATION_PERMISSION = 338;
-    private static final int EXTERNAL_WRITE_PERMISSION = 509;
+    private static final int FINE_LOCATION_PERMISSION = 1;
+    private static final int EXTERNAL_WRITE_PERMISSION = 2;
+    private static final int CHANGE_NETWORK_PERMISSION = 4;
+    private static final int ACCESS_NETWORK_PERMISSION = 8;
+    private static final int CHANGE_WIFI_PERMISSION = 16;
+    private static final int ACCESS_WIFI_PERMISSION = 32;
 
     // Important Globals
     private static String ssid;
@@ -95,11 +100,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         // Request permissions the app will need
+        List<String> permissions = new ArrayList<>();
+        int permissionCode = 0;
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_PERMISSION);
+            permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+            permissionCode += FINE_LOCATION_PERMISSION;
         }
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, EXTERNAL_WRITE_PERMISSION);
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            permissionCode += EXTERNAL_WRITE_PERMISSION;
+        }
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CHANGE_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.CHANGE_NETWORK_STATE);
+            permissionCode += CHANGE_NETWORK_PERMISSION;
+        }
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.ACCESS_NETWORK_STATE);
+            permissionCode += ACCESS_NETWORK_PERMISSION;
+        }
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.CHANGE_WIFI_STATE);
+            permissionCode += CHANGE_WIFI_PERMISSION;
+        }
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.ACCESS_WIFI_STATE);
+            permissionCode += ACCESS_WIFI_PERMISSION;
+        }
+
+        if(!permissions.isEmpty()) {
+            ActivityCompat.requestPermissions(this, permissions.toArray(new String[0]), permissionCode);
         }
     }
 
@@ -232,6 +261,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     // TODO : Decide what I want to do with this
                 }
                 break;
+            // TODO : Add rest of permissions and decide what I want to do with this
             default: break;
         }
     }
@@ -258,30 +288,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      */
     public void wifi_connect() {
         if(!connected_to_network()) { // Only connect if we aren't already
-            last_net_id = wifiManager.getConnectionInfo().getNetworkId();
-            // setup a wifi configuration
-            WifiConfiguration wc = new WifiConfiguration();
-            wc.SSID = ssid;
-            wc.preSharedKey = sharedkey;
-            wc.status = WifiConfiguration.Status.ENABLED;
-            wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-            wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-            // connect to and enable the connection
-            int netId = wifiManager.addNetwork(wc);
-            if(netId == -1) { // Find the network id if it already exists
-                List<WifiConfiguration> networks = wifiManager.getConfiguredNetworks();
-                if(networks != null) {
-                    for(WifiConfiguration existing : networks) {
-                        if(existing.SSID.contentEquals(ssid)) {
-                            netId = existing.networkId;
+            if(ContextCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.CHANGE_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
+                String[] permissions = {Manifest.permission.CHANGE_WIFI_STATE, Manifest.permission.CHANGE_NETWORK_STATE};
+                ActivityCompat.requestPermissions(this, permissions, CHANGE_NETWORK_PERMISSION + CHANGE_WIFI_PERMISSION);
+            } else {
+                last_net_id = wifiManager.getConnectionInfo().getNetworkId();
+                // setup a wifi configuration
+                WifiConfiguration wc = new WifiConfiguration();
+                wc.SSID = ssid;
+                wc.preSharedKey = sharedkey;
+                wc.status = WifiConfiguration.Status.ENABLED;
+                wc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+                wc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+                // connect to and enable the connection
+                int netId = wifiManager.addNetwork(wc);
+                if (netId == -1) { // Find the network id if it already exists
+                    List<WifiConfiguration> networks = wifiManager.getConfiguredNetworks();
+                    if (networks != null) {
+                        for (WifiConfiguration existing : networks) {
+                            if (existing.SSID.contentEquals(ssid)) {
+                                netId = existing.networkId;
+                            }
                         }
                     }
                 }
+                wifiManager.setWifiEnabled(true);
+                wifiManager.disconnect();
+                wifiManager.enableNetwork(netId, true);
+                wifiManager.reconnect();
             }
-            wifiManager.setWifiEnabled(true);
-            wifiManager.disconnect();
-            wifiManager.enableNetwork(netId, true);
-            wifiManager.reconnect();
         }
     }
 
@@ -292,10 +328,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
      */
     public void wifi_disconnect() {
         if(connected_to_network()) { // We only want to disconnect if we were connected to the server's network
-            wifiManager.disconnect();
-            if (last_net_id != 0) { // Try to reconnect to the network previously attached to
-                wifiManager.enableNetwork(last_net_id, true);
-                wifiManager.setWifiEnabled(true);
+            if(ContextCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED ||
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.CHANGE_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
+                String[] permissions = {Manifest.permission.CHANGE_WIFI_STATE, Manifest.permission.CHANGE_NETWORK_STATE};
+                ActivityCompat.requestPermissions(this, permissions, CHANGE_NETWORK_PERMISSION + CHANGE_WIFI_PERMISSION);
+            } else {
+                wifiManager.disconnect();
+                if (last_net_id != 0) { // Try to reconnect to the network previously attached to
+                    wifiManager.enableNetwork(last_net_id, true);
+                    wifiManager.setWifiEnabled(true);
+                }
             }
         }
     }
