@@ -60,6 +60,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     private static boolean videostatus = true;
     private static boolean autofocusStatus = true;
     private static boolean lightStatus = false;
+    private static boolean otoscopeMode = false;
     private static int imgCount = 1;
     private static int vidCount = 1;
     private int visibleButtonDuration = 30000;
@@ -490,8 +491,18 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         }
     }
 
+    /**
+     * Zooms out the webview
+     */
     private void fullZoomOut() {
         while(webView.zoomOut()){}
+    }
+
+    /**
+     * Zooms in the webview
+     */
+    private void fullZoomIn() {
+        while (webView.zoomIn()) {}
     }
 
     /**
@@ -657,17 +668,17 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     }
 
     /**
-     * Sends message to server to set autofocus on or off
-     *
-     * @param status Set status of autofocus. True turns off autofocus, False turns autofocus on
+     * Sends message to server to toggle autofocus
+     * ONLY WORKS ON SUPPORTED CAMERAS
      */
-    private void set_autofocus_status(boolean status) {
-        String url = "http://stream.pi:5000/autofocus?status=" + status;
+    private void toggle_autofocus() {
+        autofocusStatus = !autofocusStatus; // Flip autofocusButton status
+        String url = "http://stream.pi:5000/autofocus?status=" + autofocusStatus;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        // Nothing needed
+                        update_autofocus_button();
                     }
                 },
                 new Response.ErrorListener() {
@@ -697,6 +708,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                             if(mainActivity != null)
                                 mainActivity.snack_message(R.string.error_camera_autofocus);
                         }
+                        autofocusStatus = !autofocusStatus; // Flip autofocusButton status back
+                        update_autofocus_button();
                     }
                 }
         );
@@ -704,12 +717,9 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     }
 
     /**
-     * Sends message to server to toggle autofocus
-     * ONLY WORKS ON SUPPORTED CAMERAS
+     * Set autofocus button to reflect the state of autofocus
      */
-    private void toggle_autofocus() {
-        autofocusStatus = !autofocusStatus; // Flip autofocusButton status
-        set_autofocus_status(autofocusStatus);
+    private void update_autofocus_button() {
         if(autofocusStatus) {
             autofocusButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.red_light), getResources().getColor(R.color.red_dark)));
         }
@@ -719,12 +729,11 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     }
 
     /**
-     * Sends message to server to set light on or off
-     *
-     * @param status Set status of light. True turns off light, False turns light on
+     * Sends message to server to toggle the light on and off
      */
-    private void  set_light_status(boolean status) {
-        String url = "http://stream.pi:5000/light?status=" + status;
+    private void toggle_light() {
+        lightStatus = !lightStatus;
+        String url = "http://stream.pi:5000/light?status=" + lightStatus;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -763,14 +772,6 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 }
         );
         queue.add(stringRequest);
-    }
-
-    /**
-     * Sends message to server to toggle the light on and off
-     */
-    private void toggle_light() {
-        lightStatus = !lightStatus;
-        set_light_status(lightStatus);
     }
 
     /**
@@ -869,6 +870,63 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
             }.start();
         } else {
             enableScreenOffTimer = null;
+        }
+    }
+
+    /**
+     * Switch between fully zoomed in and focusing just beyond tip of otoscope speculum or not
+     */
+    private void toggleOtoscopeMode() {
+        otoscopeMode = !otoscopeMode;
+        if(otoscopeMode) {
+            fullZoomIn(); // TODO: Figure out if this is too much zoom
+            double focalpoint = 0.5; // TODO: Find the right value for this
+            String url = "http://stream.pi:5000/set_focus?value=" + focalpoint;
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            autofocusStatus = false;
+                            update_autofocus_button();
+                        }
+                    },
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            NetworkResponse response = error.networkResponse;
+                            if (response != null && response.data != null) {
+                                switch (response.statusCode) {
+                                    case 401:
+                                        if (mainActivity != null)
+                                            mainActivity.snack_message(R.string.invalid_user_key);
+                                        break;
+                                    case 403:
+                                        if (mainActivity != null)
+                                            mainActivity.snack_message(R.string.unsupported_camera_focus);
+                                        break;
+                                    case 500:
+                                        if (mainActivity != null)
+                                            mainActivity.snack_message(R.string.error_server_cant_autofocus);
+                                        break;
+                                    default:
+                                        if (mainActivity != null)
+                                            mainActivity.snack_message(R.string.error_camera_autofocus);
+                                        break;
+                                }
+                            } else {
+                                if (mainActivity != null)
+                                    mainActivity.snack_message(R.string.error_camera_autofocus);
+                            }
+                            update_autofocus_button();
+                        }
+                    }
+            );
+            queue.add(stringRequest);
+        } else {
+            fullZoomOut();
+            if(!autofocusStatus) {
+                toggle_autofocus();
+            }
         }
     }
 }
