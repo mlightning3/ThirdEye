@@ -80,6 +80,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     private Button resolutionButton;
     private Button autofocusButton;
     private Button lightButton;
+    private Button otoscopeButton;
 
     /**
      * This is called when the fragment is created, but before its view is
@@ -95,33 +96,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         updateScreenTimeout();
-
-        // Start countdown timers
-        hideButtonsTimer = new CountDownTimer(visibleButtonDuration, 1000) {
-
-            public void onTick(long millisUntilFinished) {
-                // Nothing needed
-            }
-
-            public void onFinish() {
-                updateButtons(false);
-            }
-        }.start();
-        if(forceScreenOnDuration > 0) {
-            enableScreenOffTimer = new CountDownTimer(forceScreenOnDuration, 1000) {
-                @Override
-                public void onTick(long millisUntilFinished) {
-                    // Nothing needed
-                }
-
-                @Override
-                public void onFinish() {
-                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                }
-            }.start();
-        } else {
-            enableScreenOffTimer = null;
-        }
+        initializeTimers();
     }
 
     /**
@@ -161,6 +136,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         resolutionButton = (Button) view.findViewById(R.id.resolution);
         autofocusButton = (Button) view.findViewById(R.id.autofocus);
         lightButton = (Button) view.findViewById(R.id.light);
+        otoscopeButton = (Button) view.findViewById(R.id.otoscopemode);
         initializeListeners(view);
         // Open video feed
         webView = (WebView) view.findViewById(R.id.web);
@@ -170,6 +146,43 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         mainActivity.wifi_connect(); // Try to connect to the network with the server automatically
         webView.loadUrl("http://stream.pi:5000/video_feed");
         return view;
+    }
+
+    /**
+     * Sets up the timers we will use
+     */
+    private void initializeTimers() {
+        if(hideButtonsTimer != null) {
+            hideButtonsTimer.cancel();
+        }
+        if(enableScreenOffTimer != null) {
+            enableScreenOffTimer.cancel();
+        }
+        hideButtonsTimer = new CountDownTimer(visibleButtonDuration, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                // Nothing needed
+            }
+
+            public void onFinish() {
+                updateButtons(false);
+            }
+        }.start();
+        if(forceScreenOnDuration > 0) {
+            enableScreenOffTimer = new CountDownTimer(forceScreenOnDuration, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    // Nothing needed
+                }
+
+                @Override
+                public void onFinish() {
+                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
+            }.start();
+        } else {
+            enableScreenOffTimer = null;
+        }
     }
 
     /**
@@ -184,6 +197,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         resolutionButton.setOnClickListener(this);
         autofocusButton.setOnClickListener(this);
         autofocusButton.getBackground().setColorFilter(new LightingColorFilter(getResources().getColor(R.color.green_light), getResources().getColor(R.color.green_dark)));
+        otoscopeButton.setOnClickListener(this);
         focusBar.setOnSeekBarChangeListener(new focusListener());
         lightBar.setOnSeekBarChangeListener(new lightListener());
         lightButton.setOnClickListener(this);
@@ -212,9 +226,11 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         if(sharedPreferences.getBoolean(getString(R.string.key_focus_control), false) && visible) {
             autofocusButton.setVisibility(View.VISIBLE);
             focusBar.setVisibility(View.VISIBLE);
+            otoscopeButton.setVisibility(View.VISIBLE);
         } else {
             autofocusButton.setVisibility(View.GONE);
             focusBar.setVisibility(View.GONE);
+            otoscopeButton.setVisibility(View.GONE);
         }
         if(sharedPreferences.getBoolean(getString(R.string.key_light_control), true) && visible) {
             lightButton.setVisibility(View.VISIBLE);
@@ -232,6 +248,10 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
     public void onPause() {
         getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         webView.onPause();
+        hideButtonsTimer.cancel();
+        hideButtonsTimer = null;
+        enableScreenOffTimer.cancel();
+        enableScreenOffTimer = null;
         super.onPause();
     }
 
@@ -241,6 +261,8 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).setActionBarTitle(R.string.stream_title);
         }
+        updateScreenTimeout();
+        initializeTimers();
     }
 
     @Override
@@ -285,6 +307,9 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
                 break;
             case R.id.light:
                 toggle_light();
+                break;
+            case R.id.otoscopemode:
+                toggleOtoscopeMode();
                 break;
             default: break;
         }

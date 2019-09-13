@@ -37,6 +37,7 @@
     <string name="snapshot">Snapshot</string>
     <string name="light">Light</string>
     <string name="record">Record</string>
+    <string name="otoscope">Otoscope</string>
     <string name="focus_change_let_go">Focus will change when you let go</string>
     <string name="adjusting_focus">Adjusting focus…</string>
     <string name="unsupported_camera_focus">Camera does not support changing focus</string>
