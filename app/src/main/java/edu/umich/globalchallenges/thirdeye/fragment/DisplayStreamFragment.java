@@ -455,6 +455,9 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         }
     }
 
+    /**
+     * Class for listening to things done with the seekbar to change the light brightness
+     */
     public class lightListener implements AppCompatSeekBar.OnSeekBarChangeListener {
         private double value;
 
@@ -906,6 +909,7 @@ public class DisplayStreamFragment extends Fragment implements View.OnClickListe
         if(otoscopeMode) {
             fullZoomIn(); // TODO: Figure out if this is too much zoom
             double focalpoint = 0.5; // TODO: Find the right value for this
+            focusBar.setProgress((int) (focalpoint * 100));
             String url = "http://stream.pi:5000/set_focus?value=" + focalpoint;
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
